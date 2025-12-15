@@ -38,7 +38,7 @@ export async function newProject(details, folder, user) {
  * 
  * @param {string} folder Folder containing the repo
  */
-export async function sanitize(folder) {
+async function sanitize(folder) {
     // get remote url
     let url = await git.getConfig({
         fs,
@@ -57,10 +57,9 @@ export async function sanitize(folder) {
 }
 
 
-export async function sync(folder, user, force=false) {
-    output(`Syncing folder ${folder} with Pavlovia (as ${user.profile.username})...`)
-    // sanitize repo
-    await sanitize(folder)
+export async function getRemote(folder, user=undefined) {
+    // sanitize remote
+    sanitize(folder)
     // get remote URL
     let remote = new URL(
         await git.getConfig({
@@ -70,70 +69,126 @@ export async function sync(folder, user, force=false) {
         })
     )
     // apply auth
-    remote.username = "oauth2"
-    remote.password = user.token.access
-    // check whether remote exists
-    let remoteExists
-    try {
-        await git.getRemoteInfo({
-            http,
-            url: remote.toString()
-        })
-        output(`Found online project: ${remote.origin + remote.pathname}`)
-        remoteExists = true
-    } catch {
-        remoteExists = false
+    if (user) {
+        remote.username = "oauth2"
+        remote.password = user.token.access
     }
-    // if remote exists, pull from it
-    if (remoteExists) {
-        // pull commits
-        output(`Getting changes from online...`)
-        await git.pull({
+
+    return remote.toString()
+}
+
+
+export async function getInfo(folder) {
+    // get remote URL
+    let remote = new URL(
+        await git.getConfig({
             fs,
-            http,
             dir: folder,
-            remote: "origin",
-            author: {
-                name: user.profile.name,
-                email: user.profile.email
-            },
-            onAuth: evt => { 
-                return { username: "oauth2", password: user.token.access } 
-            },
-            fastForwardOnly: true,
-            onMessage: output
+            path: "remote.origin.url"
+        })
+    )
+    // get name from remote URL
+    let [_, group, name] = remote.pathname.split("/");
+    // search projects
+    let found = fetch(`https://gitlab.pavlovia.org/api/v4/users/${group}/projects?${name}`)
+    return {
+        url: await git.getConfig({
+            fs,
+            dir: folder,
+            path: "remote.origin.url"
         })
     }
-    // stage all changes
+}
+
+
+export async function pull(folder, user, force=true) {
+    // log
+    output(`Getting changes from online...`)
+    // fetch changes
+    await git.fetch({
+        fs,
+        http,
+        dir: folder,
+        remote: "origin",
+        author: {
+            name: user.profile.name,
+            email: user.profile.email
+        },
+        onAuth: evt => { 
+            return { username: "oauth2", password: user.token.access } 
+        },
+        onMessage: output
+    })
+    // checkout latest
+    await git.checkout({
+        fs,
+        dir: folder,
+        force: force
+    })
+    output(`Finished getting changes.`)
+}
+
+
+export async function stage(folder) {
+    // log
     output(`Scanning for local changes...`)
-    for (let file of fs.globSync("*", { cwd: folder })) {
-        // skip if gitignored
-        if (await git.isIgnored({
-            fs, 
-            dir: folder, 
-            filepath: file
-        })) {
+    // track changed files
+    let changed = []
+    // iterate through files
+    for (let file of fs.globSync("**/*.*", { cwd: folder })) {
+        // skip if gitignored or unchanged
+        if (["ignored", "unmodified"].includes(
+            await git.status({
+                fs,
+                dir: folder,
+                filepath: file
+            })
+        )) {
             continue
         }
         // stage
         await git.add({
             fs, 
             dir: folder, 
-            filepath: file
+            filepath: file,
+            onMessage: output
         })
+        // note change
+        changed.push(file)
     }
-    // make commit
+    // log changes
+    if (changed.length) {
+        output(`${changed.length} files changed:\n${changed.join("\n")}`)
+    } else {
+        output("No files changed.")
+    }
+
+    return changed
+}
+
+
+export async function commit(message, folder, user) {
+    // make commit with message
     let sha = await git.commit({
         fs,
         dir: folder,
-        message: "Test commit",
+        message: message,
         author: {
             name: user.profile.name,
             email: user.profile.email
         }
     })
-    // push changes
+    // log
+    output(`Committed changes: "${message}" (${sha})`)
+
+    return sha
+}
+
+
+export async function push(folder, user, force=false) {
+    // log
     output(`Sending changes to Pavlovia...`)
+    // push
     await git.push({
         fs,
         http,
@@ -144,7 +199,32 @@ export async function sync(folder, user, force=false) {
         force: force,
         onMessage: output
     })
+}
 
+
+export async function sync(folder, user, force=false) {
+    output(`Syncing folder ${folder} with Pavlovia (as ${user.profile.username})...`)
+    // sanitize repo
+    await sanitize(folder)
+    // get / create remote
+    try {
+        let remote = await getRemote(folder, user)
+    } catch {
+        return
+    }
+    // pull from remote
+    await pull(folder, user)
+    // stage all changes
+    let sha
+    if (await stage(folder)) {
+        // make commit
+        sha = await commit("Test commit", folder, user)
+        // push changes
+        await push(folder, user, force)
+    } else {
+        output("Nothing to push.")
+    }
+    
     output(`Finished sync`)
 
     return sha
