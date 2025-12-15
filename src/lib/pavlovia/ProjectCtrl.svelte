@@ -91,7 +91,7 @@
     label={label}
     onclick={(evt) => {
         if (current.project) {
-            window.open(current.project.remote)
+            window.open(current.project.web_url)
         }
     }}
 >
@@ -104,7 +104,7 @@
     <MenuItem
         label="Edit project"
         icon="/icons/btn-edit.svg"
-        onclick={evt => window.open(current.project.remote, "_blank")}
+        onclick={evt => window.open(`${current.project.web_url}/edit`, "_blank")}
         disabled={!current.project}
     ></MenuItem>
     <MenuItem
