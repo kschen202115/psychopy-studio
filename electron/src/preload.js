@@ -101,6 +101,7 @@ const python = {
 contextBridge.exposeInMainWorld('python', python)
 
 const git = {
+  listen: (lsnr) => ipcRenderer.on("git", lsnr),
   sync: (folder, user) => ipcRenderer.invoke("git.sync", folder, user).then(resp => resp),
   newProject: (details, folder, user) => ipcRenderer.invoke("git.newProject", details, folder, user).then(resp => resp)
 }

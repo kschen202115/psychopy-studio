@@ -1,9 +1,16 @@
 <script>
     import { CompactButton } from "$lib/utils/buttons";
+    import { git } from "$lib/globals.svelte";
     import { CodeOutput } from "$lib/utils/code";
     import { getContext } from "svelte";
 
     let current = getContext("current")
+
+    git.listen(
+        (evt, message) => {
+            current.output.pavlovia += message + "\n"
+        }
+    )
 </script>
 
 

@@ -1,6 +1,8 @@
 import git from "isomorphic-git";
+import logging from "./logging.js";
 import http from "isomorphic-git/http/node";
 import fs from "node:fs";
+import { BrowserWindow } from "electron";
 
 
 export async function newProject(details, folder, user) {
@@ -56,6 +58,7 @@ export async function sanitize(folder) {
 
 
 export async function sync(folder, user, force=false) {
+    output(`Syncing folder ${folder} with Pavlovia (as ${user.profile.username})...`)
     // sanitize repo
     await sanitize(folder)
     // get remote URL
@@ -76,12 +79,15 @@ export async function sync(folder, user, force=false) {
             http,
             url: remote.toString()
         })
+        output(`Found online project: ${remote.origin + remote.pathname}`)
         remoteExists = true
     } catch {
         remoteExists = false
     }
     // if remote exists, pull from it
     if (remoteExists) {
+        // pull commits
+        output(`Getting changes from online...`)
         await git.pull({
             fs,
             http,
@@ -94,10 +100,12 @@ export async function sync(folder, user, force=false) {
             onAuth: evt => { 
                 return { username: "oauth2", password: user.token.access } 
             },
-            fastForwardOnly: true
+            fastForwardOnly: true,
+            onMessage: output
         })
     }
     // stage all changes
+    output(`Scanning for local changes...`)
     for (let file of fs.globSync("*", { cwd: folder })) {
         // skip if gitignored
         if (await git.isIgnored({
@@ -125,6 +133,7 @@ export async function sync(folder, user, force=false) {
         }
     })
     // push changes
+    output(`Sending changes to Pavlovia...`)
     await git.push({
         fs,
         http,
@@ -132,8 +141,25 @@ export async function sync(folder, user, force=false) {
         onAuth: evt => { 
             return {username: "oauth2", password: user.token.access} 
         },
-        force: force
+        force: force,
+        onMessage: output
     })
 
+    output(`Finished sync`)
+
     return sha
+}
+
+
+export function output(message) {
+    // if given a buffer, decode it
+    if (message instanceof Buffer) {
+        message = decoder.decode(message)
+    }
+    // log message
+    logging.log(message, "GIT")
+    // emit event
+    BrowserWindow.getAllWindows().forEach(
+        win => win.webContents.send("git", message)
+    )
 }

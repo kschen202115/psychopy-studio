@@ -1,5 +1,6 @@
 <script>
     import { CompactButton } from "$lib/utils/buttons";
+    import { python } from "$lib/globals.svelte";
     import { getContext } from "svelte";
     import { fly } from "svelte/transition"
 
