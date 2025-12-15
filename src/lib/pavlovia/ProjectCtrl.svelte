@@ -3,8 +3,9 @@
     import { getContext, onMount } from "svelte";
     import { projects } from "./pavlovia.svelte";
     import { MenuItem, MenuSeparator, SubMenu } from "$lib/utils/menu";
-    import { electron } from "$lib/globals.svelte";
+    import { electron, git } from "$lib/globals.svelte";
     import ManageProjectsDlg from "$lib/dialogs/projects/manage/ManageProjectsDlg.svelte";
+    import NewProjectDlg from "./NewProjectDlg.svelte";
 
     let current = getContext("current")
 
@@ -39,21 +40,25 @@
 </script>
 
 <DropdownButton
-    label={current.project ? current.project.id : "No project"}
+    label={current.project ? `${current.project.group}/${current.project.name}` : "No project"}
     icon={current.project ? current.project.avatar_url : undefined}
     onclick={(evt) => {
         if (current.project) {
-            window.open(current.project.web_url)
+            window.open(current.project.remote)
         }
     }}
 >
     <MenuItem
         label="New project"
         icon="/icons/btn-add.svg"
+        onclick={evt => show.newProjectDlg = true}
+        disabled={!current.user}
     ></MenuItem>
     <MenuItem
         label="Edit project"
         icon="/icons/btn-edit.svg"
+        onclick={evt => window.open(current.project.remote, "_blank")}
+        disabled={!current.project}
     ></MenuItem>
     <MenuItem
         label="Manage local projects..."
@@ -70,4 +75,7 @@
 
 <ManageProjectsDlg 
     bind:shown={show.manageProjectsDlg}
+/>
+<NewProjectDlg 
+    bind:shown={show.newProjectDlg}
 />

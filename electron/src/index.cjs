@@ -13,6 +13,7 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
 
 const { python, startPython } = require("./python.js");
 const { uv } = require("./uv.js");
+const git = require("./git.js");
 const logging = require("./logging.js");
 const { appVersion, isDev } = require('./version.js');
 
@@ -392,6 +393,10 @@ const handlers = {
       run: ipcMain.handle("python.scripts.run", (evt, file, ...args) => python.scripts.run(file, ...args)),
       stop: ipcMain.handle("python.scripts.stop", (evt) => python.scripts.stop())
     }
+  },
+  git: {
+    sync: ipcMain.handle("git.sync", (evt, folder, user) => git.sync(folder, user)),
+    newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => git.newProject(details, folder, user))
   }
 };
 

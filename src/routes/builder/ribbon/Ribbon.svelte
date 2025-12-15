@@ -20,15 +20,13 @@
     import Menu from "./Menu.svelte";
     import { Ribbon, RibbonSection, RibbonGap } from '$lib/utils/ribbon';
     import { getContext } from "svelte";
-    import { electron, python } from "$lib/globals.svelte.js";
+    import { electron, python, git } from "$lib/globals.svelte.js";
     import SavePrompt from "./SavePrompt.svelte";
-    import InstallPrompt from "./InstallPrompt.svelte"
     import { FindDialog } from "$lib/dialogs/find/index.js";
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js"
     import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
-    
     import { IconButton, SwitchButton } from '$lib/utils/buttons';
-    import { UserCtrl, ProjectCtrl } from '$lib/pavlovia/pavlovia.svelte';
+    import { users, UserCtrl, ProjectCtrl } from '$lib/pavlovia/pavlovia.svelte';
     import MonitorCenterDlg from '../../../lib/dialogs/monitorCenter/MonitorCenterDlg.svelte';
 
     let current = getContext("current");
@@ -257,6 +255,13 @@
     -->
 
     <RibbonSection label=Pavlovia icon="/icons/rbn-pavlovia.svg">
+        <IconButton 
+            icon="/icons/btn-sync.svg" 
+            label="Sync experiment" 
+            onclick={(evt) => git.sync(current.experiment.file.parent, $state.snapshot(current.user))}
+            disabled={!current.user || !current.experiment.file}
+            borderless
+        />
         <UserCtrl />
         <ProjectCtrl />
     </RibbonSection>

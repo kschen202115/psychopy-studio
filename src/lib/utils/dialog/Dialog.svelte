@@ -48,112 +48,114 @@
     id={id} 
     bind:this={handle}
 >
-    <div class="title">
-        <label for={id}>{title}</label>
-        <div class=gap></div>
-        <div class=title-btns>
-            <button 
-                id=close
-                onclick={(evt) => {
-                    shown = false;
-                    if (buttons.CANCEL) {
-                        buttons.CANCEL(evt)
-                    }
-                }}
-            >
-                🞪
-            </button>
+    {#if shown}
+        <div class="title">
+            <label for={id}>{title}</label>
+            <div class=gap></div>
+            <div class=title-btns>
+                <button 
+                    id=close
+                    onclick={(evt) => {
+                        shown = false;
+                        if (buttons.CANCEL) {
+                            buttons.CANCEL(evt)
+                        }
+                    }}
+                >
+                    🞪
+                </button>
+            </div>
         </div>
-    </div>
-    <div 
-        class="content"
-        style:height={shrink ? "fit-content" : "80vh"}
-    >
-        {@render children?.()}
-    </div>
-    <div class="buttons">
-        <div class="btn-array extra">
-                {#if buttons.HELP}
+        <div 
+            class="content"
+            style:height={shrink ? "fit-content" : "80vh"}
+        >
+            {@render children?.()}
+        </div>
+        <div class="buttons">
+            <div class="btn-array extra">
+                    {#if buttons.HELP}
+                    <Button 
+                        label=Help
+                        onclick={() => {
+                            window.open(buttons.HELP, '_blank').focus();
+                        }} 
+                        horizontal
+                    ></Button>
+                    {/if}
+            </div>
+            <div class=gap></div>
+            <div class="btn-array standard">
+                {#if buttons.YES}
                 <Button 
-                    label=Help
-                    onclick={() => {
-                        window.open(buttons.HELP, '_blank').focus();
+                    label="Yes"
+                    onclick={(evt) => {
+                        buttons['YES'](evt);
+                        shown = false;
                     }} 
+                    affirmative
                     horizontal
+                    disabled={buttonsDisabled && buttonsDisabled['YES']}
                 ></Button>
                 {/if}
+                {#if buttons.NO}
+                <Button 
+                    label="No"
+                    onclick={(evt) => {
+                        buttons['NO'](evt);
+                        shown = false;
+                    }} 
+                    horizontal
+                    negative
+                    disabled={buttonsDisabled && buttonsDisabled['NO']}
+                ></Button>
+                {/if}
+                {#if buttons.OK}
+                <Button 
+                    label="Okay"
+                    onclick={(evt) => {
+                        buttons['OK'](evt);
+                        shown = false;
+                    }} 
+                    primary
+                    horizontal
+                    disabled={buttonsDisabled && buttonsDisabled['OK']}
+                ></Button>
+                {/if}
+                {#if buttons.APPLY}
+                <Button 
+                    label="Apply"
+                    onclick={(evt) => {
+                        buttons['APPLY'](evt); 
+                    }} 
+                    horizontal
+                    disabled={buttonsDisabled && buttonsDisabled['APPLY']}
+                ></Button>
+                {/if}
+                {#if buttons.EXTRA}
+                    {#each Object.entries(buttons['EXTRA']) as [label, onclick]}
+                        <Button
+                            label={label}
+                            onclick={onclick}
+                            horizontal
+                            disabled={buttonsDisabled && buttonsDisabled['EXTRA'] && buttonsDisabled['EXTRA'][label]}
+                        />
+                    {/each}
+                {/if}
+                {#if buttons.CANCEL}
+                <Button 
+                    label="Cancel"
+                    onclick={(evt) => {
+                        buttons['CANCEL'](evt); 
+                        shown = false;
+                    }} 
+                    horizontal
+                    disabled={buttonsDisabled && buttonsDisabled['CANCEL']}
+                ></Button>
+                {/if}
+            </div>
         </div>
-        <div class=gap></div>
-        <div class="btn-array standard">
-            {#if buttons.YES}
-            <Button 
-                label="Yes"
-                onclick={(evt) => {
-                    buttons['YES'](evt);
-                    shown = false;
-                }} 
-                affirmative
-                horizontal
-                disabled={buttonsDisabled && buttonsDisabled['YES']}
-            ></Button>
-            {/if}
-            {#if buttons.NO}
-            <Button 
-                label="No"
-                onclick={(evt) => {
-                    buttons['NO'](evt);
-                    shown = false;
-                }} 
-                horizontal
-                negative
-                disabled={buttonsDisabled && buttonsDisabled['NO']}
-            ></Button>
-            {/if}
-            {#if buttons.OK}
-            <Button 
-                label="Okay"
-                onclick={(evt) => {
-                    buttons['OK'](evt);
-                    shown = false;
-                }} 
-                primary
-                horizontal
-                disabled={buttonsDisabled && buttonsDisabled['OK']}
-            ></Button>
-            {/if}
-            {#if buttons.APPLY}
-            <Button 
-                label="Apply"
-                onclick={(evt) => {
-                    buttons['APPLY'](evt); 
-                }} 
-                horizontal
-                disabled={buttonsDisabled && buttonsDisabled['APPLY']}
-            ></Button>
-            {/if}
-            {#if buttons.EXTRA}
-                {#each Object.entries(buttons['EXTRA']) as [label, onclick]}
-                    <Button
-                        label={label}
-                        onclick={onclick}
-                        horizontal
-                        disabled={buttonsDisabled && buttonsDisabled['EXTRA'] && buttonsDisabled['EXTRA'][label]}
-                    />
-                {/each}
-            {/if}
-            {#if buttons.CANCEL}
-            <Button 
-                label="Cancel"
-                onclick={(evt) => {
-                    buttons['CANCEL'](evt); 
-                    shown = false;
-                }} 
-                horizontal
-                disabled={buttonsDisabled && buttonsDisabled['CANCEL']}
-            ></Button>
-            {/if}
-        </div>
-    </div>
+    {/if}
 </dialog>
 
 <style>
