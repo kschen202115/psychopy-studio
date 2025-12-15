@@ -86,6 +86,7 @@ export async function sync(folder, user, force=false) {
             fs,
             http,
             dir: folder,
+            remote: "origin",
             author: {
                 name: user.profile.name,
                 email: user.profile.email
