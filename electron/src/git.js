@@ -137,7 +137,7 @@ export async function stage(folder) {
     // iterate through files
     for (let file of fs.globSync("**/*.*", { cwd: folder })) {
         // skip if gitignored or unchanged
-        if (["ignored", "unmodified"].includes(
+        if (["ignored", "unmodified", "*unmodified"].includes(
             await git.status({
                 fs,
                 dir: folder,
@@ -193,6 +193,7 @@ export async function push(folder, user, force=false) {
         fs,
         http,
         dir: folder,
+        remote: "origin",
         onAuth: evt => { 
             return {username: "oauth2", password: user.token.access} 
         },

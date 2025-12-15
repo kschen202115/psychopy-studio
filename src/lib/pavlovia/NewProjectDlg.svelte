@@ -5,7 +5,8 @@
     import { auth } from "./pavlovia.svelte";
 
     let {
-        shown=$bindable()
+        shown=$bindable(),
+        awaiting=$bindable()
     } = $props()
 
     let current = getContext("current");
@@ -25,14 +26,21 @@
             current.experiment.file.parent, 
             $state.snapshot(current.user)
         ).then(
-            resp => current.project = resp
+            resp => {
+                current.project = resp
+                awaiting.resolve(true)
+            }
         ),
-        CANCEL: evt => {}
+        CANCEL: evt => awaiting.resolve(false)
     }}
     onopen={evt => {
         details.name = current.experiment.file.stem
         details.group = current.user?.profile.username
         details.root = auth.root
+        // refresh promise
+        let newPromise = Promise.withResolvers();
+        awaiting.resolve(newPromise.promise);
+        awaiting = newPromise;
     }}
     bind:shown={shown}
     shrink

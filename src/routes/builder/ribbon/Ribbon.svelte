@@ -27,7 +27,8 @@
     import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
     import { IconButton, SwitchButton } from '$lib/utils/buttons';
     import { users, UserCtrl, ProjectCtrl } from '$lib/pavlovia/pavlovia.svelte';
-    import MonitorCenterDlg from '../../../lib/dialogs/monitorCenter/MonitorCenterDlg.svelte';
+    import MonitorCenterDlg from '$lib/dialogs/monitorCenter/MonitorCenterDlg.svelte';
+    import PavloviaSync from "$lib/pavlovia/Sync.svelte"
 
     let current = getContext("current");
 
@@ -255,13 +256,22 @@
     -->
 
     <RibbonSection label=Pavlovia icon="/icons/rbn-pavlovia.svg">
-        <IconButton 
-            icon="/icons/btn-sync.svg" 
-            label="Sync experiment" 
-            onclick={(evt) => git.sync(current.experiment.file.parent, $state.snapshot(current.user))}
-            disabled={!current.user || !current.experiment.file}
-            borderless
-        />
+        
+        <PavloviaSync>
+            {#snippet button(sync)}
+                <IconButton 
+                    icon="/icons/btn-sync.svg" 
+                    label="Sync experiment" 
+                    onclick={(evt) => sync(
+                        $state.snapshot(current.experiment.file.parent), 
+                        $state.snapshot(current.user),
+                        true
+                    )}
+                    disabled={!current.user || !current.experiment.file}
+                    borderless
+                />
+            {/snippet}
+        </PavloviaSync>
         <UserCtrl />
         <ProjectCtrl />
     </RibbonSection>

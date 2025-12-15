@@ -1,0 +1,71 @@
+<script>
+    import { git } from "$lib/globals.svelte";
+    import { getContext } from "svelte";
+    import CommitDlg from "./CommitDlg.svelte";
+    import NewProjectDlg from "./CommitDlg.svelte";
+
+    let current = getContext("current");
+
+    let {
+        /** @interface */
+        button
+    } = $props()
+
+
+    export async function sync(folder, user, force=false) {
+        // get/create remote
+        try {
+            await git.getRemote(folder, user);
+        } catch {
+            // if no remote, prompt to create one
+            show.newProject = true;
+            // if cancelled, return
+            if (!(await awaiting.newProject.promise)) {
+                git.output("Cancelled by user.")
+                return
+            }
+        }
+        // pull from remote
+        await git.pull(folder, user, force)
+        // stage all changes
+        let sha
+        if (await git.stage(folder)) {
+            // propt to commit
+            show.commit = true;
+            sha = await awaiting.commit.promise;
+            // if cancelled, return
+            if (!sha) {
+                git.output("Cancelled by user.")
+                return
+            }
+            // push changes
+            await git.push(folder, user, force)
+        } else {
+            git.output("Nothing to push.")
+        }
+        
+        git.output(`Finished sync`)
+
+        return sha
+    }
+
+    let show = $state({
+        newProject: false,
+        commit: false
+    })
+    let awaiting = $state({
+        newProject: Promise.withResolvers(),
+        commit: Promise.withResolvers()
+    })
+</script>
+
+{@render button(sync)}
+
+<NewProjectDlg 
+    bind:shown={show.newProject}
+    bind:awaiting={awaiting.newProject}
+/>
+<CommitDlg 
+    bind:shown={show.commit}
+    bind:awaiting={awaiting.commit}
+/>

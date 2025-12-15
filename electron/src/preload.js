@@ -102,6 +102,7 @@ contextBridge.exposeInMainWorld('python', python)
 
 const git = {
   listen: (lsnr) => ipcRenderer.on("git", lsnr),
+  output: (message) => ipcRenderer.invoke("git.output", message),
   getRemote: (folder, user) => ipcRenderer.invoke("git.getRemote", folder, user),
   pull: (folder, user, force=true) => ipcRenderer.invoke("git.pull", folder, user, force),
   stage: (folder) => ipcRenderer.invoke("git.stage", folder),
