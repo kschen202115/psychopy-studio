@@ -38,42 +38,42 @@
         browseProjectsDlg: false
     })
 
-    $effect(() => {
+    $effect(async () => {
         // if we have both an experiment file and a user...
         if (current.experiment?.file?.parent && current.user) {
             // get git remote
-            git.getRemote(
+            let remote = git.getRemote(
                 $state.snapshot(current.experiment.file.parent), $state.snapshot(current.user)
             ).then(
-                remote => new URL(remote)
-            ).then(
-                remote => {
-                    // get name from remote URL
-                    let [_, group, name] = remote.pathname.match(/\/(.+?)\/(.+?)\.git/)
-                    // search GitLab
-                    fetch(
-                        `https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}&access_token=${current.user.token.access}`
-                    ).then(
-                        resp => resp.json()
-                    ).then(
-                        resp => {
-                            if (resp.length) {
-                                // if we found one, use its details
-                                current.project = resp[0]
-                                // log
-                                console.log(`Loaded project ${group}/${name}`, resp[0])
-                            }
-                            
-                        }
-                    )
-                }
+                remote => remote ? new URL(remote) : remote
             )
+            // only continue if there is a remote...
+            if (!remote) {
+                // get name from remote URL
+                let [_, group, name] = remote.pathname.match(/\/(.+?)\/(.+?)\.git/)
+                // search GitLab
+                let found = await fetch(
+                    `https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}&access_token=${current.user.token.access}`
+                ).then(
+                    resp => resp.json()
+                )
+                // if we found a project...
+                if (found.length) {
+                    // ...use its details
+                    current.project = found[0]
+                    // log and return
+                    console.log(`Loaded project ${group}/${name}`, found[0])
+                    return
+                }
+            }
+            // if we haven't returned yet, there is no project
+            current.project = undefined
         }
     })
 
     let label = $derived.by(() => {
         if (current.project) {
-            if (current.project.owner.username === current.user?.profile?.username) {
+            if (current.project.owner?.username === current.user?.profile?.username) {
                 // if owner is current user, just display name
                 return current.project.path 
             } else {

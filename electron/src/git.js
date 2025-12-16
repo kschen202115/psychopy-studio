@@ -18,8 +18,11 @@ export async function newProject(details, folder, user) {
         remote: "origin",
         url: `${details.root}/${details.group}/${details.name}.git`
     })
+    // stage and commit all local files
+    await stage(folder)
+    await commit("Create project", folder, user)
     // push (to create project)
-    await sync(folder, user)
+    await push(folder, user)
 
     return {
         name: details.name,
@@ -45,6 +48,10 @@ async function sanitize(folder) {
         dir: folder,
         path: "remote.origin.url"
     })
+    // if there is no URL, there's nothing to sanitize
+    if (!url) {
+        return
+    }
     // make sure it ends with .git
     if (!url.endsWith(".git")) {
         await git.setConfig({
@@ -60,21 +67,25 @@ async function sanitize(folder) {
 export async function getRemote(folder, user=undefined) {
     // sanitize remote
     sanitize(folder)
-    // get remote URL
-    let remote = new URL(
-        await git.getConfig({
-            fs,
-            dir: folder,
-            path: "remote.origin.url"
-        })
-    )
+    // get raw remote from config
+    let remote = await git.getConfig({
+        fs,
+        dir: folder,
+        path: "remote.origin.url"
+    })
+    // if no remote, return null
+    if (!remote) {
+        return null
+    }
+    // parse to a URL
+    let url = new URL(remote)
     // apply auth
     if (user) {
-        remote.username = "oauth2"
-        remote.password = user.token.access
+        url.username = "oauth2"
+        url.password = user.token.access
     }
 
-    return remote.toString()
+    return url.toString()
 }
 
 

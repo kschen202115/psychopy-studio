@@ -2,7 +2,7 @@
     import { git } from "$lib/globals.svelte";
     import { getContext } from "svelte";
     import CommitDlg from "./CommitDlg.svelte";
-    import NewProjectDlg from "./CommitDlg.svelte";
+    import NewProjectDlg from "./NewProjectDlg.svelte";
 
     let current = getContext("current");
 
@@ -13,14 +13,17 @@
 
 
     export async function sync(folder, user, force=false) {
-        // get/create remote
-        try {
-            await git.getRemote(folder, user);
-        } catch {
-            // if no remote, prompt to create one
+        // get remote
+        let remote = await git.getRemote(folder, user);
+        // if there is no remote, create one
+        if (remote === null) {
+            // prompt to create one
             show.newProject = true;
-            // if cancelled, return
-            if (!(await awaiting.newProject.promise)) {
+            if (await awaiting.newProject.promise) {
+                // if completed, get details
+                remote = git.getRemote(folder, user);
+            } else {
+                // if cancelled, return
                 git.output("Cancelled by user.")
                 return
             }
@@ -57,6 +60,7 @@
         newProject: Promise.withResolvers(),
         commit: Promise.withResolvers()
     })
+    $inspect(awaiting.newProject)
 </script>
 
 {@render button(sync)}

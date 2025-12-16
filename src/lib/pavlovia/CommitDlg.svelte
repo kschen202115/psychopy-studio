@@ -49,10 +49,4 @@
         padding: 1rem;
         min-width: 35rem;
     }
-    .ctrl {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: .5rem;
-    }
 </style>
