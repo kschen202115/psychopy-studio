@@ -214,35 +214,6 @@ export async function push(folder, user, force=false) {
 }
 
 
-export async function sync(folder, user, force=false) {
-    output(`Syncing folder ${folder} with Pavlovia (as ${user.profile.username})...`)
-    // sanitize repo
-    await sanitize(folder)
-    // get / create remote
-    try {
-        let remote = await getRemote(folder, user)
-    } catch {
-        return
-    }
-    // pull from remote
-    await pull(folder, user)
-    // stage all changes
-    let sha
-    if (await stage(folder)) {
-        // make commit
-        sha = await commit("Test commit", folder, user)
-        // push changes
-        await push(folder, user, force)
-    } else {
-        output("Nothing to push.")
-    }
-    
-    output(`Finished sync`)
-
-    return sha
-}
-
-
 export function output(message) {
     // if given a buffer, decode it
     if (message instanceof Buffer) {

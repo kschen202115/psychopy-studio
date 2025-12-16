@@ -401,7 +401,6 @@ const handlers = {
     stage: ipcMain.handle("git.stage", (evt, folder) => git.stage(folder)),
     commit: ipcMain.handle("git.commit", (evt, message, folder, user) => git.commit(message, folder, user)),
     push: ipcMain.handle("git.push", (evt, folder, user, force=false) => git.push(folder, user, force)),
-    sync: ipcMain.handle("git.sync", (evt, folder, user) => git.sync(folder, user)),
     newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => git.newProject(details, folder, user))
   }
 };
