@@ -21,7 +21,7 @@
             show.newProject = true;
             if (await awaiting.newProject.promise) {
                 // if completed, get details
-                remote = git.getRemote(folder, user);
+                remote = await git.getRemote(folder, user);
             } else {
                 // if cancelled, return
                 git.output("Cancelled by user.")
