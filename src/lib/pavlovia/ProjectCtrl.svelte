@@ -42,13 +42,13 @@
         // if we have both an experiment file and a user...
         if (current.experiment?.file?.parent && current.user) {
             // get git remote
-            let remote = git.getRemote(
+            let remote = await git.getRemote(
                 $state.snapshot(current.experiment.file.parent), $state.snapshot(current.user)
             ).then(
                 remote => remote ? new URL(remote) : remote
             )
             // only continue if there is a remote...
-            if (!remote) {
+            if (remote) {
                 // get name from remote URL
                 let [_, group, name] = remote.pathname.match(/\/(.+?)\/(.+?)\.git/)
                 // search GitLab
