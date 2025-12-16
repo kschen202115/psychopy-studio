@@ -3,13 +3,15 @@
     import { fly } from "svelte/transition";
     let {
         message,
-        icon=undefined
+        icon=undefined,
+        onclick=evt => {}
     } = $props()
 </script>
 
 
-<div 
+<button 
     class=message
+    onclick={onclick}
     transition:fly
 >
     {#if icon}
@@ -19,7 +21,7 @@
         />
     {/if}
     {message}
-</div>
+</button>
 
 <style>
     .message {

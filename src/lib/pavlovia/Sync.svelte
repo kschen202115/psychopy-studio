@@ -60,7 +60,6 @@
         newProject: Promise.withResolvers(),
         commit: Promise.withResolvers()
     })
-    $inspect(awaiting.newProject)
 </script>
 
 {@render button(sync)}

@@ -3,7 +3,6 @@
     import { CodeOutput } from "$lib/utils/code";
     import { getContext } from "svelte";
     import { python } from "$lib/globals.svelte";
-    import { run } from "svelte/legacy";
 
     let current = getContext("current");
 
@@ -12,6 +11,9 @@
     )
     python.output.stderr.listen(
         (evt, message) => current.output.stdout += `${message}\n`
+    )
+    python.liaison.listen("error",
+        (evt, message) => current.output.stdout += `${message.error}\n`
     )
 </script>
 

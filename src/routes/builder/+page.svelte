@@ -10,8 +10,7 @@
     import { current } from "./globals.svelte.js";
     import { setContext } from 'svelte';
     import { electron } from "$lib/globals.svelte";
-    import { parsePath } from "$lib/utils/files";
-    import SetupPython from '$lib/python/SetupPython.svelte';
+    import { SetupPython, PythonErrors } from '$lib/python';
     import ReadMe from '$lib/dialogs/readme/ReadMe.svelte';
     import {
         openFile
@@ -74,6 +73,7 @@
     />
     <!-- this will setup a Python instance -->
     <SetupPython />
+    <PythonErrors />
 
 </Frame>
 

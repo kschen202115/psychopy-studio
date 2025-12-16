@@ -62,4 +62,6 @@ export async function setupPython(forceReinstall=false) {
         status.message = "Successfully started Python"
         status.ready.resolve(true)
     }
+
+    return python
 }
