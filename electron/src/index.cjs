@@ -51,7 +51,7 @@ const createWindow = () => {
   // create splash
   windows.splash = new BrowserWindow({
     icon: favicon,
-    title: "PsychoPy",
+    title: "PsychoPy Studio",
     width: 720,
     height: 400,
     show: false,
