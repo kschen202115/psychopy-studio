@@ -162,7 +162,7 @@ export async function installPython(
     })
     // make a new venv
     await execTracked([
-        "venv", "--python", version.python, "--clear", `"${folder}"`
+        "venv", "--python", version.python, "--clear", folder
     ])
     // get executable
     python.details.executable = findPython()
