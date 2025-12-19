@@ -4,6 +4,7 @@
     import PrefsDialog from '$lib/dialogs/preferences/PrefsDialog.svelte';
     import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
     import { FindDialog } from "$lib/dialogs/find";
+    import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js";
@@ -51,6 +52,7 @@
         settingsDlg: false,
         deviceMgrDlg: false,
         pluginMgr: false,
+        bugReport: false
     })
 </script>
 
@@ -294,15 +296,22 @@
         {/if}
     </SubMenu>
 
-    <MenuSeparator />
-
     {#if electron}
+        <MenuSeparator />
+        
+        <MenuItem
+            label="Report bug"
+            onclick={evt => show.bugReport = true}
+        />
+
+        <MenuSeparator />
+
         <MenuItem
             label="Quit"
             onclick={quit}
             shortcut="quit"
         />
-    {/if}    
+    {/if}
 </Menu>
 
 
@@ -323,5 +332,12 @@
 {#if python}
     <PluginManagerDlg 
         bind:shown={show.pluginMgr}
+    />
+{/if}
+{#if electron}
+    <BugReportDlg 
+        user={current.user}
+        context={current.experiment}
+        bind:shown={show.bugReport}
     />
 {/if}

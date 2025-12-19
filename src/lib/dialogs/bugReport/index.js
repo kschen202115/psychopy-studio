@@ -1,0 +1,1 @@
+export { default as BugReportDlg } from "./BugReport.svelte";

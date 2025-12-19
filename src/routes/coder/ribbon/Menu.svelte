@@ -5,6 +5,7 @@
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
     import { PluginManagerDlg } from "$lib/dialogs/pluginManager";
+    import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { setupPython } from "$lib/python";
 
     import {
@@ -43,6 +44,7 @@
         prefsDlg: false,
         deviceMgrDlg: false,
         pluginMgr: false,
+        bugReport: false
     })
 </script>
 <Menu 
@@ -225,15 +227,22 @@
         {/if}
     </SubMenu>
 
-    <MenuSeparator />
-
     {#if electron}
+        <MenuSeparator />
+        
+        <MenuItem
+            label="Report bug"
+            onclick={evt => show.bugReport = true}
+        />
+
+        <MenuSeparator />
+
         <MenuItem
             label="Quit"
             onclick={quit}
             shortcut="quit"
         />
-    {/if}  
+    {/if}
 </Menu>
 
 
@@ -244,5 +253,12 @@
 {#if python}
     <PluginManagerDlg 
         bind:shown={show.pluginMgr}
+    />
+{/if}
+{#if electron}
+    <BugReportDlg 
+        user={current.user}
+        context={current.pages}
+        bind:shown={show.bugReport}
     />
 {/if}

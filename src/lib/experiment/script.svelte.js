@@ -84,4 +84,12 @@ export class Script {
         // store file
         this.file = file
     }
+
+    toJSON() {
+        return $state.snapshot({
+            pilotMode: this.pilotMode,
+            file: this.file,
+            content: this.content
+        })
+    }
 }

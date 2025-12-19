@@ -2,6 +2,7 @@
     import { getContext } from "svelte";
     import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu';
     import PrefsDialog from '$lib/dialogs/preferences/PrefsDialog.svelte';
+    import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
     import { showDevTools } from "$lib/utils/views.svelte"
@@ -29,7 +30,8 @@
     let show = $state({
         prefsDlg: false,
         findDlg: false,
-        settingsDlg: false
+        settingsDlg: false,
+        bugReport: false,
     })
 </script>
 
@@ -198,6 +200,23 @@
             {/await}
         {/if}
     </SubMenu>
+
+    {#if electron}
+        <MenuSeparator />
+        
+        <MenuItem
+            label="Report bug"
+            onclick={evt => show.bugReport = true}
+        />
+
+        <MenuSeparator />
+
+        <MenuItem
+            label="Quit"
+            onclick={quit}
+            shortcut="quit"
+        />
+    {/if}
 </Menu>
 
 
@@ -205,3 +224,10 @@
 <PrefsDialog
     bind:shown={show.prefsDlg}
 />
+{#if electron}
+    <BugReportDlg 
+        user={current.user}
+        context={current.runlist}
+        bind:shown={show.bugReport}
+    />
+{/if}
