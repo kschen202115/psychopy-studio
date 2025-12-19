@@ -7,9 +7,6 @@ from pathlib import Path
 
 # iterate through icons
 for file in Path(__file__).parent.glob("**/*.svg"):
-    # skip GratingComponent (this doesn't work with gradients)
-    if file.stem == "GratingComponent":
-        continue
     # read file
     content = file.read_text("utf-8")
     # iterate through theme colors
