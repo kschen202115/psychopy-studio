@@ -23,7 +23,6 @@
             liaison: ""
         },
     })
-    $inspect(report)
 
     async function populate() {
         // clear message, title and priority

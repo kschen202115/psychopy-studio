@@ -313,7 +313,7 @@ const handlers = {
       get: ipcMain.handle("electron.windows.get", (evt, target) => Object.keys(windows).filter(
         id => !windows[id].isDestroyed()
       ).filter(
-        id => String(windows[id].webContents.getURL()).startsWith(`http://${svelte.address.host}:${svelte.address.port}/${target}`)
+        id => String(windows[id].webContents.getURL()).includes(target)
       )),
       send: ipcMain.handle("electron.windows.send", (evt, id, tag, data) => windows[id].webContents.send(tag, data)),
       focus: ipcMain.handle("electron.windows.focus", (evt, id) => windows[id || evt.sender.id].focus()),
