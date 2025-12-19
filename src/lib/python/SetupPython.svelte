@@ -1,12 +1,21 @@
 <script>
     import { Button } from "$lib/utils/buttons";
     import { MessageArray, Message } from "$lib/utils/message";
-    import { MessageDialog } from "$lib/utils/dialog"
+    import { MessageDialog } from "$lib/utils/dialog";
+    import { showWindow } from "$lib/utils/views.svelte";
     import { marked } from "marked";
     import { status } from "./globals.svelte.js";
     import { setupPython } from "./functions.svelte.js";
 
     setupPython()
+
+    // open Runner on error
+    python.output.stderr.listen(
+        (evt, message) => showWindow("runner")
+    )
+    python.liaison.listen("error",
+        (evt, message) => showWindow("runner")
+    )
 </script>
 
 
