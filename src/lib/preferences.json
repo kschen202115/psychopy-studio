@@ -348,17 +348,23 @@
         "theme": {
             "val": "psychopy",
             "valType": "str",
-            "inputType": "single",
+            "inputType": "choice",
             "categ": "Application",
             "updates": null,
             "allowedUpdates": null,
             "allowedVals": [
                 "psychopy",
-                "catppuccin-latte"
+                "catppuccin-latte",
+                "catppuccin-frappe",
+                "catppuccin-macchiato",
+                "catppuccin-mocha"
             ],
             "allowedLabels": [
                 "PsychoPy",
-                "Catppuccin Latte"
+                "Catppuccin Latte",
+                "Catppuccin Frappe",
+                "Catppuccin Macchiato",
+                "Catppuccin Mocha"
             ],
             "label": "Theme",
             "hint": "Control the look and feel of PsychoPy",
