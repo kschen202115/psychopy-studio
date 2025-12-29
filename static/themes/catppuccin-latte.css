@@ -1,6 +1,6 @@
 :root {
     /* colors */
-    --red: #e64553;  /* Red */
+    --red: #e64553;  /* Maroon */
     --purple: #8839ef;  /* Mauve */
     --blue: #04a5e5;  /* Sky */
     --green: #40a02b;  /* Green */
@@ -26,29 +26,4 @@
     --text-on-crust: var(--text);
     --text-on-overlay: var(--text);
     --text-on-outline: var(--hltext);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* shades */
-        --base: #4c4f69;  /* Text */
-        --mantle: #66666E;  /* Overlay 2 */
-        --crust: #6c6f85;  /* Subtext 0 */
-        --overlay: #5c5f77;  /* Subtext 1 */
-        --outline: #bcc0cc; /* Surface 1 */
-        /*  text colors */
-        --text: #eff1f5;  /* Base */
-        --hltext: #4c4f69;  /* Text */
-        --text-on-red: var(--text);
-        --text-on-purple: var(--hltext);
-        --text-on-blue: var(--text);
-        --text-on-green: var(--text);
-        --text-on-orange: var(--text);
-        --text-on-yellow: var(--hltext);
-        --text-on-base: var(--text);
-        --text-on-mantle: var(--text);
-        --text-on-crust: var(--text);
-        --text-on-overlay: var(--text);
-        --text-on-outline: var(--hltext);
-    }
 }
