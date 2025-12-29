@@ -5,19 +5,19 @@
         <g id="light-btn-delete" serif:id="light/btn-delete" transform="matrix(0.451519,0,0,0.451519,72,0)">
             <rect x="0" y="0" width="70.872" height="70.866" style="fill:none;"/>
             <g transform="matrix(1.78883,0,0,1.78883,-121.981,6.3645)">
-                <path d="M97,10C97,10 96.537,18.796 96.241,24.418C96.106,26.987 93.984,29 91.412,29C89.271,29 86.729,29 84.588,29C82.016,29 79.894,26.987 79.759,24.418C79.463,18.796 79,10 79,10" style="fill:none;stroke:rgb(242,84,91);stroke-width:4px;"/>
+                <path d="M97,10C97,10 96.537,18.796 96.241,24.418C96.106,26.987 93.984,29 91.412,29C89.271,29 86.729,29 84.588,29C82.016,29 79.894,26.987 79.759,24.418C79.463,18.796 79,10 79,10" style="fill:none;stroke:var(--red);stroke-width:4px;"/>
             </g>
             <g transform="matrix(1.78883,0,0,1.78883,-121.534,7.25891)">
-                <path d="M82,8L82,6.352C82,5.463 82.353,4.61 82.982,3.982C83.61,3.353 84.463,3 85.352,3C86.861,3 88.639,3 90.148,3C91.037,3 91.89,3.353 92.518,3.982C93.147,4.61 93.5,5.463 93.5,6.352C93.5,7.261 93.5,8 93.5,8" style="fill:none;stroke:rgb(242,84,91);stroke-width:3px;"/>
+                <path d="M82,8L82,6.352C82,5.463 82.353,4.61 82.982,3.982C83.61,3.353 84.463,3 85.352,3C86.861,3 88.639,3 90.148,3C91.037,3 91.89,3.353 92.518,3.982C93.147,4.61 93.5,5.463 93.5,6.352C93.5,7.261 93.5,8 93.5,8" style="fill:none;stroke:var(--red);stroke-width:3px;"/>
             </g>
             <g transform="matrix(1.78883,0,0,1.78883,-121.981,9.04775)">
-                <path d="M75,8.5C84,7.186 92,7.187 101,8.5" style="fill:none;stroke:rgb(242,84,91);stroke-width:4px;"/>
+                <path d="M75,8.5C84,7.186 92,7.187 101,8.5" style="fill:none;stroke:var(--red);stroke-width:4px;"/>
             </g>
             <g transform="matrix(1.78883,0,0,1.78883,-121.981,6.3645)">
-                <path d="M85,14L85.5,23.95" style="fill:none;stroke:rgb(242,84,91);stroke-width:3px;"/>
+                <path d="M85,14L85.5,23.95" style="fill:none;stroke:var(--red);stroke-width:3px;"/>
             </g>
             <g transform="matrix(1.78883,0,0,1.78883,-111.248,6.3645)">
-                <path d="M85,14L84.5,23.95" style="fill:none;stroke:rgb(242,84,91);stroke-width:3px;"/>
+                <path d="M85,14L84.5,23.95" style="fill:none;stroke:var(--red);stroke-width:3px;"/>
             </g>
         </g>
     </g>

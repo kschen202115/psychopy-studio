@@ -8,17 +8,17 @@
         </g>
         <g transform="matrix(0.874349,0.504802,0.504802,1.45724,-0.340474,0.953946)">
             <g transform="matrix(1.33333,0,-0.577347,1,19.268,0)">
-                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:rgb(242,84,91);">?</text>
+                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:var(--red);">?</text>
             </g>
         </g>
         <g transform="matrix(0.874349,0.504802,-0.371957,0.951047,35.8573,-9.7475)">
             <g transform="matrix(1.33333,0,-0.577347,1,19.268,0)">
-                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:rgb(242,84,91);">?</text>
+                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:var(--red);">?</text>
             </g>
         </g>
         <g transform="matrix(0.874348,-0.504805,0.511639,0.870402,27.0951,25.7299)">
             <g transform="matrix(1.33333,0,-0.577347,1,19.268,0)">
-                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:rgb(242,84,91);">?</text>
+                <text x="-0.719px" y="32.958px" style="font-family:'Arvo-Bold', 'Arvo';font-weight:700;font-size:20.324px;fill:var(--red);">?</text>
             </g>
         </g>
     </g>
