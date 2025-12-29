@@ -3,40 +3,12 @@
 @import url("./fonts/JetBrainsMono.css");
 
 :root {
-    /* colors */
-    --red: #F2545B;
-    --purple: #C3BEF7;
-    --blue: #02A9EA;
-    --green: #6CCC74;
-    --yellow: #F1D302;
-    --orange: #EC9703;
-    /* shades */
-    --base: #FFFFFF;
-    --mantle: #F2F2F2;
-    --crust: #E4E4E4;
-    --overlay: #D6D6D6;
-    --outline: #66666E;
-    /* text colors */
-    --text: #242427;
-    --hltext: #FFFFFF;
-    --text-on-red: var(--hltext);
-    --text-on-purple: var(--text);
-    --text-on-blue: var(--hltext);
-    --text-on-green: var(--hltext);
-    --text-on-orange: var(--hltext);
-    --text-on-yellow: var(--text);
-    --text-on-base: var(--text);
-    --text-on-mantle: var(--text);
-    --text-on-crust: var(--text);
-    --text-on-overlay: var(--text);
-    --text-on-outline: var(--hltext);
     /* fonts */
     --branded: Nunito;
     --emoji: Noto Color Emoji, Noto Sans Symbols;
     --body: Noto Sans, var(--emoji);
     --heading: Noto Sans, var(--emoji);
     --mono: JetBrains Mono, var(--emoji);
-
 
     /* defaults */
     color: var(--text);
@@ -47,27 +19,6 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        /* shades */
-        --base: #75757d;
-        --mantle: #66666E;
-        --crust: #57575f;
-        --overlay: #484850;
-        --outline: #ACACB0;
-        /*  text colors */
-        --text: #FFFFFF;
-        --hltext: #242427;
-        --text-on-red: var(--text);
-        --text-on-purple: var(--hltext);
-        --text-on-blue: var(--text);
-        --text-on-green: var(--text);
-        --text-on-orange: var(--text);
-        --text-on-yellow: var(--hltext);
-        --text-on-base: var(--text);
-        --text-on-mantle: var(--text);
-        --text-on-crust: var(--text);
-        --text-on-overlay: var(--text);
-        --text-on-outline: var(--hltext);
-
         /* defaults */
         color: var(--text);
         background-color: var(--base);

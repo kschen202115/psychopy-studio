@@ -1,6 +1,7 @@
 <script>
     import Panel from '$lib/utils/Panel.svelte';
     import Frame from '$lib/utils/Frame.svelte';
+    import Theme from "$lib/utils/Theme.svelte";
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
     import Ribbon from './ribbon/Ribbon.svelte';
@@ -67,6 +68,10 @@
         bind:shown={current.readme.shown}
     />
 
+    <!-- this will setup themeing -->
+    <Theme 
+        file="/themes/psychopy.css"
+    />
     <!-- this will setup keyboard shortcuts -->
     <Shortcuts
         callbacks={shortcuts}

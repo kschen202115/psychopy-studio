@@ -1,7 +1,7 @@
 <script>
     import { setContext } from "svelte";
     import { current } from "./globals.svelte";
-
+    import Theme from "$lib/utils/Theme.svelte";
     import CoderRibbon from "./ribbon/Ribbon.svelte";
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
@@ -61,6 +61,10 @@
             <ShellNotebook />
         </Panel>
     {/if}
+    <!-- this will setup themeing -->
+    <Theme 
+        file="/themes/psychopy.css"
+    />
     <!-- this will setup keyboard shortcuts -->
     <Shortcuts
         callbacks={shortcuts}

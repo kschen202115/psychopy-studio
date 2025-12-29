@@ -2,6 +2,7 @@
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
+    import Theme from "$lib/utils/Theme.svelte";
     import AlertsOutput from "./outputs/AlertsOutput.svelte";
     import FilesPanel from "./files/Panel.svelte";
 
@@ -99,6 +100,10 @@
         </Notebook>
     </Panel>
 
+    <!-- this will setup themeing -->
+    <Theme 
+        file="/themes/psychopy.css"
+    />
     <!-- this will setup keyboard shortcuts -->
     <Shortcuts
         callbacks={shortcuts}
