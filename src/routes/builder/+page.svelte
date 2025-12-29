@@ -69,9 +69,7 @@
     />
 
     <!-- this will setup themeing -->
-    <Theme 
-        file="/themes/psychopy.css"
-    />
+    <Theme />
     <!-- this will setup keyboard shortcuts -->
     <Shortcuts
         callbacks={shortcuts}

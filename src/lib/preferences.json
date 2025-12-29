@@ -346,14 +346,20 @@
             }
         },
         "theme": {
-            "val": "PsychopyLight",
+            "val": "psychopy",
             "valType": "str",
             "inputType": "single",
             "categ": "Application",
             "updates": null,
             "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
+            "allowedVals": [
+                "psychopy",
+                "catppuccin-latte"
+            ],
+            "allowedLabels": [
+                "PsychoPy",
+                "Catppuccin Latte"
+            ],
             "label": "Theme",
             "hint": "Control the look and feel of PsychoPy",
             "plugin": null,
