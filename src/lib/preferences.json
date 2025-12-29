@@ -354,13 +354,17 @@
             "allowedUpdates": null,
             "allowedVals": [
                 "psychopy",
+                "psychopy-light",
+                "psychopy-dark",
                 "catppuccin-latte",
                 "catppuccin-frappe",
                 "catppuccin-macchiato",
                 "catppuccin-mocha"
             ],
             "allowedLabels": [
-                "PsychoPy",
+                "PsychoPy Responsive",
+                "PsychoPy Light",
+                "PsychoPy Dark",
                 "Catppuccin Latte",
                 "Catppuccin Frappe",
                 "Catppuccin Macchiato",
