@@ -16,6 +16,7 @@
     import {
         openFile
     } from "./callbacks.svelte";
+    import { python } from "$lib/globals.svelte";
 
     // reference current in context for ease of access
     setContext("current", current)
@@ -75,8 +76,10 @@
         callbacks={shortcuts}
     />
     <!-- this will setup a Python instance -->
-    <SetupPython />
-    <PythonErrors />
+    {#if python}
+        <SetupPython />
+        <PythonErrors />
+    {/if}
 
 </Frame>
 
