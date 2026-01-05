@@ -1543,6 +1543,27 @@
                 "enabled": []
             }
         },
+        "syncPavlovia": {
+            "val": [
+                "CONTROL",
+                "ALT",
+                "Y"
+            ],
+            "valType": "keypress",
+            "inputType": "keypress",
+            "categ": "Key Bindings",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Sync to Pavlovia",
+            "hint": "Sync the current project to Pavlovia",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "showDevTools": {
             "val": [
                 "CONTROL",
