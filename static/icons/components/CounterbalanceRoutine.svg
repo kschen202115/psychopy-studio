@@ -13,16 +13,16 @@
             <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(37,169,234);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-620.917,-1096)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-620.917,-1081)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-613.917,-1108)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-614.917,-1115)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-619.917,-1110)">
             <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(37,169,234);"/>
@@ -34,10 +34,10 @@
             <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(37,169,234);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-625.917,-1105)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-624.917,-1115)">
-            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(242,84,91);"/>
+            <circle cx="624.962" cy="1087.64" r="2.909" style="fill:var(--red);"/>
         </g>
         <g transform="matrix(1.03113,0,0,1.03113,-618.417,-1102.5)">
             <circle cx="624.962" cy="1087.64" r="2.909" style="fill:rgb(37,169,234);"/>

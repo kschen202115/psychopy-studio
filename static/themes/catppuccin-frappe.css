@@ -1,0 +1,29 @@
+:root {
+    /* colors */
+    --red: #e78284;  /* Red */
+    --purple: #ca9ee6;  /* Mauve */
+    --blue: #99d1db;  /* Sky */
+    --green: #a6d189;  /* Green */
+    --yellow: #e5c890;  /* Yellow */
+    --orange: #ef9f76;  /* Peach */
+    /* shades */
+    --base: #303446;  /* Base */
+    --mantle: #292c3c;  /* Mantle */
+    --crust: #232634;  /* Crust */
+    --overlay: #414559;  /* Surface 0 */
+    --outline: #737994;  /* Overlay 0 */
+    /* text colors */
+    --text: #c6d0f5;  /* Text */
+    --hltext: #303446;  /* Base */
+    --text-on-red: var(--hltext);
+    --text-on-purple: var(--text);
+    --text-on-blue: var(--hltext);
+    --text-on-green: var(--hltext);
+    --text-on-orange: var(--hltext);
+    --text-on-yellow: var(--text);
+    --text-on-base: var(--text);
+    --text-on-mantle: var(--text);
+    --text-on-crust: var(--text);
+    --text-on-overlay: var(--text);
+    --text-on-outline: var(--hltext);
+}

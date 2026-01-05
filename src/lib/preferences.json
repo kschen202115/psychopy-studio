@@ -346,19 +346,59 @@
             }
         },
         "theme": {
-            "val": "PsychopyLight",
+            "val": "psychopy",
             "valType": "str",
-            "inputType": "single",
+            "inputType": "choice",
             "categ": "Application",
             "updates": null,
             "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
+            "allowedVals": [
+                "psychopy",
+                "psychopy-light",
+                "psychopy-dark",
+                "catppuccin-latte",
+                "catppuccin-frappe",
+                "catppuccin-macchiato",
+                "catppuccin-mocha",
+                "custom"
+            ],
+            "allowedLabels": [
+                "PsychoPy Responsive",
+                "PsychoPy Light",
+                "PsychoPy Dark",
+                "Catppuccin Latte",
+                "Catppuccin Frappe",
+                "Catppuccin Macchiato",
+                "Catppuccin Mocha",
+                "Custom..."
+            ],
             "label": "Theme",
             "hint": "Control the look and feel of PsychoPy",
             "plugin": null,
             "depends": {
                 "shown": [],
+                "enabled": []
+            }
+        },
+        "customTheme": {
+            "val": "",
+            "valType": "str",
+            "inputType": "file",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Custom theme file",
+            "hint": "Select a custom CSS file defining a theme",
+            "plugin": null,
+            "depends": {
+                "shown": [
+                    {
+                        "param": "theme",
+                        "condition": "=='custom'"
+                    }
+                ],
                 "enabled": []
             }
         },

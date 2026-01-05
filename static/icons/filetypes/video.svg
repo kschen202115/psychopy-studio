@@ -15,7 +15,7 @@
                     </clipPath>
                     <g clip-path="url(#_clip2)">
                         <g transform="matrix(-1.11757,0,0,1.01973,63.3607,-23.24)">
-                            <rect x="6.039" y="19.255" width="52.614" height="44.659" style="fill:rgb(2,169,234);"/>
+                            <rect x="6.039" y="19.255" width="52.614" height="44.659" style="fill:var(--blue);"/>
                         </g>
                         <g id="Mountains" transform="matrix(1.02928,0,0,0.797016,-494.86,-1.77309)">
                             <path d="M484,41.774L496.338,27.38C497.941,25.509 500.887,25.688 502.253,27.737L510.432,40.01L527.58,20.004C528.661,18.742 530.648,18.862 531.57,20.245L544,38.899L544,65L484,65L484,41.774Z" style="fill:var(--outline);fill-opacity:0.5;"/>

@@ -1,6 +1,7 @@
 <script>
     import Panel from '$lib/utils/Panel.svelte';
     import Frame from '$lib/utils/Frame.svelte';
+    import Theme from "$lib/utils/Theme.svelte";
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
     import Ribbon from './ribbon/Ribbon.svelte';
@@ -15,6 +16,7 @@
     import {
         openFile
     } from "./callbacks.svelte";
+    import { python } from "$lib/globals.svelte";
 
     // reference current in context for ease of access
     setContext("current", current)
@@ -67,13 +69,17 @@
         bind:shown={current.readme.shown}
     />
 
+    <!-- this will setup themeing -->
+    <Theme />
     <!-- this will setup keyboard shortcuts -->
     <Shortcuts
         callbacks={shortcuts}
     />
     <!-- this will setup a Python instance -->
-    <SetupPython />
-    <PythonErrors />
+    {#if python}
+        <SetupPython />
+        <PythonErrors />
+    {/if}
 
 </Frame>
 

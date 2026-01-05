@@ -4,6 +4,7 @@
     import { Button } from "$lib/utils/buttons";
     import { Icon } from "$lib/utils/icons";
     import { asset } from "$app/paths";
+    import Theme from "$lib/utils/Theme.svelte";
 
     // handle initial setup
     let ready = $state({
@@ -104,6 +105,9 @@
             />
         {/await}
     </div>
+
+    <!-- this will setup themeing -->
+    <Theme />
 </div>
 
 <style>
