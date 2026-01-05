@@ -3,36 +3,94 @@
 
 <script>
     import loader from '@monaco-editor/loader';
-    import { onDestroy, onMount } from 'svelte';
-    import themes from "./themes";
+    import { onMount } from 'svelte';
 
     let {
         value=$bindable(),
         editor=$bindable(),
+        theme=$bindable(),
         canUndo=$bindable(),
         canRedo=$bindable(),
         readonly=$bindable(false),
         resize="none",
-        language='python',
-        theme='psychopy-light'
+        language='python'
     } = $props();
 
-    let monaco;
+    let monaco = $state.raw();
     let container;
+
+    $effect(() => {
+        // get palette from css variables
+        let palette = {}
+        for (let name of [
+            "red",
+            "purple",
+            "blue",
+            "green",
+            "yellow",
+            "orange",
+            "base",
+            "mantle",
+            "crust",
+            "overlay",
+            "outline",
+            "text"
+        ]) {
+            palette[name] = window.getComputedStyle(document.body).getPropertyValue(`--${name}`)
+        }
+        // setup theme spec from css variables
+        let spec = {
+            "base": "vs",
+            "inherit": false,
+            "rules": [
+                // default
+                { 'token': "", 'foreground': palette.text, 'background': palette.base },
+                // data types
+                { 'token': "string", 'foreground': palette.outline },
+                { 'token': "number", 'foreground': palette.blue },
+                // comments
+                { 'token': "comment.block", 'fontStyle':"italic" },
+                { 'token': "comment", 'foreground': palette.green},
+                // keywords
+                { 'token': "keyword", 'foreground': palette.red },
+                { 'token': "type", 'foreground': palette.blue },
+                // generic
+                { 'token': "invalid", 'foreground': palette.red },
+                { 'token': "emphasis", 'fontStyle': "italic" },
+                { 'token': "strong", 'fontStyle': "bold" },
+            ],
+            "colors": {
+                'editor.foreground': palette.text,
+                'editor.background': palette.base,
+                'editor.selectionBackground': palette.crust,
+                'editor.inactiveSelection': palette.mantle,
+                'editor.referenceHighlight': palette.red,
+                'editorCursor.foreground': palette.red,
+                'editorWhitespace.foreground': palette.mantle,
+                'editorGutter.background': palette.mantle,
+                'editorLineNumber.foreground': palette.outline,
+                'editorLineNumber.activeForeground': palette.text,
+                'editor.lineHighlightBackground': palette.crust,
+                'scrollbar.shadow': palette.overlay,
+            }
+        }
+        
+        if (monaco) {
+            // define theme
+            monaco.editor.defineTheme(theme || "default", spec);
+            // set theme
+            monaco.editor.setTheme(theme || "default");
+        }
+    })
 
     onMount(() => {
         (async () => {
             // initialise monaco loader
             monaco = await loader.init();
-            // setup themes
-            for (let [themeName, themeSpec] of Object.entries(themes)) {
-                monaco.editor.defineTheme(themeName, themeSpec);
-            }
             // initialise editor
             editor = monaco.editor.create(container, {
                 value,
                 language,
-                theme,
                 fontFamily: "JetBrains Mono",
                 colorDecorators: false,
                 lineHeight: 1.6,
@@ -84,15 +142,6 @@
             editor?.setValue(' ');
         }
     });
-
-    // // this meant the editor would unload when hidden (we hide it in Components)
-    // onDestroy(() => {
-    //     // unload models on destroy
-    //     monaco?.editor.getModels().forEach(
-    //         (model) => model.dispose()
-    //     );
-    //     editor?.dispose();
-    // });
 </script>
 
 <div 

@@ -1,7 +1,8 @@
 <script>
     import { getContext, onMount } from "svelte";
     import { ButtonTab, Notebook, NotebookPage } from "$lib/utils/notebook";
-    import CodeEditor from "$lib/utils/code/CodeEditor.svelte";
+    import { CodeEditor } from "$lib/utils/code";
+    import { prefs } from "$lib/preferences.svelte";
 
     var media = $state({
         prefersColorScheme: "light"
@@ -30,7 +31,7 @@
             }
         >
             <CodeEditor
-                theme="psychopy-{media.prefersColorScheme}"
+                bind:theme={prefs.params.theme.val}
                 bind:value={page.content}
                 bind:editor={page.editor}
                 bind:canUndo={page.canUndo}
