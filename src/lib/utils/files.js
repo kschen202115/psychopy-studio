@@ -13,7 +13,6 @@ mime.define({
     "text/python": ["py"],
     "text/config": ["cfg"],
 })
-console.log(mime.getType("something/something.py"))
 
 
 /**
