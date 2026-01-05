@@ -7,6 +7,8 @@
         element,
         /** @bindable State controlling this dialog's visibility */
         shown=$bindable(),
+        /** @prop @type {object} Additional buttons beyond the standard OK, APPLY, CANCEL and HELP */
+        extraButtons={},
         /** @prop @type {function} Function to execute when param changes are applied */
         onapply=(evt) => {},
         /** @prop @type {function} Function to execute when this dialog closes */
@@ -44,6 +46,7 @@
             element.restore.set();
             onapply(evt);
         }, 
+        EXTRA: extraButtons,
         CANCEL: evt => {
             element.restore.apply()
         }, 

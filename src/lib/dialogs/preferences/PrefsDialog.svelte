@@ -13,6 +13,9 @@
     <ParamsDialog
         element={prefs}
         onapply={evt => prefs.save()}
+        extraButtons={{
+            Reset: evt => prefs.reset()
+        }}
         bind:shown={shown}
     />
 {/await}
