@@ -143,6 +143,15 @@ export async function startPython() {
           }, 10000).catch(
             err => console.error(`Failed to set devices file`, err)
           )
+          // set prefs from JSON
+          python.liaison.send({
+            command: "run",
+            args: ["prefs.fromJSON", path.join(
+              app.getPath("appData"), "psychopy4", "preferences.json"
+            )]
+          }, 10000).catch(
+            err => console.error(`Failed to load preferences`, err)
+          )
         }
       )
     }).catch(

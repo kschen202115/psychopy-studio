@@ -480,7 +480,9 @@ export class Experiment {
         await python.scripts.run(
             target, 
             executable || await python.details().then(resp => resp.executable),
-            ...(this.pilotMode ? ["--pilot"] : [])
+            ...(this.pilotMode ? ["--pilot"] : []),
+            "--prefs-json",
+            await electron.paths.prefs()
         )
     }
 
