@@ -40,7 +40,7 @@
         <input 
             type=search 
             class=search
-            bind:value={current.search} 
+            bind:value={searchTerm} 
         />
         <Notebook>
             {#each ["system", "packaged", "user", "experiment"] as source}
