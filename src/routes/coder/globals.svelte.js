@@ -1,7 +1,8 @@
 import { Script } from "$lib/experiment/script.svelte"
 import { openIn } from "$lib/utils/views.svelte"
 import { python } from "$lib/globals.svelte"
-import { parsePath } from "$lib/utils/files"
+import { parsePath, mime } from "$lib/utils/files"
+import { electron } from "$lib/globals.svelte"
 
 export let current = $state({
     pages: [],
@@ -27,6 +28,18 @@ export let current = $state({
             })
             // open new path
             file = parsePath(fileCSV)
+        }
+        // open non-text files via system
+        let mimeType = mime.getType(file.name) || "unknown"
+        if (!(
+            mimeType.startsWith("text") ||
+            [
+                "application/json", 
+                "application/xml"
+            ].includes(mimeType)
+        )) {
+            electron.files.openExternal(file.file)
+            return
         }
         // if file not already open, open it
         if (!current.pages.some(

@@ -1,5 +1,19 @@
 import path from "path-browserify";
 import { electron } from "$lib/globals.svelte"
+import { Mime } from 'mime/lite';
+import standardTypes from 'mime/types/standard.js';
+import otherTypes from 'mime/types/other.js';
+
+/** Export a custom mime instance with some custom mappings */
+export const mime = new Mime(standardTypes, otherTypes)
+mime.define({
+    "application/xml": ["psyexp"],
+    "text/json": ["psyrun"],
+    "text/python": ["py"],
+    "text/config": ["cfg"],
+})
+console.log(mime.getType("something/something.py"))
+
 
 /**
  * path-browserify is fine, but it's no pathlib.Path

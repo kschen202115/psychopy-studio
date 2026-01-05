@@ -40,14 +40,8 @@
         icon="/icons/btn-target.svg"
         tooltip="Navigate to current file"
         onclick={evt => {
-            // get file
-            let file = current.pages[current.tab].file
-            // sanitize
-            file = file.replaceAll("\\", path.sep)
-            // get folder
-            let folder = path.dirname(file)
             // set
-            value = folder
+            value = current.pages[current.tab].file.parent
             onchange($state.snapshot(value))
         }}
         disabled={current.pages[current.tab] === undefined}
