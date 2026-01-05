@@ -9,6 +9,7 @@ export const mime = new Mime(standardTypes, otherTypes)
 mime.define({
     "application/xml": ["psyexp"],
     "text/json": ["psyrun"],
+    "application/psydat": ["psydat"],
     "text/python": ["py"],
     "text/config": ["cfg"],
 })

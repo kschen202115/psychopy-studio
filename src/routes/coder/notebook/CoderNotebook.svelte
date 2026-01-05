@@ -36,6 +36,7 @@
                 bind:editor={page.editor}
                 bind:canUndo={page.canUndo}
                 bind:canRedo={page.canRedo}
+                file={page.file}
             ></CodeEditor>
         </NotebookPage>
     {/each}

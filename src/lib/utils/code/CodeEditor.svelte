@@ -13,11 +13,20 @@
         canRedo=$bindable(),
         readonly=$bindable(false),
         resize="none",
-        language='python'
+        file
     } = $props();
 
     let monaco = $state.raw();
     let container;
+
+    // maps file extensions to languages
+    let languages = {
+        ".py": "python",
+        ".js": "javascript",
+        ".md": "markdown",
+        ".html": "html",
+        ".json": "json"
+    }
 
     $effect(() => {
         // get palette from css variables
@@ -49,7 +58,7 @@
                 { 'token': "string", 'foreground': palette.outline },
                 { 'token': "number", 'foreground': palette.blue },
                 // comments
-                { 'token': "comment.block", 'fontStyle':"italic" },
+                { 'token': "comment.block", 'fontStyle': "italic" },
                 { 'token': "comment", 'foreground': palette.green},
                 // keywords
                 { 'token': "keyword", 'foreground': palette.red },
@@ -87,6 +96,8 @@
         (async () => {
             // initialise monaco loader
             monaco = await loader.init();
+            // figure out language from file
+            let language = languages[file?.ext] || "text"
             // initialise editor
             editor = monaco.editor.create(container, {
                 value,
