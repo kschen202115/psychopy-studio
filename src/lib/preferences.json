@@ -260,23 +260,6 @@
                 "enabled": []
             }
         },
-        "resetPrefs": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Application",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Reset preferences",
-            "hint": "Reset preferences to defaults on next restart of PsychoPy",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "autoSavePrefs": {
             "val": false,
             "valType": "code",
