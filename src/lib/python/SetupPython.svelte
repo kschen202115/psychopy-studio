@@ -56,15 +56,19 @@
     <div class=output-container>
         <CodeOutput bind:value={status.logs} />
     </div>
-    <div class=finished-msg>
         {#await status.ready.promise then ready}
-            <span>Install completed successfully, you can safely close this window.</span>
+            <div class=finished-msg>
+                Install completed successfully, you can safely close this window.
+            </div>
         {:catch err}
-            <Icon 
-                src="/icons/sym-error.svg"
-                size=1rem
-            />
-            <span style:color=var(--red)>Install failed, see above for error.</span>
+            <div class=finished-msg style:color=var(--red)>
+                <Icon 
+                    src="/icons/sym-error.svg"
+                    size=1rem
+                />
+                Install failed, see above for error.
+            </div>
+            
             <Button
                 label="Try again?"
                 icon="/icons/btn-refresh.svg"
