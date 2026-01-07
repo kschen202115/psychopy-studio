@@ -72,35 +72,39 @@ export async function installUV() {
         }
     }
     // get relevant executable 
-    await fetch(
-        `https://github.com/astral-sh/uv/releases/download/0.8.18/${installers[platform][arch]}`
-    ).then(
-        resp => resp.blob()
-    ).then(
-        async blob => {
-            // write to a zipped file
-            let zipfile = path.join(uv.dir, installers[platform][arch]);
-            fs.writeFileSync(zipfile, await blob.bytes());
-            // extract file
-            if (path.extname(zipfile) === ".zip") {
-                // extract zip file...
-                await unzip(zipfile, {
-                    dir: uv.dir
-                })
+    try {
+        await fetch(
+            `https://github.com/astral-sh/uv/releases/download/0.8.18/${installers[platform][arch]}`
+        ).then(
+            resp => resp.blob()
+        ).then(
+            async blob => {
+                // write to a zipped file
+                let zipfile = path.join(uv.dir, installers[platform][arch]);
+                fs.writeFileSync(zipfile, await blob.bytes());
+                // extract file
+                if (path.extname(zipfile) === ".zip") {
+                    // extract zip file...
+                    await unzip(zipfile, {
+                        dir: uv.dir
+                    })
+                }
+                if (path.extname(zipfile) === ".gz") {
+                    // extract tar.gz file...
+                    untar({
+                        file: zipfile,
+                        cwd: uv.dir,
+                        strip: 1,
+                        sync: true
+                    })
+                }
+                // delete zip file
+                fs.unlink(zipfile, err => {if (err) throw err})
             }
-            if (path.extname(zipfile) === ".gz") {
-                // extract tar.gz file...
-                untar({
-                    file: zipfile,
-                    cwd: uv.dir,
-                    strip: 1,
-                    sync: true
-                })
-            }
-            // delete zip file
-            fs.unlink(zipfile, err => {if (err) throw err})
-        }
-    )
+        )
+    } catch (err) {
+        uv.output(err?.error || err)
+    }
 }
 
 export function findPython(
