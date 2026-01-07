@@ -6,24 +6,14 @@
     import DeviceListItem from "./DeviceListItem.svelte";
     import { ParamCtrl } from "$lib/paramCtrls";
     import { Device, Param } from "$lib/experiment"
-    import { onMount, setContext } from "svelte";
+    import { setContext } from "svelte";
     import { devices, python } from "$lib/globals.svelte";
-    import { profiles } from "$lib/experiment"
+    import { pending as profilesPending, profiles } from "$lib/experiment/profiles.svelte"
 
     let {
         shown=$bindable()
     } = $props()
 
-    function titleCase(name) {
-        name = name.replace("DeviceBackend", "");
-        name = name.replace("Backend", "");
-        name = name.replace(/(\w)([A-Z])/g, "$1 $2")
-
-        return name;
-    }
-    function className(name) {
-        return name.match(/(?<=\.)\w+$/)[0]
-    }
     let selected = $state({
         device: undefined
     })
@@ -36,12 +26,9 @@
     let panelsOpen = $state({})
 
     let timeout = $state.raw(60000)
-    let promises = $state({
-        backends: undefined
-    })
 
     function refresh(evt) {
-        promises.backends = python.liaison.send({
+        profilesPending.devices = python.liaison.send({
             command: "run",
             args: [
                 "psychopy.experiment:getDeviceProfiles"
@@ -50,8 +37,6 @@
             resp => Object.assign(profiles.devices, resp)
         )
     }
-
-    onMount(refresh)
 
     let disableBtns = $derived({
         OK: !param.valid.value || !selected.device
@@ -103,7 +88,7 @@
             <RadioGroup
                 bind:value={selected.device}
             >
-                {#await promises.backends}
+                {#await profilesPending.devices}
                     <div class=loading-msg>
                         Getting device backends...
                     </div>

@@ -2,79 +2,85 @@
     import ComponentButton from './ComponentButton.svelte';
     import ComponentSection from './Section.svelte';
 
-    import { profiles as allProfiles } from '$lib/experiment';
+    import { profiles as allProfiles, pending as profilesPending } from '$lib/experiment/profiles.svelte';
     import RoutineButton from './RoutineButton.svelte';
     import FilterDialog from './FilterDialog.svelte';
     import { CompactButton } from "$lib/utils/buttons";
     import { PluginManagerDlg } from "$lib/dialogs/pluginManager"
     import { electron, python } from "$lib/globals.svelte";
 
-    let profiles = $state({
-        promise: undefined,
-        error: undefined,
-        all: allProfiles.components,
-    })
+    /**
+     * Sort Components into ordered categories
+     * 
+     * @param profiles { object } Object containing Component profiles, unsorted
+     * 
+     * @returns { array<array> } Entries-style array, with each item being a category (in order) and matching profiles
+     */
+    function sortProfiles(profiles) {
+        // get all unique categs from profiles
+        let categs = Object.values(profiles).reduce(
+            (all, profile) => Array.prototype.concat(all, profile.categories.filter(categ => !all.includes(categ))),
+            [],
+        )
+        // define which categories go first and last
+        let categOrder = {
+            first: ["Stimuli", "Responses"],
+            last: ["I/O", "Custom", "Other"]
+        }
+        // sort categories
+        categs.sort(
+            (a, b) => (
+                // prioritise categs listed in `first`
+                categOrder.first.includes(b) - categOrder.first.includes(a)
+            ) + (
+                // deprioritise categs listed in `last`
+                categOrder.last.includes(a) - categOrder.last.includes(b)
+            )
+        )
+        // sort profiles into categories
+        let sorted = categs.map(
+            categ => [
+                categ, 
+                Object.values(profiles).filter(
+                    profile => (
+                        // only include profiles in this category
+                        profile.categories.includes(categ) && 
+                        // skip base elements
+                        !profile['__class__'].match(/psychopy\.experiment\.(components|routines)\._?base:.*/) &&
+                        // skip hidden elements
+                        !profile.hidden
+                    )
+                )
+            ]
+        )
 
-    function loadComponents(evt) {
-        if (python?.ready) {
-            // request profiles from Python
-            profiles.promise = python.liaison.send({
+        return sorted
+    }
+
+    /**
+     * Apply the current filter to an array of profiles
+     */
+    function filterProfiles(profiles) {
+        return profiles.filter(
+            profile => filter === undefined || filter.every(
+                value => profile.targets.includes(value)
+            )
+        )
+    }
+
+    /**
+     * Get Components again from PsychoPy
+     */
+    async function refreshProfiles() {
+        if (await python?.ready) {
+            profilesPending.components = python.liaison.send({
                 command: "run",
                 args: ["psychopy.experiment:getElementProfiles"]
-            }, 100000)
-            // store response on success
-            profiles.promise.then(
-                data => Object.assign(profiles.all, data)
+            }, 100000).then(
+                data => Object.assign(allProfiles.components, data)
             )
-            // store error on fail
-            profiles.promise.catch(
-                err => profiles.error = err
-            )
-        } else {
-            // if in web-only mode, use stored profiles
-            profiles.all = allProfiles.components
         }
     }
-    // load once on init
-    loadComponents()   
-
-    let components = $derived.by(() => {
-        let output = {
-            categs: {
-                first: ["Stimuli", "Responses"],
-                other: [],
-                last: ["I/O", "Custom", "Other"]
-            },
-            sorted: {}
-        }
-        // iterate through all profiles
-        for (let profile of Object.values(profiles.all)) {
-            // skip...
-            if (
-                // ...base elements
-                profile['__class__'].match(/psychopy\.experiment\.(components|routines)\._?base:.*/) ||
-                // ...hidden elements
-                profile.hidden
-            ) {
-                continue
-            }
-            // iterate through categories
-            for (let categ of profile.categories) {
-                // make sure categ exists in order
-                if (!Object.values(output.categs).flat().includes(categ)) {
-                    output.categs.other.push(categ)
-                }
-                // make sure category exists in sorted comps object
-                if (!(categ in output.sorted)) {
-                    output.sorted[categ] = []
-                }
-                // append Component to categ
-                output.sorted[categ].push(profile)
-            }
-        }
-
-        return output
-    })
 
     let showFilterDlg = $state.raw(false);
     let showPluginMgr = $state.raw(false);
@@ -94,7 +100,7 @@
             <CompactButton
                 icon="/icons/btn-refresh.svg"
                 tooltip="Reload Components"
-                onclick={loadComponents}
+                onclick={refreshProfiles}
             />
         {/if}
         <CompactButton
@@ -108,37 +114,37 @@
         ></FilterDialog>
     </div>
     <div class=components>
-        {#await profiles.promise}
-            <div class=message>Loading Components...</div>
-        {:then}
-            {#each [components.categs.first, components.categs.other, components.categs.last].flat() as categ}
-                {#if components.sorted[categ] && components.sorted[categ].length}
-                    <ComponentSection label={categ}>
-                        {#each components.sorted[categ] as comp}
-                            {#if filter === undefined || filter.every((value) => comp.targets.includes(value))}
-                                {#if comp['__class__'].startsWith("psychopy.experiment.components") || comp['__class__'].endsWith("omponent")}
+        {#await python?.ready then ready}
+            {#await profilesPending.components}
+                <div class=message>Loading Components...</div>
+            {:then}
+                {#each sortProfiles(allProfiles.components) as [categ, categProfiles]}
+                    {#if filterProfiles(categProfiles).length}
+                        <ComponentSection label={categ}>
+                            {#each filterProfiles(categProfiles) as profile}
+                                {#if profile['__class__'].startsWith("psychopy.experiment.components") || profile['__class__'].endsWith("omponent")}
                                     <ComponentButton 
-                                        component={comp}
+                                        component={profile}
                                     ></ComponentButton>
                                 {:else}
                                     <RoutineButton 
-                                        component={comp}
+                                        component={profile}
                                     ></RoutineButton>
                                 {/if}
-                            {/if}
-                        {/each}
-                    </ComponentSection>
-                {/if}
-            {/each}
-        {:catch err}
-            <div class="message error">
-                <div>
-                    Failed to load Components. 
-                </div>
-                <pre>
+                            {/each}
+                        </ComponentSection>
+                    {/if}
+                {/each}
+            {:catch err}
+                <div class="message error">
+                    <div>
+                        Failed to load Components. 
+                    </div>
+                    <pre>
 {err.error?.join?.("\n")}
-                </pre>
-            </div>
+                    </pre>
+                </div>
+            {/await}
         {/await}
     </div>
 </div>
