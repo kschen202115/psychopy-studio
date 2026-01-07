@@ -1,9 +1,11 @@
 <script>
     import { MessageArray, Message } from "$lib/utils/message";
+    import { MessageDialog } from "$lib/utils/dialog";
+    import { CodeOutput } from "$lib/utils/code";
     import { python } from "$lib/globals.svelte.js";
-    import { showWindow } from "$lib/utils/views.svelte";
 
     let errors = $state([])
+    let showDlg = $state.raw(false)
 
     // listen to Python stderr
     python.output.stderr.listen(
@@ -30,12 +32,23 @@
     {#each errors as error}
         {#await error.dismiss}
             <Message
-                message="Python error, view in Runner"
+                message="Python error, click to show error"
                 icon="/icons/sym-error.svg"
-                onclick={evt => showWindow("runner")}
+                onclick={evt => showDlg = true}
             />
         {:then}
             {""}
         {/await}
     {/each}
 </MessageArray>
+
+<MessageDialog
+    bind:shown={showDlg}
+    buttons={{
+        CANCEL: evt => {}
+    }}
+>
+    <div class=output-container>
+        <CodeOutput value={errors.map(err => err.content).join("\n")} />
+    </div>
+</MessageDialog>
