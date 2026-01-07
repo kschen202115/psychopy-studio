@@ -1,5 +1,5 @@
 import { python, electron } from "$lib/globals.svelte";
-import { parsePath } from "$lib/utils/files";
+import { readFile, writeFile, parsePath } from "$lib/utils/files";
 
 
 export class Script {
@@ -51,20 +51,11 @@ export class Script {
         }
         // if we were keeping track of history, clear it now
         this.canUndo = false
-        // write content from file
-        if (electron) {
-            electron.files.save(
-                $state.snapshot(this.file.file), 
-                $state.snapshot(this.content)
-            )
-        } else {
-            // get file writable from handle
-            let writable = await file.handle.createWritable();
-            // write to file
-            writable.seek(0);
-            writable.write(this.content);
-            writable.close();
-        }
+        // write content to file
+        writeFile(
+            $state.snapshot(this.file.file),
+            $state.snapshot(this.content)
+        )
     }
 
     /**
@@ -76,11 +67,7 @@ export class Script {
             file = parsePath(file)
         }
         // load content from file
-        if (electron) {
-            this.content = await electron.files.load(file.file)
-        } else {
-            this.content = await file.handle.text()
-        }
+        this.content = readFile(file)
         // store file
         this.file = file
     }

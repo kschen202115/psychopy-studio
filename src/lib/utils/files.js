@@ -133,3 +133,39 @@ export async function browseFileSave(
 
     return output
 }
+
+
+export async function readFile(file) {
+    // parse to object if needed
+    if (typeof file === "string") {
+        file = parsePath(file)
+    }
+    // load content from file
+    if (electron) {
+         return await electron.files.load(file.file)
+    } else {
+        return await file.handle.text()
+    }
+}
+
+
+export async function writeFile(file, content) {
+    // parse to object if needed
+    if (typeof file === "string") {
+        file = parsePath(file)
+    }
+    // write content to file
+    if (electron) {
+        electron.files.save(
+            file.file, 
+            content
+        )
+    } else {
+        // get file writable from handle
+        let writable = await file.handle.createWritable();
+        // write to file
+        writable.seek(0);
+        writable.write(content);
+        writable.close();
+    }
+}

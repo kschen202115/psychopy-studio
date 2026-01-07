@@ -1,6 +1,7 @@
 <script>
-    import { Dialog } from "$lib/utils/dialog";
-    import { Tooltip } from "$lib/utils/tooltip";
+    import { Dialog, MessageDialog } from "$lib/utils/dialog";
+    import { browseFileSave, writeFile } from "$lib/utils/files.js"
+    import { Button } from "$lib/utils/buttons";
     import { Experiment } from "$lib/experiment";
     import { electron } from "$lib/globals.svelte";
     import path from "path-browserify";
@@ -22,6 +23,11 @@
             app: "",
             liaison: ""
         },
+    })
+
+    let err = $state({
+        shown: false,
+        message: undefined
     })
 
     async function populate() {
@@ -57,7 +63,14 @@
         let resp = await fetch("/api/report", {
             method: "POST",
             body: JSON.stringify($state.snapshot(report))
-        })
+        }).then(
+            resp => resp.json()
+        )
+        // catch error
+        if (resp.err) {
+            err.shown = true
+            err.message = resp.err
+        }
     }
 </script>
 
@@ -99,6 +112,25 @@
         </div>
     </div>
 </Dialog>
+
+<MessageDialog
+    bind:shown={err.shown}
+>
+    <p>Failed to send report. Click below to download the report so you can send it manually:</p>
+    <Button 
+        label="Download"
+        icon="/icons/btn-download.svg"
+        onclick={evt => browseFileSave(
+            [
+                { description: "JSON file", accept: {"text/json": [".json"]} }
+            ],
+            "./bug_report.json"
+        ).then(
+            file => writeFile(file, JSON.stringify(report, undefined, 4))
+        )}
+        horizontal
+    />
+</MessageDialog>
 
 <style>
     .content {
