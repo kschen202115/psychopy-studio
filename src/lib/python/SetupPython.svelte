@@ -56,27 +56,26 @@
     <div class=output-container>
         <CodeOutput bind:value={status.logs} />
     </div>
-        {#await status.ready.promise then ready}
-            <div class=finished-msg>
-                Install completed successfully, you can safely close this window.
-            </div>
-        {:catch err}
-            <div class=finished-msg style:color=var(--red)>
-                <Icon 
-                    src="/icons/sym-error.svg"
-                    size=1rem
-                />
-                Install failed, see above for error.
-            </div>
-            
-            <Button
-                label="Try again?"
-                icon="/icons/btn-refresh.svg"
-                onclick={evt => setupPython()}
-                horizontal
+    {#await status.ready.promise then ready}
+        <div class=finished-msg>
+            Install completed successfully, you can safely close this window.
+        </div>
+    {:catch err}
+        <div class=finished-msg style:color=var(--red)>
+            <Icon 
+                src="/icons/sym-error.svg"
+                size=1rem
             />
-        {/await}
-    </div>
+            Install failed, see above for error.
+        </div>
+        
+        <Button
+            label="Try again?"
+            icon="/icons/btn-refresh.svg"
+            onclick={evt => setupPython()}
+            horizontal
+        />
+    {/await}
 </MessageDialog>
 
 <style>
