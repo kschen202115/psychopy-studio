@@ -75,6 +75,12 @@
                 size=1rem
             />
             <span style:color=var(--red)>Install failed, see above for error.</span>
+            <Button
+                label="Try again?"
+                icon="/icons/btn-refresh.svg"
+                onclick={evt => setupPython()}
+                horizontal
+            />
         {/await}
     </div>
 </MessageDialog>
