@@ -4,25 +4,15 @@
     import { MessageArray, Message } from "$lib/utils/message";
     import { MessageDialog } from "$lib/utils/dialog";
     import { CodeOutput } from "$lib/utils/code";
-    import { showWindow } from "$lib/utils/views.svelte";
     import { marked } from "marked";
     import { status } from "./globals.svelte.js";
     import { setupPython } from "./functions.svelte.js";
-    import { python, electron } from "$lib/globals.svelte";
-    import { onMount } from "svelte";
-
+    import { electron } from "$lib/globals.svelte";
+    
+    // setup logging to app
+    electron.windows.listen("uv", (evt, message) => status.logs += `${message}\n`)
+    // setup on initial load
     setupPython()
-    onMount(() => {
-        // setup logging to app
-        electron.windows.listen("uv", (evt, message) => status.logs += `${message}\n`)
-        // open Runner on error
-        python.output.stderr.listen(
-            (evt, message) => showWindow("runner")
-        )
-        python.liaison.listen("error",
-            (evt, message) => showWindow("runner")
-        )
-    })
 </script>
 
 
