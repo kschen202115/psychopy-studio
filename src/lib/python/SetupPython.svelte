@@ -1,21 +1,28 @@
 <script>
     import { Button } from "$lib/utils/buttons";
+    import { Icon } from "$lib/utils/icons";
     import { MessageArray, Message } from "$lib/utils/message";
     import { MessageDialog } from "$lib/utils/dialog";
+    import { CodeOutput } from "$lib/utils/code";
     import { showWindow } from "$lib/utils/views.svelte";
     import { marked } from "marked";
     import { status } from "./globals.svelte.js";
     import { setupPython } from "./functions.svelte.js";
+    import { python, electron } from "$lib/globals.svelte";
+    import { onMount } from "svelte";
 
     setupPython()
-
-    // open Runner on error
-    python.output.stderr.listen(
-        (evt, message) => showWindow("runner")
-    )
-    python.liaison.listen("error",
-        (evt, message) => showWindow("runner")
-    )
+    onMount(() => {
+        // setup logging to app
+        electron.windows.listen("uv", (evt, message) => status.logs += `${message}\n`)
+        // open Runner on error
+        python.output.stderr.listen(
+            (evt, message) => showWindow("runner")
+        )
+        python.liaison.listen("error",
+            (evt, message) => showWindow("runner")
+        )
+    })
 </script>
 
 
@@ -28,6 +35,7 @@
         {#await status.dismiss.promise}
             <Message
                 message={status.message}
+                onclick={evt => status.logs.shown = true}
                 icon="/icons/sym-python.svg"
             />
         {/await}
@@ -46,9 +54,45 @@
 
 <MessageDialog
     bind:shown={status.dlg.shown}
+    buttons={{
+        OK: evt => {}
+    }}
+    buttonsDisabled={{
+        OK: status.dlg.busy
+    }}
 >
     {@html marked(status.dlg.message || "")}
+    <p>See below for details:</p>
+    <div class=output-container>
+        <CodeOutput bind:value={status.logs} />
+    </div>
+    <div class=finished-msg>
+        {#await status.ready.promise then ready}
+            <span>Install completed successfully, you can safely close this window.</span>
+        {:catch err}
+            <Icon 
+                src="/icons/sym-error.svg"
+                size=1rem
+            />
+            <span style:color=var(--red)>Install failed, see above for error.</span>
+        {/await}
+    </div>
 </MessageDialog>
 
+<style>
+    .output-container {
+        overflow-y: auto;
+        height: 20rem;
+        background-color: var(--base);
+        border: 1px solid var(--overlay);
+        border-radius: .5rem;
+        padding: 1rem;
+    }
 
-
+    .finished-msg {
+        padding: 1rem;
+        display: flex;
+        flex-direction: row;
+        gap: .5rem;
+    }
+</style>

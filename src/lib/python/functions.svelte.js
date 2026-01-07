@@ -22,25 +22,33 @@ export async function setupPython(forceReinstall=false) {
     if (!hasUV || forceReinstall) {
         // kill any existing process
         await python.stop()
-        // do install
+        // open dialog to show progress
         status.message = "Downloading UV (a Python installer)..."
+        status.dlg.message = (
+            "### Downloading UV...\n (a Python installer)...\n" + 
+            "This is a program we use to install Python. Once it's finished installing, you won't have to see this message again."
+        )
+        status.dlg.shown = true
+        status.dlg.busy = true
+        // do install
         await python.uv.installUV().catch(err => status.ready.reject(err?.error || err))
+        status.dlg.busy = false
     }
     // install Python
     if (!hasPython || forceReinstall) {
         // kill any existing process
         await python.stop()
-        // do install
+        // open dialog to show progress
         status.message = "Installing Python and PsychoPy library..."
         status.dlg.message = (
             "### Installing Python and PsychoPy library...\n" +
-            "It looks like this is the first time you've opened PsychoPy on this machine, so we need to install the PsychoPy Python module.\n" + 
-            "\n" +
             "This may take some time and, unfortunately, cannot be done in the background. Once it's finished installing, you won't have to see this message again."
         )
         status.dlg.shown = true
+        status.dlg.busy = true
+        // do install
         await python.uv.installPython().catch(err => status.ready.reject(err?.error || err))
-        status.dlg.shown = false
+        status.dlg.busy = false
     }
     // is Python already running?
     status.message = "Connecting Python"

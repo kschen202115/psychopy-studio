@@ -14,6 +14,8 @@
             CANCEL: undefined,
             HELP: undefined
         },
+        /** @bindable State controlling whether each button is disabled */
+        buttonsDisabled={},
         /** @returns @type {HTMLElement} Handle of this dialog's HTML Element */
         shown=$bindable(),
         /** @prop Children are assumed to be the message */
@@ -25,6 +27,7 @@
     id={id}
     title={title}
     buttons={buttons}
+    buttonsDisabled={buttonsDisabled}
     bind:shown={shown}
     shrink={true}
 >
