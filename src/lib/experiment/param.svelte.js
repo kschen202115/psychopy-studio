@@ -133,7 +133,7 @@ export class Param {
         let node = {};
         // populate node
         for (let key of this.saveAttrs) {
-            node[key] = $state.snapshot(this[key]);
+            node[key] = $state.snapshot(js2py(this[key]));
         }
 
         return node;
@@ -149,7 +149,7 @@ export class Param {
         for (let key of this.saveAttrs) {
             // set from JSON if possible
             if (key in node) {
-                this[key] = node[key];
+                this[key] = py2js(node[key]);
             }
         }
     }
