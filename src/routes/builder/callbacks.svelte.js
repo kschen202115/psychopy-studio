@@ -214,8 +214,8 @@ export function togglePiloting() {
 }
 
 
-export function sendToRunner() {
-    openIn(current.experiment.file.file, "runner")
+export async function sendToRunner() {
+    await openIn(current.experiment.file.file, "runner")
 }
 
 
@@ -256,8 +256,8 @@ export async function compileJS() {
 }
 
 export async function runPython(executable) {
-    // write Python script
-    let target = await compilePython();
+    // send to runner
+    await sendToRunner()
     // run script
     await current.experiment.runPython(false, executable)
 
