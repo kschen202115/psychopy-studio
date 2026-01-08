@@ -476,7 +476,7 @@ export class HasParams {
         );
         // set name and plugin
         node.setAttribute("name", this.name);
-        node.setAttribute("plugin", this.plugin);
+        node.setAttribute("plugin", js2py(this.plugin));
         // add params
         for (let param of Object.values(this.params)) {
             node.appendChild(
@@ -495,7 +495,7 @@ export class HasParams {
     fromXML(node) {
         // set plugin and tag from node
         this.tag = node.nodeName === "Settings" ? "SettingsComponent" : node.nodeName;
-        this.plugin = node.getAttribute("plugin");
+        this.plugin = py2js(node.getAttribute("plugin"));
         // iterate through param nodes
         for (let paramNode of node.getElementsByTagName("Param")) {
             // param name
