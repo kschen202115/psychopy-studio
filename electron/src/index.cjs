@@ -46,6 +46,24 @@ app.setPath("userData", path.join(app.getPath("appData"), "psychopy4", ".node"))
 // setup a clipboard
 clipboard = undefined
 
+// setup listener for file open
+function onFileOpen(evt, file) {
+  if (!file) {
+    // do nothing if no file
+    return
+  }
+  if (file.endsWith(".psyexp")) {
+    // open psyexp in Builder
+    newWindow(`builder?fileOpen=${file}`, true, false)
+  } else if (startFile.endsWith(".psyrun")) {
+    // open psyrun in Runner
+    newWindow(`runner?fileOpen=${file}`, true, false)
+  } else {
+    // log anything else and leave default
+    logging.error(`Requested file is not a PsychoPy file (.psyexp or .psyrun): ${process.argv[1]}`)
+  }
+}
+app.on("open-file", onFileOpen)
 
 const createWindow = () => {
   // create splash
@@ -66,20 +84,9 @@ const createWindow = () => {
   let ready = {
     svelte: Promise.withResolvers()
   }
-  // figure out frames to start with
-  let startFile = process.argv[isDev ? 2 : 1]
-  let startFrame = "builder"
-  if (!startFile) {
-    // if no file, leave default
-  } else if (startFile.endsWith(".psyexp")) {
-    // open psyexp in Builder
-    startFrame = `builder?fileOpen=${process.argv[1]}`
-  } else if (startFile.endsWith(".psyrun")) {
-    // open psyrun in Runner
-    startFrame = `builder?fileOpen=${process.argv[1]}`
-  } else {
-    // log anything else and leave default
-    logging.error(`Requested file is not a PsychoPy file (.psyexp or .psyrun): ${process.argv[1]}`)
+  // if on windows, get frame to open with from argv
+  if (process.platform === "win32") {
+    onFileOpen(undefined, process.argv[isDev ? 2 : 1])
   }
   // start timers 
   let mintime = new Promise((resolve, reject) => setTimeout(resolve, 1000));
@@ -137,7 +144,12 @@ const createWindow = () => {
     ]),
     maxtime
   ]).then(
-    () => newWindow(startFrame, true, false)
+    () => {
+      // make sure at least one window is open
+      if (!Object.keys(windows).filter(key => key !== "splash").length) {
+        newWindow("builder", true, false)
+      }
+    }
   )
 };
 
