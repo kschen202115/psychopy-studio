@@ -5,16 +5,6 @@
     import { python } from "$lib/globals.svelte";
 
     let current = getContext("current");
-
-    python.output.stdout.listen(
-        (evt, message) => current.output.stdout += `${message}\n`
-    )
-    python.output.stderr.listen(
-        (evt, message) => current.output.stdout += `${message}\n`
-    )
-    python.liaison.listen("error",
-        (evt, message) => current.output.stdout += `${message.error}\n`
-    )
 </script>
 
 

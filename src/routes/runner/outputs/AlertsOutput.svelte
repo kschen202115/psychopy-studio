@@ -5,17 +5,6 @@
     import { fly } from "svelte/transition"
 
     let current = getContext("current")
-    // listen for alerts from Python
-    python.liaison.listen("alert", 
-        (evt, message) => {
-            // if this code isn't already in the panel, add it
-            if (!current.output.alerts.some(
-                item => item.code === message.message.code
-            )) {
-                current.output.alerts.push(message.message)
-            }
-        }
-    )
 </script>
 
 

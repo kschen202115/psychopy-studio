@@ -10,7 +10,7 @@
     import { setContext } from "svelte";
     import StdoutOutput from "./outputs/StdoutOutput.svelte";
     import PavloviaOutput from "./outputs/PavloviaOutput.svelte";
-    import { electron } from "$lib/globals.svelte";
+    import { electron, python, git } from "$lib/globals.svelte";
     import SetupPython from "../../lib/python/SetupPython.svelte";
     import { addFile } from "./callbacks.svelte";
     import Ribbon from "./ribbon/Ribbon.svelte";
@@ -27,8 +27,33 @@
         electron.windows.emit("ready", true)
     }
 
-    let selection = $state.raw()
-
+    // setup listener for alerts
+    python.liaison.listen("alert", 
+        (evt, message) => {
+            // if this code isn't already in the panel, add it
+            if (!current.output.alerts.some(
+                item => item.code === message.message.code
+            )) {
+                current.output.alerts.push(message.message)
+            }
+        }
+    )
+    // setup listeners for stdout
+    python.output.stdout.listen(
+        (evt, message) => current.output.stdout += `${message}\n`
+    )
+    python.output.stderr.listen(
+        (evt, message) => current.output.stdout += `${message}\n`
+    )
+    python.liaison.listen("error",
+        (evt, message) => current.output.stdout += `${message.error}\n`
+    )
+    // setup listener for pavlovia
+    git.listen(
+        (evt, message) => {
+            current.output.pavlovia += message + "\n"
+        }
+    )
 </script>
 
 

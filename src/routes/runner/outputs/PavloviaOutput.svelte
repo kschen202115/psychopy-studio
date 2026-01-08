@@ -6,11 +6,7 @@
 
     let current = getContext("current")
 
-    git.listen(
-        (evt, message) => {
-            current.output.pavlovia += message + "\n"
-        }
-    )
+    
 </script>
 
 
