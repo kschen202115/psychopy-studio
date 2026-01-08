@@ -11,12 +11,18 @@
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
     import { electron, python } from "$lib/globals.svelte";
-    import path from "path-browserify";
     import SetupPython from "../../lib/python/SetupPython.svelte";
     
 
     // reference current in context for ease of access
     setContext("current", current)
+
+    // parse url params
+    let params = new URLSearchParams(location.search)
+    // if given a file to open, open it
+    if (params.get("fileOpen")) {
+        current.openFile(params.get("fileOpen"))
+    }
 
     // listen for messages from other windows
     if (electron) {

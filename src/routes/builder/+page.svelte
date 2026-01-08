@@ -18,6 +18,13 @@
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
 
+    // parse url params
+    let params = new URLSearchParams(location.search)
+    // if given a file to open, open it
+    if (params.get("fileOpen")) {
+        openFile(params.get("fileOpen"))
+    }
+
     // reference current in context for ease of access
     setContext("current", current)
     // listen for messages from other windows

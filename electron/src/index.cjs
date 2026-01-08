@@ -62,10 +62,24 @@ const createWindow = () => {
   windows.splash.loadFile(path.join(__dirname, 'splash.html'));
   windows.splash.center();
   windows.splash.show();
-
   // keep track of ready statuses
   let ready = {
     svelte: Promise.withResolvers()
+  }
+  // figure out frames to start with
+  let startFile = process.argv[isDev ? 2 : 1]
+  let startFrame = "builder"
+  if (!startFile) {
+    // if no file, leave default
+  } else if (startFile.endsWith(".psyexp")) {
+    // open psyexp in Builder
+    startFrame = `builder?fileOpen=${process.argv[1]}`
+  } else if (startFile.endsWith(".psyrun")) {
+    // open psyrun in Runner
+    startFrame = `builder?fileOpen=${process.argv[1]}`
+  } else {
+    // log anything else and leave default
+    logging.error(`Requested file is not a PsychoPy file (.psyexp or .psyrun): ${process.argv[1]}`)
   }
   // start timers 
   let mintime = new Promise((resolve, reject) => setTimeout(resolve, 1000));
@@ -94,6 +108,8 @@ const createWindow = () => {
       }
     })
   } else {
+    // log run args
+    logging.log(`Running: ${process.argv.join(" | ")}`)
     // use express to serve static files in production
     const express = require('express');
     const app = express();
@@ -121,7 +137,7 @@ const createWindow = () => {
     ]),
     maxtime
   ]).then(
-    () => newWindow("builder", true, false)
+    () => newWindow(startFrame, true, false)
   )
 };
 

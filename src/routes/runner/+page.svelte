@@ -19,6 +19,13 @@
 
     setContext("current", current)
 
+    // parse url params
+    let params = new URLSearchParams(location.search)
+    // if given a file to open, open it
+    if (params.get("fileOpen")) {
+        addFile(params.get("fileOpen"))
+    }
+    
     // listen for messages from other windows
     if (electron) {
         // for opening files via another window
