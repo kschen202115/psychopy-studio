@@ -19,20 +19,68 @@
 			"target": [
 				"zip"
 			],
-			"icon": "./static/branding/favicon.ico"
+			"icon": "./static/branding/favicon.ico",
+			"fileAssociations": [
+				{
+					"ext": "psyexp",
+					"name": "PsychoPy Experiment",
+					"icon": "./static/branding/favicon.ico",
+					"role": "Editor",
+					"perMachine": true
+				},
+				{
+					"ext": "psyrun",
+					"name": "PsychoPy Run Configuration",
+					"icon": "./static/branding/favicon-psyrun.ico",
+					"role": "Editor",
+					"perMachine": true
+				}
+			]
 		},
 		"mac": {
 			"target": [
 				"dmg"
 			],
-			"icon": "./static/branding/favicon.icns"
+			"icon": "./static/branding/favicon.icns",
+			"fileAssociations": [
+				{
+					"ext": "psyexp",
+					"name": "PsychoPy Experiment",
+					"icon": "./static/branding/favicon.icns",
+					"role": "Editor",
+					"perMachine": true
+				},
+				{
+					"ext": "psyrun",
+					"name": "PsychoPy Run Configuration",
+					"icon": "./static/branding/favicon-psyrun.icns",
+					"role": "Editor",
+					"perMachine": true
+				}
+			]
 		},
 		"linux": {
 			"target": [
 				"AppImage"
 			],
 			"icon": "./static/branding/favicon@1024x1024.png",
-			"category": "Science"
+			"category": "Science",
+			"fileAssociations": [
+				{
+					"ext": "psyexp",
+					"name": "PsychoPy Experiment",
+					"icon": "./static/branding/favicon.svg",
+					"role": "Editor",
+					"perMachine": true
+				},
+				{
+					"ext": "psyrun",
+					"name": "PsychoPy Run Configuration",
+					"icon": "./static/branding/favicon-psyrun.svg",
+					"role": "Editor",
+					"perMachine": true
+				}
+			]
 		},
 		"dmg": {
 			"background": "./static/branding/mac-install-backboard.png"
