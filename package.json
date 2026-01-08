@@ -15,6 +15,9 @@
 		"directories": {
 			"output": "out"
 		},
+		"nsis": {
+			"perMachine": true
+		},
 		"win": {
 			"target": [
 				"zip"
@@ -25,15 +28,13 @@
 					"ext": "psyexp",
 					"name": "PsychoPy Experiment",
 					"icon": "./static/branding/favicon.ico",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				},
 				{
 					"ext": "psyrun",
 					"name": "PsychoPy Run Configuration",
 					"icon": "./static/branding/favicon-psyrun.ico",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				}
 			]
 		},
@@ -47,15 +48,13 @@
 					"ext": "psyexp",
 					"name": "PsychoPy Experiment",
 					"icon": "./static/branding/favicon.icns",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				},
 				{
 					"ext": "psyrun",
 					"name": "PsychoPy Run Configuration",
 					"icon": "./static/branding/favicon-psyrun.icns",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				}
 			]
 		},
@@ -70,15 +69,13 @@
 					"ext": "psyexp",
 					"name": "PsychoPy Experiment",
 					"icon": "./static/branding/favicon.svg",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				},
 				{
 					"ext": "psyrun",
 					"name": "PsychoPy Run Configuration",
 					"icon": "./static/branding/favicon-psyrun.svg",
-					"role": "Editor",
-					"perMachine": true
+					"role": "Editor"
 				}
 			]
 		},
