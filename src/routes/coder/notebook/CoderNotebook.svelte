@@ -37,7 +37,7 @@
                 bind:canUndo={page.canUndo}
                 bind:canRedo={page.canRedo}
                 file={page.file}
-            ></CodeEditor>
+            />
         </NotebookPage>
     {/each}
     <ButtonTab

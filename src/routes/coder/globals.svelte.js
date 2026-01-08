@@ -8,6 +8,9 @@ export let current = $state({
     pages: [],
     tab: 0,
     openFile: async file => {
+        if (typeof file === "string") {
+            file = parsePath(file)
+        }
         // open in other frame if relevant
         if (file.ext === ".psyexp") {
             openIn(file.file, "builder")
