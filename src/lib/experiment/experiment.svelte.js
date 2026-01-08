@@ -476,6 +476,10 @@ export class Experiment {
                 this.file.stem + ".py"
             )
         }
+        // mark started
+        await python.output.stdout.send(
+            `--- Started experiment ${this.file.name} ---`
+        )
         // run script
         await python.scripts.run(
             target, 
@@ -483,6 +487,10 @@ export class Experiment {
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
             await electron.paths.prefs()
+        )
+        // mark finished
+        await python.output.stdout.send(
+            `--- Finished experiment ${this.file.name} ---`
         )
     }
 
