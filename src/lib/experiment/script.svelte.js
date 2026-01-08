@@ -67,7 +67,7 @@ export class Script {
             file = parsePath(file)
         }
         // load content from file
-        this.content = readFile(file)
+        this.content = await readFile(file)
         // store file
         this.file = file
     }
