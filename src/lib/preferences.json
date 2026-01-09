@@ -1000,8 +1000,8 @@
         },
         "forcedWindowSize": {
             "val": [
-                "800",
-                "600"
+                800,
+                600
             ],
             "valType": "str",
             "inputType": "list",
