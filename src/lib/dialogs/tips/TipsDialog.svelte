@@ -4,6 +4,7 @@
     import tips from "./tips.json";
     import { Icon } from "$lib/utils/icons";
     import { prefs } from "$lib/preferences.svelte";
+    import { marked } from "marked";
 
     let {
         categories=["general", "silly"],
@@ -55,7 +56,7 @@
                 src="/icons/sym-info.svg"
             />
         </span>
-        {tip}
+        {@html marked(tip)}
     </div>
     <div class=stop>
         <input type=checkbox bind:checked={hide}/>

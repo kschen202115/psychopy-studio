@@ -4,7 +4,7 @@
         "PsychoPy can handle many different units (degrees of visual angle, cm...) for your stimuli. But you need to tell it about your monitor first (see the online documentation on General > Units)",
         "Menu items show you the current key bindings (which can be configured in preferences)",
         "It's a really good idea to run in pilot mode and check your data are all being saved as you like BEFORE running all of your participants!",
-        "The user forum is a great place to ask questions and receive updates, at https://discourse.psychopy.org",
+        "The [user forum](https://discourse.psychopy.org) is a great place to ask questions and receive updates",
         "If you write to the forum, make it clear whether you're using Builder or Coder interfaces and which version/platform you use.",
         "You can use the source. PsychoPy comes with all its source code included. If you know Python, you'd be surprised how easy it is to find your own bug-fixes.",
         "Degrees of visual angle are 'device independent'. Normalized units mean that your stimulus will be different on each different computer. Do you really want that?",
@@ -14,7 +14,7 @@
         "Did your stimulus not appear? Was it really tiny? Setting units='pix' and size=0.1 means it has a size of 0.1 pixels!",
         "The default color values in PsychoPy range from -1 to +1, with 0 being the mean grey of the screen. So black is like the maximum decrement from grey and white is an increment. Right?",
         "Data can be output in many different formats, but it's worth saving the 'psydat' (aka pickle) format as well as the others. Although this isn't 'human readable' it stores more information than excel/csv files including an entire copy of your actual experiment!",
-        "You can see how many people used PsychoPy this month at https://usage.psychopy.org",
+        "You can see how many people used PsychoPy this month at [usage.psychopy.org](https://usage.psychopy.org)",
         "If you like PsychoPy spread the word",
         "For the best audio timing you need to use the 'PTB' backend (set this in the app Preferences).",
         "Get your department to buy a site licence for Pavlovia.org. You'll be helping fund PsychoPy development and you'll be able to run unlimited online studies."
