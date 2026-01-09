@@ -184,8 +184,6 @@
             icon="/icons/btn-paste.svg"
             onclick={evt => pasteRoutine()}
         />
-
-        <!-- todo: Copy/paste Routine/Component/etc. -->
     </SubMenu>
 
     {#if electron}

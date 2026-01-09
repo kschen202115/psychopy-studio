@@ -19,8 +19,14 @@ export class Component extends HasParams {
      * Start time to display on the Routine canvas
      */
     visualStart = $derived.by(() => {
-        // todo: get frame rate from exp
-        let fr = 60;
+        // get frame rate if possible
+        let fr
+        if (this.exp && !this.exp.settings?.params?.['measureFrameRate']?.val) {
+            fr = parseInt(this.exp.settings.params['frameRate']?.val || 60)
+        } else {
+            // if measured on the fly, assume 60 for display purposes
+            fr = 60;
+        }
         // if we don't have the necessary params, return null
         if (!("startType" in this.params) || !("startVal" in this.params)) {
             return null;
@@ -47,8 +53,14 @@ export class Component extends HasParams {
      * Stop time to display on the Routine canvas
      */
     visualStop = $derived.by(() => {
-        // todo: get frame rate from exp
-        let fr = 60;
+        // get frame rate if possible
+        let fr
+        if (this.exp && !this.exp.settings?.params?.['measureFrameRate']?.val) {
+            fr = parseInt(this.exp.settings.params['frameRate']?.val || 60)
+        } else {
+            // if measured on the fly, assume 60 for display purposes
+            fr = 60;
+        }
         // if we don't have the necessary params, return null
         if (!("stopType" in this.params) || !("stopVal" in this.params)) {
             return null;
