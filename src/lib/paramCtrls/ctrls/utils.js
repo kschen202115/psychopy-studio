@@ -22,6 +22,38 @@ export function iterateName(name) {
     
 }
 
+
+/**
+ * Get param options from Python using a query string (will try calling first, then will get if 
+ * that fails)
+ * 
+ * @param {string} query Query string to send to Python (including the python:/// prefix)
+ */
+async function optionsFromPython(query) {
+    // start off with no options (i.e. disabled)
+    let options = []
+    // if in web view, abort
+    if (!python?.ready) {
+        return options
+    }
+
+    try {
+        // first try calling the arg
+        options = await python.liaison.send({
+            command: "run",
+            args: [query.replace("python:///", "")]
+        }, 10000)
+    } catch {
+        // if that fails, it might be a static value, so try getting it
+        options = await python.liaison.send({
+            command: "get",
+            args: [query.replace("python:///", "")]
+        }, 10000)
+    }
+    
+    return options
+}
+
 /**
  * Get an object mapping options from a parameter
  * 
@@ -31,29 +63,24 @@ export async function optionsFromParam(param) {
         let output = [];
         // if either allowed labels or values are a Python function, execute it
         if (typeof param.allowedVals === "string" && param.allowedVals.startsWith("python:///")) {
-            if (python?.ready) {
-                param.allowedVals = await python.liaison.send({
-                    command: "run",
-                    args: [param.allowedVals.replace("python:///", "")]
-                }, 10000).catch(
-                    (reason) => console.log(`Failed to get allowedVals for param ${param.name} (${param.allowedVals}, ${reason})`)
-                )
-            } else {
-                // disable ctrl
+            // get options from Python
+            try {
+                param.allowedVals = await optionsFromPython(param.allowedVals)
+                console.log(param.name, param.allowedVals)
+            } catch (err) {
+                // disable ctrl if this fails
+                console.log(`Failed to get allowedVals for param ${param.name} (${param.allowedVals}, ${err})`)
                 param.allowedVals = []
             }
         }
         if (typeof param.allowedLabels === "string" && param.allowedLabels.startsWith("python:///")) {
-            if (python?.ready) {
-                param.allowedLabels = await python.liaison.send({
-                    command: "run",
-                    args: [param.allowedLabels.replace("python:///", "")]
-                }, 10000).catch(
-                    (reason) => console.log(`Failed to get allowedLabels for param ${param.name} (${param.allowedLabels}, ${reason})`)
-                )
-            } else {
-                // disable ctrl
-                param.allowedLabels = []
+            // get options from Python
+            try {
+                param.allowedVals = await optionsFromPython(param.allowedLabels)
+            } catch (err) {
+                // disable ctrl if this fails
+                console.log(`Failed to get allowedVals for param ${param.name} (${param.allowedVals}, ${err})`)
+                param.allowedVals = []
             }
         }
         // if no allowed labels, use allowed values
@@ -75,7 +102,17 @@ export async function optionsFromParam(param) {
             );
         }
         // add current value if not already present
-        if (!output.some((value) => value[0] === param.val)) {
+        if (Array.isArray(param.val)) {
+            // if value is an array, this means adding missing items
+            for (let item of param.val.filter(
+                item => !output.some((value) => value[0] === item)
+            )) {
+                output.push(
+                    [item, item]
+                );
+            }
+        } else if (!output.some((value) => value[0] === param.val)) {
+            // otherwise, this means adding the value
             output.push(
                 [param.val, param.val]
             );
