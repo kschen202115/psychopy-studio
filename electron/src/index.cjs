@@ -169,7 +169,7 @@ const createWindow = () => {
 };
 
 
-async function newWindow(target = null, show = true, fullscreen = false, debug = isDev) {
+async function newWindow(target = null, show = true, fullscreen = false) {
   // create window
   let win = new BrowserWindow({
     icon: favicon,
@@ -215,7 +215,7 @@ async function newWindow(target = null, show = true, fullscreen = false, debug =
         windows.splash.close()
       }
       // show dev tools if debugging
-      if (debug) {
+      if (isDev || prefs?.params?.debugMode?.val === "True") {
         win.webContents.openDevTools();
       }
     })

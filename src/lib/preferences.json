@@ -220,74 +220,27 @@
                 "enabled": []
             }
         },
-        "showStartupTips": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Application",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Show startup tips",
-            "hint": "Display tips when starting PsychoPy",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "defaultView": {
-            "val": "last",
+            "val": [
+                "builder"
+            ],
             "valType": "str",
-            "inputType": "choice",
+            "inputType": "multiChoice",
             "categ": "Application",
             "updates": null,
             "allowedUpdates": null,
             "allowedVals": [
-                "last",
                 "builder",
                 "coder",
-                "runner",
-                "all"
+                "runner"
             ],
-            "allowedLabels": [],
+            "allowedLabels": [
+                "Builder view",
+                "Coder view",
+                "Runner view"
+            ],
             "label": "Default view",
             "hint": "What windows to display when PsychoPy starts",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "autoSavePrefs": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Application",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Auto-save preferences",
-            "hint": "Save any unsaved preferences before closing the window",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "debugMode": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Application",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Debug mode",
-            "hint": "enable features for debugging PsychoPy itself, including unit-tests",
             "plugin": null,
             "depends": {
                 "shown": [],
@@ -297,31 +250,14 @@
         "locale": {
             "val": "system locale",
             "valType": "str",
-            "inputType": "single",
+            "inputType": "choice",
             "categ": "Application",
             "updates": null,
             "allowedUpdates": null,
-            "allowedVals": [],
+            "allowedVals": "python:///psychopy.localization:available",
             "allowedLabels": [],
-            "label": "Locale",
+            "label": "Language",
             "hint": "Language to use in menus etc; not all translations are available. Select a value, then restart the app.",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "errorDialog": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Application",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Error dialog",
-            "hint": "Show an error dialog when PsychoPy encounters an unhandled internal error",
             "plugin": null,
             "depends": {
                 "shown": [],
@@ -395,7 +331,41 @@
             "allowedVals": [],
             "allowedLabels": [],
             "label": "Show splash",
-            "hint": "Whether to show a splash screen while loading",
+            "hint": "Whether to show a splash screen while loading the app",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "showStartupTips": {
+            "val": true,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Show startup tips",
+            "hint": "Display tips when starting PsychoPy",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "debugMode": {
+            "val": false,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Developer mode",
+            "hint": "Enables developer tools on next restart",
             "plugin": null,
             "depends": {
                 "shown": [],
