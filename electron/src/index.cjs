@@ -43,6 +43,17 @@ var windows = {
 // redirect app gubbins to a subfolder so it's distinct from user data
 app.setPath("userData", path.join(app.getPath("appData"), "psychopy4", ".node"))
 
+// load prefs from a JSON (if there is one)
+let prefsFile = path.join(app.getPath("appData"), "psychopy4", "preferences.json");
+let prefs
+if (fs.existsSync(prefsFile)) {
+  prefs = JSON.parse(
+    fs.readFileSync(prefsFile)
+  )
+} else {
+  prefs = {}
+}
+
 // setup a clipboard
 clipboard = undefined
 
@@ -79,7 +90,11 @@ const createWindow = () => {
   });
   windows.splash.loadFile(path.join(__dirname, 'splash.html'));
   windows.splash.center();
-  windows.splash.show();
+  if (prefs.params?.showSplash?.val !== "False") {
+    // only show if requested via prefs
+    windows.splash.show();
+  }
+  
   // keep track of ready statuses
   let ready = {
     svelte: Promise.withResolvers()
@@ -89,7 +104,7 @@ const createWindow = () => {
     onFileOpen(undefined, process.argv[isDev ? 2 : 1])
   }
   // start timers 
-  let mintime = new Promise((resolve, reject) => setTimeout(resolve, 1000));
+  let mintime = new Promise((resolve, reject) => setTimeout(resolve, prefs.params?.showSplash?.val !== "False" ? 1000 : 0));
   let maxtime = new Promise((resolve, reject) => setTimeout(resolve, 10000));
   // start the svelte side of things
   if (isDev) {
@@ -352,7 +367,7 @@ const handlers = {
       documents: ipcMain.handle("electron.paths.documents", (evt) => app.getPath("documents")),
       user: ipcMain.handle("electron.paths.user", (evt) => path.join(app.getPath("appData"), "psychopy4")),
       devices: ipcMain.handle("electron.paths.devices", (evt) => path.join(app.getPath("appData"), "psychopy4", "devices.json")),
-      prefs: ipcMain.handle("electron.paths.prefs", (evt) => path.join(app.getPath("appData"), "psychopy4", "preferences.json")),
+      prefs: ipcMain.handle("electron.paths.prefs", (evt) => prefsFile),
       pavlovia: {
         dir: ipcMain.handle("electron.paths.pavlovia", (evt) => path.join(app.getPath("appData"), "psychopy4", "pavlovia")),
         users: ipcMain.handle("electron.paths.pavlovia.users", (evt) => path.join(app.getPath("appData"), "psychopy4", "pavlovia", "users.json")),
