@@ -34,7 +34,7 @@
 
 <style>
     .readme-preview {
-        min-width: 35rem;
+        width: 65rem;
         min-height: 100%;
         box-sizing: border-box;
         padding: 1rem 2rem;
