@@ -6,7 +6,7 @@
         fileSave,
         fileSaveAs,
         // view
-        newWindow,
+        showWindow,
     } from '../callbacks.svelte.js'
     
     import Menu from "./Menu.svelte";
@@ -125,21 +125,22 @@
         <IconButton 
             icon="/icons/btn-builder.svg" 
             label="Builder view" 
-            onclick={(evt) => newWindow("builder")} 
+            onclick={(evt) => showWindow("builder")} 
             borderless
         />
         <IconButton 
             icon="/icons/btn-coder.svg" 
             label="Coder view" 
-            onclick={(evt) => newWindow("coder")} 
+            onclick={(evt) => showWindow("coder")} 
             borderless
         />
         {#if electron}
             <IconButton 
                 icon="/icons/btn-runner.svg" 
                 label="Runner view" 
-                onclick={(evt) => newWindow("runner")} 
+                onclick={(evt) => showWindow("runner")} 
                 borderless
+                disabled
             />
         {/if}
     </RibbonSection>

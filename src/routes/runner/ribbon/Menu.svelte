@@ -102,10 +102,6 @@
             label="Show Coder"
             onclick={evt => showWindow("coder")}
         />
-        <MenuItem 
-            label="Show Runner"
-            onclick={evt => showWindow("runner")}
-        />
 
         <MenuSeparator />
 

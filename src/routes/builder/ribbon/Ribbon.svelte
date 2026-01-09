@@ -13,7 +13,7 @@
         compilePython,
         compileJS,
         runPython,
-        newWindow,
+        showWindow,
         runJS,
     } from '../callbacks.svelte.js'
     
@@ -277,20 +277,21 @@
         <IconButton 
             icon="/icons/btn-builder.svg" 
             label="Builder view" 
-            onclick={(evt) => newWindow("builder")} 
+            onclick={(evt) => showWindow("builder")} 
             borderless
+            disabled
         />
         <IconButton 
             icon="/icons/btn-coder.svg" 
             label="Coder view" 
-            onclick={(evt) => newWindow("coder")} 
+            onclick={(evt) => showWindow("coder")} 
             borderless
         />
         {#if electron}
             <IconButton 
                 icon="/icons/btn-runner.svg" 
                 label="Runner view" 
-                onclick={(evt) => newWindow("runner")} 
+                onclick={(evt) => showWindow("runner")} 
                 borderless
             />
         {/if}

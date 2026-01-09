@@ -137,10 +137,6 @@
 
     <SubMenu label="View" icon="/icons/rbn-windows.svg">
         <MenuItem 
-            label="Show Builder"
-            onclick={evt => showWindow("builder")}
-        />
-        <MenuItem 
             label="Show Coder"
             onclick={evt => showWindow("coder")}
         />
