@@ -29,6 +29,10 @@
                 bind:checked={
                     () => param.val.includes(val),
                     (value) => {
+                        // make sure val is an array
+                        if (typeof param.val === "string") {
+                            param.val = []
+                        }
                         if (value && !param.val.includes(val)) {
                             // if checked and value isn't in param, add it
                             param.val.push(val)
