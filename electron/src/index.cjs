@@ -228,7 +228,7 @@ async function newWindow(target = null, show = true, fullscreen = false) {
         windows.splash.close()
       }
       // show dev tools if debugging
-      if (isDev || prefs?.params?.debugMode?.val === "True") {
+      if (prefs?.params?.debugMode?.val === "True") {
         win.webContents.openDevTools();
       }
     })
