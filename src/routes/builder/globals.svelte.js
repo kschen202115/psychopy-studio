@@ -6,7 +6,7 @@ export let current = $state({
     user: undefined,
     file: undefined,
     project: undefined,
-    experiment: new Experiment("untitled.psyexp"),
+    experiment: new Experiment(),
     readme: {
         shown: false,
         script: new Script("readme.md")

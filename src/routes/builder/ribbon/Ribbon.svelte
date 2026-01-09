@@ -103,7 +103,7 @@
             icon="/icons/btn-save.svg" 
             label="Save file" 
             onclick={file_save}
-            disabled={!current.experiment.history.past.length} 
+            disabled={!current.experiment.history.past.length && current.experiment.file.file} 
             borderless
         />
         <IconButton 
@@ -119,14 +119,14 @@
             icon="/icons/btn-undo.svg" 
             label="Undo{lastAction}" 
             onclick={undo} 
-            disabled={current.experiment.file === null || !current.experiment.history.past.length} 
+            disabled={!current.experiment.file.file || !current.experiment.history.past.length} 
             borderless
         />
         <IconButton 
             icon="/icons/btn-redo.svg" 
             label="Redo {nextAction}" 
             onclick={redo} 
-            disabled={current.experiment.file === null || !current.experiment.history.future.length} 
+            disabled={!current.experiment.file.file || !current.experiment.history.future.length} 
             borderless
         />
         <IconButton 
@@ -141,13 +141,8 @@
     </RibbonSection>
     
     <RibbonSection label=Experiment icon="/icons/rbn-experiment.svg">
-        <!-- <IconButton 
-            id="ribbon-btn-monitors" 
-            icon="/icons/btn-monitors.svg" 
-            label="Monitor centre" 
-        />         -->
         {#if python?.ready}
-        <IconButton
+            <IconButton
                 icon="/icons/btn-monitors.svg"
                 label="Open the monitor center"
                 onclick={(evt) => show.monitorCenterDlg = true}
@@ -200,7 +195,7 @@
                 icon="/icons/btn-send{current.experiment.pilotMode ? "pilot" : "run"}.svg" 
                 label="Send experiment to runner" 
                 onclick={sendToRunner}
-                disabled={!current.experiment.file}
+                disabled={!current.experiment.file.file}
                 borderless
             /> 
         {/if}
@@ -212,7 +207,7 @@
                 icon="/icons/btn-compilepy.svg" 
                 label="Write experiment as a .py file" 
                 onclick={evt => compilePython()}
-                disabled={current.experiment === null}
+                disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.compilepy}
                 borderless
             /> 
@@ -220,7 +215,7 @@
                 icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}py.svg" 
                 label="{current.experiment.pilotMode ? "Pilot" : "Run"} experiment locally" 
                 onclick={evt => runPython()}
-                disabled={current.experiment === null}
+                disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.runpy}
                 cancel={python.scripts.stop}
                 borderless
@@ -232,7 +227,7 @@
                     icon="/icons/btn-compilejs.svg" 
                     label="Write experiment as a .js file" 
                     onclick={(evt) => compileJS()}
-                    disabled={current.experiment === null}
+                    disabled={!current.experiment.file.file}
                     bind:awaiting={awaiting.compilejs}
                     borderless
                 />
@@ -240,7 +235,7 @@
                     icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}js.svg" 
                     label="{current.experiment.pilotMode ? "Pilot" : "Run"} experiment in browser" 
                     onclick={(evt) => runJS()}
-                    disabled={current.experiment === null}
+                    disabled={!current.experiment.file.file}
                     bind:awaiting={awaiting.runjs}
                     borderless
                 />
@@ -267,7 +262,7 @@
                         $state.snapshot(current.user),
                         true
                     )}
-                    disabled={!current.user || !current.experiment.file}
+                    disabled={!current.user || !current.experiment.file.file}
                     borderless
                 />
             {/snippet}

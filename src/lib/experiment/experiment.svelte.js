@@ -147,7 +147,9 @@ export class Experiment {
         // starting defaults
         this.reset()
         // set filename
-        this.file = parsePath(filename);
+        if (filename) {
+            this.file = parsePath(filename);
+        }
     }
 
     /** 
@@ -166,7 +168,13 @@ export class Experiment {
      */
     reset(keepHistory=false) {
         // clear file
-        this.file = undefined
+        this.file = {
+            file: undefined,
+            parent: undefined,
+            name: "untitled.psyexp",
+            stem: "untitled",
+            ext: ".psyexp"
+        }
         // set to current version
         this.version = "2026.1.0"
         // clear history

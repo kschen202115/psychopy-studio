@@ -94,6 +94,7 @@
             window.open(current.project.web_url)
         }
     }}
+    disabled={!current.project}
 >
     <MenuItem
         label="New project"

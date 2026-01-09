@@ -39,6 +39,7 @@
             window.open(current.user.profile.web_url);
         }
     }}
+    disabled={!current.user}
 >
     <MenuItem
         label="Edit user..."
