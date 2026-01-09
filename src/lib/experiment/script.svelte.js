@@ -7,7 +7,7 @@ export class Script {
     // file this script is saved to (if any)
     file = $state();
     // text content of this script
-    content = $state.raw();
+    content = $state.raw("");
     // these are only relevant if script is open in an editor
     canUndo = $state.raw(false)
     canRedo = $state.raw(false)

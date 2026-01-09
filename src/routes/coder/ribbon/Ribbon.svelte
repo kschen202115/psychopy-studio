@@ -64,7 +64,7 @@
             label="Save file" 
             onclick={fileSave}
             borderless
-            disabled={!current.pages[current.tab]?.canUndo}
+            disabled={!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file}
         />
         <IconButton 
             icon="/icons/btn-saveas.svg" 
@@ -114,7 +114,7 @@
                 icon="/icons/btn-send{current.pages[current.tab]?.pilotMode ? "pilot" : "run"}.svg" 
                 label="Send experiment to runner" 
                 onclick={sendToRunner}
-                disabled={!current.pages[current.tab]}
+                disabled={!current.pages[current.tab]?.file?.file}
                 borderless
             /> 
         {/if}
@@ -125,7 +125,7 @@
                 icon="/icons/btn-{current.pages[current.tab]?.pilotMode ? "pilot" : "run"}py.svg" 
                 label="{current.pages[current.tab]?.pilotMode ? "Pilot" : "Run"} experiment locally" 
                 onclick={evt => runPython()}
-                disabled={!current.pages[current.tab] || current.pages[current.tab].file.ext !== ".py"}
+                disabled={!current.pages[current.tab]?.file?.file || current.pages[current.tab]?.file?.ext !== ".py"}
                 bind:awaiting={awaiting.runpy}
                 cancel={python.scripts.stop}
                 borderless

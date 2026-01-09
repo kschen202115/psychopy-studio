@@ -2,6 +2,7 @@ import { electron, python, projects } from '$lib/globals.svelte.js';
 import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
 import { openIn, showDevTools } from "$lib/utils/views.svelte"
 import { current } from './globals.svelte.js';
+import { Script } from "$lib/experiment"
 
 
 /* File */
@@ -9,7 +10,13 @@ import { current } from './globals.svelte.js';
 export function fileNew() {
     // add new tab with blank file
     current.pages.push(
-        new Script(parsePath("untitled.py"))
+        new Script({
+            file: undefined,
+            parent: undefined,
+            name: "untitled.py",
+            stem: "untitled",
+            ext: ".py"
+        })
     )
     // focus new tab
     current.tab = $state.snapshot(current.pages.length) - 1
@@ -40,7 +47,7 @@ export async function revealFolder() {
 
 export async function fileSave() {
     // if no file yet, save as instead
-    if (!current.pages[current.tab]?.file) {
+    if (!current.pages[current.tab]?.file?.file) {
         return fileSaveAs()
     }
     // save
