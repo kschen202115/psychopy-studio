@@ -322,7 +322,7 @@
             }
         },
         "showSplash": {
-            "val": true,
+            "val": "True",
             "valType": "code",
             "inputType": "bool",
             "categ": "Application",
@@ -339,7 +339,7 @@
             }
         },
         "showStartupTips": {
-            "val": true,
+            "val": "True",
             "valType": "code",
             "inputType": "bool",
             "categ": "Application",
@@ -356,7 +356,7 @@
             }
         },
         "debugMode": {
-            "val": false,
+            "val": "False",
             "valType": "code",
             "inputType": "bool",
             "categ": "Application",

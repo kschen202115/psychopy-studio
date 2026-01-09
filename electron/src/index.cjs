@@ -162,7 +162,20 @@ const createWindow = () => {
     () => {
       // make sure at least one window is open
       if (!Object.keys(windows).filter(key => key !== "splash").length) {
-        newWindow("builder", true, false)
+        let targets
+        try {
+          targets = JSON.parse(prefs.params?.defaultView?.val)
+        } catch {
+          targets = ["builder"]
+        }
+        for (let target of targets) {
+          newWindow(target, true, false).then(
+            // show tips if requested
+            id => windows[id].webContents.send(
+              "showTips", prefs.params?.showStartupTips?.val === "True"
+            )
+          )
+        }
       }
     }
   )

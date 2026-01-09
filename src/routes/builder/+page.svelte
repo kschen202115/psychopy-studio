@@ -17,6 +17,7 @@
         openFile
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
+    import TipsDialog from '../../lib/dialogs/tips/TipsDialog.svelte';
 
     // parse url params
     let params = new URLSearchParams(location.search)
@@ -75,7 +76,10 @@
         script={current.readme.script}
         bind:shown={current.readme.shown}
     />
-
+    <TipsDialog 
+        categories={["general", "builder", "silly"]}
+        bind:shown={current.tip.shown}
+    />
     <!-- this will setup themeing -->
     <Theme />
     <!-- this will setup keyboard shortcuts -->

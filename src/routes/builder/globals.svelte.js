@@ -11,6 +11,9 @@ export let current = $state({
         shown: false,
         script: new Script("readme.md")
     },
+    tip: {
+        shown: false
+    },
     routine: undefined,
     moving: undefined,
     inserting: undefined,

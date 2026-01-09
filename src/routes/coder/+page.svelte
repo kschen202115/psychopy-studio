@@ -11,7 +11,8 @@
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
     import { electron, python } from "$lib/globals.svelte";
-    import SetupPython from "../../lib/python/SetupPython.svelte";
+    import SetupPython from "$lib/python/SetupPython.svelte";
+    import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
     
 
     // reference current in context for ease of access
@@ -67,6 +68,12 @@
             <ShellNotebook />
         </Panel>
     {/if}
+
+    <TipsDialog 
+        categories={["general", "coder", "silly"]}
+        bind:shown={current.tip.shown}
+    />
+
     <!-- this will setup themeing -->
     <Theme />
     <!-- this will setup keyboard shortcuts -->

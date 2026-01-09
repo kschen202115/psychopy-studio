@@ -16,6 +16,7 @@
     import Ribbon from "./ribbon/Ribbon.svelte";
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
+    import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
 
     setContext("current", current)
 
@@ -131,6 +132,11 @@
             </NotebookPage>
         </Notebook>
     </Panel>
+
+    <TipsDialog 
+        categories={["general", "runner", "silly"]}
+        bind:shown={current.tip.shown}
+    />
 
     <!-- this will setup themeing -->
     <Theme />
