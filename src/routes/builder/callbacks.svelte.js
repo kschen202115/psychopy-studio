@@ -2,7 +2,7 @@ import { electron, projects, python } from '$lib/globals.svelte.js';
 import { current } from './globals.svelte.js';
 
 import path from "path-browserify";
-import { openIn, showDevTools } from "$lib/utils/views.svelte"
+import { newWindow, openIn, showDevTools } from "$lib/utils/views.svelte"
 import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
 import { Routine, HasParams } from "$lib/experiment"
 
@@ -10,10 +10,7 @@ import { Routine, HasParams } from "$lib/experiment"
 /* File */
 
 export function file_new() {
-    // clear experiment
-    current.experiment.reset()
-    // focus trial
-    current.routine = current.experiment.routines['trial']
+    newWindow("builder")
 }
 
 export async function file_open() {
