@@ -33,10 +33,15 @@ export function py2js(val) {
         val = val.replaceAll("&#10;", "\n")
     }
     // recursively parse a JSON
-    if (String(val).startsWith("{") && String(val).endsWith("}")) {
-        val = JSON.parse(
-            sanitizeJSON(val)
-        )
+    if (String(val).match(/^\{.*\}$|^\[.*\]$/g)) {
+        try {
+            val = JSON.parse(
+                sanitizeJSON(val)
+            )
+        } catch {
+            // leave val as-is if this fails
+        }
+        
     }
 
     return val
