@@ -529,7 +529,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "force Windowed",
+            "label": "Force windowed mode",
             "hint": "Prevent the experiment from being fullscreen when piloting",
             "plugin": null,
             "depends": {
@@ -546,7 +546,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "force Mouse Visible",
+            "label": "Force mouse visible",
             "hint": "Always show the mouse when piloting",
             "plugin": null,
             "depends": {
@@ -566,7 +566,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "forced Window Size",
+            "label": "Window size",
             "hint": "What window size to use when forced to windowed mode",
             "plugin": null,
             "depends": {
@@ -590,7 +590,7 @@
                 "debug"
             ],
             "allowedLabels": [],
-            "label": "pilot Logging Level",
+            "label": "Logging level",
             "hint": "How much output to include in the log file when piloting ('error' is fewest messages, 'debug' is most)",
             "plugin": null,
             "depends": {
@@ -614,7 +614,7 @@
                 "debug"
             ],
             "allowedLabels": [],
-            "label": "pilot Console Logging Level",
+            "label": "Console logging level",
             "hint": "How much output to display in the console / app when piloting ('error' is fewest messages, 'debug' is most).",
             "plugin": null,
             "depends": {
@@ -631,7 +631,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "show Piloting Indicator",
+            "label": "Piloting indicator",
             "hint": "Show an orange border around the window when in piloting mode",
             "plugin": null,
             "depends": {
@@ -648,7 +648,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "force Non Rush",
+            "label": "Force non-rush",
             "hint": "Prevent experiment from enabling rush mode when piloting",
             "plugin": null,
             "depends": {
@@ -665,7 +665,7 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "replace Participant ID",
+            "label": "Replace participant ID",
             "hint": "Replace default participant ID with \"pilot\" when piloting",
             "plugin": null,
             "depends": {
