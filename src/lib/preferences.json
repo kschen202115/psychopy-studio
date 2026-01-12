@@ -321,23 +321,6 @@
                 "enabled": []
             }
         },
-        "readonly": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Coder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Open files as read-only",
-            "hint": "Open files as read-only in Coder (to avoid accidental changes)",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "coderFont": {
             "val": "JetBrains Mono",
             "valType": "code",
@@ -349,6 +332,23 @@
             "allowedLabels": [],
             "label": "Coder font",
             "hint": "Font face to use in Coder's code editor control",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "readonly": {
+            "val": false,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Coder",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Open files as read-only",
+            "hint": "Open files as read-only in Coder (to avoid accidental changes)",
             "plugin": null,
             "depends": {
                 "shown": [],
