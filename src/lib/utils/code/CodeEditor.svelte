@@ -4,6 +4,7 @@
 <script>
     import loader from '@monaco-editor/loader';
     import { onMount } from 'svelte';
+    import { prefs } from "$lib/preferences.svelte.js"
 
     let {
         value=$bindable(),
@@ -102,7 +103,7 @@
             editor = monaco.editor.create(container, {
                 value,
                 language,
-                fontFamily: "JetBrains Mono",
+                fontFamily: prefs.params['coderFont'].val || "JetBrains Mono",
                 colorDecorators: false,
                 lineHeight: 1.6,
                 renderLineHighlight: "gutter",
