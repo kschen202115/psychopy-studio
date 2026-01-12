@@ -56,5 +56,8 @@ export let current = $state({
         current.tab = current.pages.findIndex(item => item.file.file === file.file)
         // load content from file
         await current.pages[current.tab].fromFile(file)
+    },
+    tip: {
+        shown: false
     }
 })

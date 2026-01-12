@@ -12,5 +12,8 @@ export let current = $state({
     awaiting: {
         runpy: Promise.resolve(""),
         runjs: Promise.resolve(""),
+    },
+    tip: {
+        shown: false
     }
 })
