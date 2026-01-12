@@ -226,9 +226,7 @@ export async function compilePython() {
         }
     }
     // use experiment object to write
-    let target = await current.experiment.writeScript("PsychoPy").catch(
-        err => console.error(err)
-    );
+    let target = await current.experiment.writeScript("PsychoPy")
     // open in Coder
     openIn(target, "coder");
 

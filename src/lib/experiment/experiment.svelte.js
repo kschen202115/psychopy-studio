@@ -6,6 +6,7 @@ import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
 import { Component } from "./component.svelte";
 import { Flow, LoopInitiator } from "./flow.svelte";
+import { installPython } from "$lib/python";
 
 
 export class Experiment {
@@ -431,14 +432,22 @@ export class Experiment {
             this.file.parent,
             this.file.stem + (target === "PsychoJS" ? ".js" : ".py")
         )
+        // make sure relevant Python version is setup
+        let version = $state.snapshot(this.settings.params['Use version'].val)
+        if (version) {
+            await installPython(version)
+        }
         // write script
         await python.scripts.run(
-            target, 
+            "-m",
             executable || await python.details().then(resp => resp.executable),
+            "psychopy.scripts.psyexpCompile",
             $state.snapshot(this.file.file),
-            "--version", this.settings.params['Use version'].val,
             "--outfile", targetFile,
-            "--prefs-json", await electron.paths.prefs()
+            // "--target", target,
+            // "--prefs-json", await electron.paths.prefs(),
+        ).catch(
+            err => console.error(err)
         )
 
         return targetFile

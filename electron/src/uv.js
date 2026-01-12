@@ -6,8 +6,8 @@ import path from "path";
 import fs from "fs";
 import unzip from "extract-zip";
 import { extract as untar } from "tar";
-import { appVersion, isDev } from "./version.js";
-import { python } from "./python.js"
+import { parseVersion, appVersion, isDev } from "./version.js";
+import { python } from "./python.js";
 
 let decoder = new TextDecoder();
 
@@ -108,14 +108,17 @@ export async function installUV() {
 }
 
 export function findPython(
-    version={python: "3.10", psychopy: appVersion.major}, 
-    folder=path.join(app.getPath("appData"), "psychopy4", ".python")
+    version={python: "3.10", psychopy: appVersion}
 ) {
+    // parse psychopy version if needed
+    if (typeof version?.psychopy === "string" && version?.psychopy !== "dev") {
+        version.psychopy = parseVersion(version.psychopy)
+    }
     // make sure version has necessary keys
     version.python = version.python || "3.10"
-    version.psychopy = version.psychopy || appVersion.major
+    version.psychopy = version.psychopy || appVersion
     // get specific folder for this version
-    folder = path.join(app.getPath("appData"), "psychopy4", ".python", version.psychopy)
+    let folder = path.join(app.getPath("appData"), "psychopy4", ".python", version.psychopy.major)
     // try using UV to search for a Python executable
     try {
         return decoder.decode(
@@ -152,14 +155,17 @@ export async function listPackageVersions(name) {
 
 
 export async function installPython(
-    version={python: "3.10", psychopy: appVersion}, 
-    folder=path.join(app.getPath("appData"), "psychopy4", ".python")
+    version={python: "3.10", psychopy: appVersion}
 ) {
+    // parse psychopy version if needed
+    if (typeof version?.psychopy === "string") {
+        version.psychopy = parseVersion(version.psychopy)
+    }
     // make sure version has necessary keys
     version.python = version.python || "3.10"
     version.psychopy = version.psychopy || appVersion
     // get specific folder for this version
-    folder = path.join(app.getPath("appData"), "psychopy4", ".python", version.psychopy.major)
+    let folder = path.join(app.getPath("appData"), "psychopy4", ".python", version.psychopy.major)
     // make sure folder exists
     fs.mkdirSync(folder, {
         recursive: true

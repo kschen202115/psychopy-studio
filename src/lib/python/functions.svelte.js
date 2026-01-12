@@ -1,6 +1,35 @@
 import { status } from "./globals.svelte.js"
 
 
+export async function installPython(version=undefined, forceReinstall=false) {
+    // if installed and not forcing a reinstall, do nothing
+    if (!forceReinstall) {
+        if (
+            await python.uv.findPython(
+                {python: "3.10", psychopy: version}
+            ).catch(err => status.ready.reject(err?.error || err))
+        ) {
+            return
+        }
+    }
+    // open dialog to show progress
+    status.message = "Installing Python and PsychoPy library..."
+    status.dlg.message = (
+        `### Installing Python (3.10) and PsychoPy library (${version ? version : "latest version"})...\n` +
+        `This may take some time and, unfortunately, cannot be done in the background. Once it's finished installing, you won't have to see this message again.`
+    )
+    status.dlg.shown = true
+    status.dlg.busy = true
+    // do install
+    await python.uv.installPython(
+        {python: "3.10", psychopy: version}
+    ).catch(
+        err => status.ready.reject(err?.error || err)
+    )
+    status.dlg.busy = false
+}
+
+
 export async function setupPython(forceReinstall=false) {
     // abort if on browser
     if (!python) {
@@ -38,17 +67,7 @@ export async function setupPython(forceReinstall=false) {
     if (!hasPython || forceReinstall) {
         // kill any existing process
         await python.stop()
-        // open dialog to show progress
-        status.message = "Installing Python and PsychoPy library..."
-        status.dlg.message = (
-            "### Installing Python and PsychoPy library...\n" +
-            "This may take some time and, unfortunately, cannot be done in the background. Once it's finished installing, you won't have to see this message again."
-        )
-        status.dlg.shown = true
-        status.dlg.busy = true
-        // do install
-        await python.uv.installPython().catch(err => status.ready.reject(err?.error || err))
-        status.dlg.busy = false
+        installPython(undefined, forceReinstall)
     }
     // is Python already running?
     status.message = "Connecting Python"
