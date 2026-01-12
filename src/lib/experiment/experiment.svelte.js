@@ -390,7 +390,7 @@ export class Experiment {
         this.file = file
     }
 
-    async toFile(target) {
+    async toFile(file) {
         // get experiment as xml
         let node = this.toXML()
         // convert to an xml string
@@ -401,61 +401,45 @@ export class Experiment {
         // write file
         if (electron) {
             await electron.files.save(
-                $state.snapshot(target.file), 
+                $state.snapshot(file.file), 
                 content
             )
         } else {
             // get file writable from handle
-            let file = await target.handle.createWritable();
+            file.writable = await file.handle.createWritable();
             // write to file
-            file.seek(0);
-            file.write(content);
-            file.close();
+            file.writable.seek(0);
+            file.writable.write(content);
+            file.writable.close();
         }
     }
 
-    async writeScript(target="PsychoPy") {
+    async writeScript(target="PsychoPy", executable=undefined) {
         if (!python) {
             console.error("Script writing is not available in browser.")
             return
         }
-        // apply JSON to a Python Experiment object
-        await python.liaison.send({
-            command: "init",
-            args: [
-                "currentExperiment",
-                "psychopy.experiment:Experiment.fromJSON",
-                $state.snapshot(this.file.file),
-                $state.snapshot(this.toJSON())
-            ]
-        }, 10000).catch(
-            reason => console.error(reason)
-        )
-        // call that object's writeScript method
-        let script = await python.liaison.send({
-            command: "run",
-            args: [
-                "currentExperiment.writeScript",
-            ],
-            kwargs: {
-                target: target, 
-                modular: true,
-                expPath: this.file.file
-            }
-        }, 10000).catch(
-            reason => console.error(reason)
-        )
+        // error if there's no psyexp
+        if (!this.file.file) {
+            console.error("Cannot compile to Python on an experiment with no psyexp file attached")
+            return
+        }
+        // save to file
+        this.toFile(this.file)
         // construct output path
         let targetFile = path.join(
             this.file.parent,
             this.file.stem + (target === "PsychoJS" ? ".js" : ".py")
         )
-        // save to python file
-        if (typeof script === "string") {
-            electron.files.save(targetFile, script)
-        } else {
-            console.error(script)
-        }
+        // write script
+        await python.scripts.run(
+            target, 
+            executable || await python.details().then(resp => resp.executable),
+            $state.snapshot(this.file.file),
+            "--version", this.settings.params['Use version'].val,
+            "--outfile", targetFile,
+            "--prefs-json", await electron.paths.prefs()
+        )
 
         return targetFile
     }
