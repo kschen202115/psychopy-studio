@@ -67,7 +67,7 @@ export async function setupPython(forceReinstall=false) {
     if (!hasPython || forceReinstall) {
         // kill any existing process
         await python.stop()
-        installPython(undefined, forceReinstall)
+        await installPython(undefined, forceReinstall)
     }
     // is Python already running?
     status.message = "Connecting Python"
