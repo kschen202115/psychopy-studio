@@ -165,27 +165,6 @@
                 "enabled": []
             }
         },
-        "winType": {
-            "val": "pyglet",
-            "valType": "str",
-            "inputType": "choice",
-            "categ": "General",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [
-                "pyglet",
-                "pygame",
-                "glfw"
-            ],
-            "allowedLabels": [],
-            "label": "Window type",
-            "hint": "Which system to use as a backend for drawing",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "defaultView": {
             "val": [
                 "builder"
@@ -400,28 +379,6 @@
             "allowedLabels": [],
             "label": "Developer mode",
             "hint": "Enables developer tools on next restart",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "audioLib": {
-            "val": [
-                "ptb",
-                "sounddevice",
-                "pyo",
-                "pygame"
-            ],
-            "valType": "str",
-            "inputType": "list",
-            "categ": "Hardware",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Audio library",
-            "hint": "Choice of audio library",
             "plugin": null,
             "depends": {
                 "shown": [],
