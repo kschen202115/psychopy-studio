@@ -15,6 +15,7 @@ const { python, startPython } = require("./python.js");
 const { uv } = require("./uv.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
+const { UsageReport } = require("./usage.js")
 const { appVersion, isDev } = require('./version.js');
 
 VelopackApp.build().run();
@@ -56,6 +57,14 @@ if (fs.existsSync(prefsFile)) {
 
 // setup a clipboard
 clipboard = undefined
+
+// send usage stats
+let usageReport = new UsageReport()
+if (isDev) {
+  console.log(usageReport.url.toString())
+} else {
+  usageReport.send()
+}
 
 // setup listener for file open
 function onFileOpen(evt, file) {
