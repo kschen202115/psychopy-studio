@@ -385,23 +385,6 @@
                 "enabled": []
             }
         },
-        "audioWASAPIOnly": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Hardware",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "WASAPI-only audio",
-            "hint": "Exclude non-WASAPI audio devices",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "audioDriver": {
             "val": [
                 "Primary Sound",
@@ -426,14 +409,31 @@
         "audioDevice": {
             "val": "default",
             "valType": "str",
-            "inputType": "single",
+            "inputType": "device",
+            "categ": "Hardware",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": ["python:///psychopy.experiment.components.sound:SpeakerDeviceBackend"],
+            "allowedLabels": [],
+            "label": "Default audio device",
+            "hint": "Audio device to use by default",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "audioWASAPIOnly": {
+            "val": true,
+            "valType": "code",
+            "inputType": "bool",
             "categ": "Hardware",
             "updates": null,
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "Audio device",
-            "hint": "Audio device to use (if audioLib allows control)",
+            "label": "WASAPI-only audio",
+            "hint": "Exclude non-WASAPI audio devices",
             "plugin": null,
             "depends": {
                 "shown": [],
@@ -446,7 +446,7 @@
                 "0x03BC"
             ],
             "valType": "str",
-            "inputType": "list",
+            "inputType": "single",
             "categ": "Hardware",
             "updates": null,
             "allowedUpdates": null,
@@ -454,23 +454,6 @@
             "allowedLabels": [],
             "label": "Parallel ports",
             "hint": "A list of parallel ports",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "qmixConfiguration": {
-            "val": "qmix_config",
-            "valType": "str",
-            "inputType": "single",
-            "categ": "Hardware",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "qmix Configuration",
-            "hint": "The name of the Qmix pump configuration to use",
             "plugin": null,
             "depends": {
                 "shown": [],
