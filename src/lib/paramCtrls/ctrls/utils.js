@@ -66,7 +66,6 @@ export async function optionsFromParam(param) {
             // get options from Python
             try {
                 param.allowedVals = await optionsFromPython(param.allowedVals)
-                console.log(param.name, param.allowedVals)
             } catch (err) {
                 // disable ctrl if this fails
                 console.log(`Failed to get allowedVals for param ${param.name} (${param.allowedVals}, ${err})`)
