@@ -6,6 +6,7 @@
     import { ParamsDialog } from "$lib/paramCtrls";
     import StaticPeriod from './StaticPeriod.svelte';
     import { Icon } from "$lib/utils/icons";
+    import { prefs } from "$lib/preferences.svelte"
     
     let current = getContext("current");
 
@@ -32,11 +33,12 @@
 
     let showDialog = $state(false);
 
-    function removeComponent() {
-        // update history
-        current.experiment.history.update(`remove ${component.name}`);
-        // remove from Routine
-        component.routine.removeComponent(component);
+    function abbreviateLongName(name) {
+        if (name.length > 20) {
+            return `${name.slice(0, 20)}...`
+        }
+
+        return name
     }
 </script>
 
@@ -59,7 +61,7 @@
     oncontextmenu={oncontextmenu}
     style:grid-row-start={component.index + 3}
 >    
-    {component.name}
+    {prefs.params['abbreviateLongCompNames'].val ? abbreviateLongName(component.name) : component.name}
     <Icon 
         src={component.iconSVG}
     />

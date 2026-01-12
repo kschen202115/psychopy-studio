@@ -60,6 +60,23 @@
                 "enabled": []
             }
         },
+        "unclutteredNamespace": {
+            "val": false,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "General",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Uncluttered namespace",
+            "hint": "If ticked, won't expand headings from conditoons files into variables",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "paths": {
             "val": [],
             "valType": "str",
@@ -270,6 +287,40 @@
                 "enabled": []
             }
         },
+        "coderFont": {
+            "val": "JetBrains Mono",
+            "valType": "code",
+            "inputType": "font",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Coder font",
+            "hint": "Font face to use in Coder's code editor control",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "abbreviateLongCompNames": {
+            "val": true,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Abbreviate long Component names",
+            "hint": "Abbreviate long component names to maximise timeline space?",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "showSplash": {
             "val": "True",
             "valType": "code",
@@ -304,6 +355,40 @@
                 "enabled": []
             }
         },
+        "alwaysShowReadme": {
+            "val": true,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Show readme on open",
+            "hint": "When opening an experiment, show its readme file",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
+        "readonly": {
+            "val": false,
+            "valType": "code",
+            "inputType": "bool",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Read-only in Coder",
+            "hint": "Open files as read-only in Coder (to avoid accidental changes)",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "debugMode": {
             "val": "False",
             "valType": "code",
@@ -315,282 +400,6 @@
             "allowedLabels": [],
             "label": "Developer mode",
             "hint": "Enables developer tools on next restart",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "coderFont": {
-            "val": "JetBrains Mono",
-            "valType": "code",
-            "inputType": "font",
-            "categ": "Coder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Coder font",
-            "hint": "Font face to use in Coder's code editor control",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "readonly": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Coder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Open files as read-only",
-            "hint": "Open files as read-only in Coder (to avoid accidental changes)",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "reloadPrevExp": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "reload Prev Exp",
-            "hint": "whether to automatically reload a previously open experiment",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "codeComponentLanguage": {
-            "val": "Auto->JS",
-            "valType": "str",
-            "inputType": "choice",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [
-                "Python",
-                "JS",
-                "Both",
-                "Auto->JS"
-            ],
-            "allowedLabels": [],
-            "label": "code Component Language",
-            "hint": "Default to when writing code components",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "unclutteredNamespace": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "uncluttered Namespace",
-            "hint": "if False will create scripts with an 'easier' but more cluttered namespace",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "componentsFolders": {
-            "val": [
-                "/Users/Shared/PsychoPy3/components"
-            ],
-            "valType": "str",
-            "inputType": "list",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "components Folders",
-            "hint": "folder names for custom components; expects a comma-separated list",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "componentFilter": {
-            "val": "Any",
-            "valType": "str",
-            "inputType": "choice",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [
-                "PsychoPy",
-                "PsychoJS",
-                "Any",
-                "Both"
-            ],
-            "allowedLabels": [],
-            "label": "component Filter",
-            "hint": "Only show components which work in...",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "hiddenComponents": {
-            "val": [
-                "RatingScaleComponent",
-                "PatchComponent",
-                "UnknownComponent"
-            ],
-            "valType": "str",
-            "inputType": "list",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "hidden Components",
-            "hint": "a list of components to hide (eg, because you never use them)",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "abbreviateLongCompNames": {
-            "val": false,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "abbreviate Long Comp Names",
-            "hint": "Abbreviate long component names to maximise timeline space?",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "unpackedDemosDir": {
-            "val": "",
-            "valType": "str",
-            "inputType": "single",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "unpacked Demos Dir",
-            "hint": "where the Builder demos are located on this computer (after unpacking)",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "savedDataFolder": {
-            "val": "data",
-            "valType": "str",
-            "inputType": "single",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "saved Data Folder",
-            "hint": "name of the folder where subject data should be saved (relative to the script)",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "builderLayout": {
-            "val": "FlowBottom_CompRight",
-            "valType": "str",
-            "inputType": "choice",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [
-                "FlowBottom_CompRight",
-                "FlowBottom_CompLeft",
-                "FlowTop_CompRight",
-                "FlowTop_CompLeft"
-            ],
-            "allowedLabels": [],
-            "label": "builder Layout",
-            "hint": "Panels arrangement: Should Flow be on the top or bottom, and should Components be on the left or right?",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "alwaysShowReadme": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "always Show Readme",
-            "hint": "Display text in a floating window that describes the experiment",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "maxFavorites": {
-            "val": 10,
-            "valType": "code",
-            "inputType": "single",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "max Favorites",
-            "hint": "Upper limit on how many components can be in favorites",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "confirmRoutineClose": {
-            "val": true,
-            "valType": "code",
-            "inputType": "bool",
-            "categ": "Builder",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "confirm Routine Close",
-            "hint": "Ask for confirmation when closing a routine tab.",
             "plugin": null,
             "depends": {
                 "shown": [],

@@ -51,7 +51,9 @@ export async function openFile(file) {
     let readme = await findReadme()
     if (readme) {
         current.readme.script.fromFile(readme)
-        current.readme.shown = true
+        if (prefs.params['alwaysShowReadme'].val) {
+            current.readme.shown = true
+        }
     }
 
     console.log(`Loaded experiment '${current.experiment.file.name}':`, current.experiment);
