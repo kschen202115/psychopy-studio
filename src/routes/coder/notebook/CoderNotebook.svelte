@@ -36,6 +36,7 @@
                 bind:editor={page.editor}
                 bind:canUndo={page.canUndo}
                 bind:canRedo={page.canRedo}
+                readonly={prefs.params['readonly'].val}
                 file={page.file}
             />
         </NotebookPage>

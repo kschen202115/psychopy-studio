@@ -330,8 +330,8 @@
             "allowedUpdates": null,
             "allowedVals": [],
             "allowedLabels": [],
-            "label": "readonly",
-            "hint": "open Coder files as read-only (allows running without accidental changes)",
+            "label": "Open files as read-only",
+            "hint": "Open files as read-only in Coder (to avoid accidental changes)",
             "plugin": null,
             "depends": {
                 "shown": [],
