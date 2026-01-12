@@ -60,23 +60,6 @@
                 "enabled": []
             }
         },
-        "version": {
-            "val": "",
-            "valType": "str",
-            "inputType": "single",
-            "categ": "General",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "PsychoPy version",
-            "hint": "For internal usage",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "paths": {
             "val": [],
             "valType": "str",
@@ -94,23 +77,6 @@
                 "enabled": []
             }
         },
-        "flac": {
-            "val": "",
-            "valType": "str",
-            "inputType": "single",
-            "categ": "General",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "FLAC path",
-            "hint": "Path to flac (lossless audio compression) on this operating system",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
         "shutdownKey": {
             "val": "",
             "valType": "str",
@@ -121,7 +87,7 @@
             "allowedVals": [],
             "allowedLabels": [],
             "label": "Shutdown key",
-            "hint": "Shutdown key, following the pyglet naming scheme.",
+            "hint": "Key which forcibly shuts down the experiment when pressed.",
             "plugin": null,
             "depends": {
                 "shown": [],
@@ -138,7 +104,7 @@
             "allowedVals": [],
             "allowedLabels": [],
             "label": "Shutdown key modifiers",
-            "hint": "Modifier keys for shutdown keys",
+            "hint": "Modifier (CTRL, ALT, etc.) for the shutdown key.",
             "plugin": null,
             "depends": {
                 "shown": [],
@@ -159,23 +125,6 @@
             "allowedLabels": [],
             "label": "Gamma error policy",
             "hint": "What to do if gamma-correction not possible",
-            "plugin": null,
-            "depends": {
-                "shown": [],
-                "enabled": []
-            }
-        },
-        "startupPlugins": {
-            "val": [],
-            "valType": "str",
-            "inputType": "list",
-            "categ": "General",
-            "updates": null,
-            "allowedUpdates": null,
-            "allowedVals": [],
-            "allowedLabels": [],
-            "label": "Startup plugins",
-            "hint": "Add plugin names here to load when PsychoPy starts",
             "plugin": null,
             "depends": {
                 "shown": [],
