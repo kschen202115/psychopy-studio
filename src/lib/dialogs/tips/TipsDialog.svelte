@@ -21,11 +21,11 @@
     let tip = $state.raw();
     function chooseTip() {
         // get options from categories
-        let options = Object.entries(tips).filter(
-            ([key, values]) => categories.includes(key)
-        ).map(
-            item => item[1]
-        ).flat()
+        let options = tips.filter(
+            tip => categories.some(
+                categ => tip.categories.includes(categ)
+            )
+        )
         // pick one at random
         tip = options[
             Math.floor(Math.random() * options.length)
@@ -53,10 +53,11 @@
     <div class=tip>
         <span style:color=var(--blue)>
             <Icon 
-                src="/icons/sym-info.svg"
+                src={tip.icon || "/icons/sym-info.svg"}
+                size=3rem
             />
         </span>
-        {@html marked(tip)}
+        {@html marked(tip.message)}
     </div>
     <div class=stop>
         <input type=checkbox bind:checked={hide}/>
@@ -73,6 +74,7 @@
         background-color: var(--base);
         border: 1px solid var(--overlay);
         border-radius: .5rem;
+        align-items: center;
     }
     .stop {
         display: flex;
