@@ -56,5 +56,5 @@
 >
     <ParamsNotebook 
         element={element}
-    ></ParamsNotebook>
+    />
 </Dialog>

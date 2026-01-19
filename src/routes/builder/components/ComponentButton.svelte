@@ -32,15 +32,15 @@
         showDialog = true
     }
 
-    let valid = $state({})
+    let valid = $derived(
+        Object.values(dlgComponent.params).every(
+            param => param.valid?.value
+        )
+    )
 
     let btnsDisabled = $derived({
-        OK: Object.values(valid).some(
-            (val) => !val.state
-        ),
-        APPLY: Object.values(valid).some(
-            (val) => !val.state
-        )
+        OK: !valid,
+        APPLY: !valid
     })
         
 </script>
@@ -72,8 +72,7 @@
     buttonsDisabled={btnsDisabled}
 >
     <ParamsNotebook 
-        bind:valid={valid}
         element={dlgComponent}
-    ></ParamsNotebook>
+    />
 </Dialog>
 {/if}

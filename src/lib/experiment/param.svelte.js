@@ -33,8 +33,10 @@ export class Param {
                 // run validation
                 validator.validate(this, output);
             } catch (err) {
-                console.log(`Error validating ${this.name}`, err);
-                return false
+                return {
+                    value: false,
+                    warning: "Error validating parameter"
+                };
             }
         }
 
