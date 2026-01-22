@@ -1,6 +1,6 @@
 export class Version {
     // regex for a valid version
-    static pattern = /(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+)(?<extra>[\d\w]+)?)?/
+    static pattern = /(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>(?:\d+|\*))(?<extra>[\d\w]+)?)?/
 
     constructor(version) {
         // parse with regex
@@ -8,7 +8,7 @@ export class Version {
         // store parts (as int, if relevant)
         this.major = parseInt(parts.major)
         this.minor = parseInt(parts.minor)
-        this.patch = parseInt(parts.patch)
+        this.patch = parts.patch === "*" ? Infinity : parseInt(parts.patch)
         this.extra = parts.extra
     }
 
@@ -50,7 +50,11 @@ export class Version {
             return output
         }
         // add patch
-        output += `.${this.patch || ""}`
+        if (this.patch === Infinity) {
+            output += ".*"
+        } else {
+            output += `.${this.patch || ""}`
+        }
         if (upto === "patch") {
             return output
         }
@@ -97,17 +101,17 @@ export class Version {
             return false
         }
         // if major is the same, compare minor
-        if (other.minor || 0 > this.minor) {
+        if ((other.minor || 0) > this.minor) {
             return true
         }
-        if (other.minor || 0 < this.minor) {
+        if ((other.minor || 0) < this.minor) {
             return false
         }
         // if minor is the same, compare patch
-        if (other.patch || 0 > this.patch) {
+        if ((other.patch || 0) > this.patch) {
             return true
         }
-        if (other.patch || 0 < this.patch) {
+        if ((other.patch || 0) < this.patch) {
             return false
         }
         // if other has extra and this doesn't, it's newer
@@ -136,17 +140,17 @@ export class Version {
             return false
         }
         // if major is the same, compare minor
-        if (other.minor || 0 < this.minor) {
+        if ((other.minor || 0) < this.minor) {
             return true
         }
-        if (other.minor || 0 > this.minor) {
+        if ((other.minor || 0) > this.minor) {
             return false
         }
         // if minor is the same, compare patch
-        if (other.patch || 0 < this.patch) {
+        if ((other.patch || 0) < this.patch) {
             return true
         }
-        if (other.patch || 0 > this.patch) {
+        if ((other.patch || 0) > this.patch) {
             return false
         }
         // if other doesn't have extra and this does, it's older
