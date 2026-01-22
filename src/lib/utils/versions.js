@@ -68,27 +68,51 @@ export class Version {
      * Returns true if the given version is the same as this one.
      * 
      * @param {Version|string} other Version to compare against
+     * @param {string} upto How much of the version to check, options are:
+     *   - "major": Only the major version (2025.1.1beta -> 2025)
+     *   - "major": Up to the minor version (2025.1.1beta -> 2025.1)
+     *   - "patch": Up to the patch version (2025.1.1beta -> 2025.1.1)
+     *   - "extra": Up to the extra version, i.e. everything (2025.1.1beta -> 2025.1.1beta)
      */
-    equal(other) {
+    equal(other, upto="extra") {
         // if given a string, parse it to another Version object
         if (typeof other === "string") {
             other = Version.parse(string)
         }
+        // start off true
+        let output = true
+        // compare major
+        output &= this.major === other.major
+        if (upto === "major") {
+            return output
+        }
+        // compare minor
+        output &= this.minor === other.minor
+        if (upto === "minor") {
+            return output
+        }
+        // compare patch
+        output &= this.patch === other.patch
+        if (upto === "patch") {
+            return output
+        }
+        // compare extra
+        output &= this.extra === other.extra
 
-        return (
-            this.major === other.major &
-            this.minor === other.minor &
-            this.patch === other.patch &
-            this.extra === other.extra
-        )
+        return output
     }
 
     /**
      * Returns true if the given version is newer than this one.
      * 
      * @param {Version|string} other Version to compare against
+     * @param {boolean} equal Whether to accept equal versions
      */
-    newer(other) {
+    newer(other, equal=false) {
+        // if equal, return true/false based on whether this is accepted
+        if (this.equal(other)) {
+            return equal
+        }
         // if given a string, parse it to another Version object
         if (typeof other === "string") {
             other = Version.parse(string)
@@ -126,11 +150,16 @@ export class Version {
      * Returns true if the given version is older than this one.
      * 
      * @param {Version|string} other Version to compare against
+     * @param {boolean} equal Whether to accept equal versions
      */
-    older(other) {
+    older(other, equal=false) {
         // if given a string, parse it to another Version object
         if (typeof other === "string") {
             other = Version.parse(string)
+        }
+        // if equal, return true/false based on whether this is accepted
+        if (this.equal(other)) {
+            return equal
         }
         // compare major
         if (other.major < this.major) {
