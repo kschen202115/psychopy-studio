@@ -1,4 +1,6 @@
 <script>
+    import { Version } from "$lib/utils/versions.js";
+
     let {
         param=$bindable(),
         /** @prop @type {boolean} Controls whether this control is disabled */
@@ -8,26 +10,33 @@
     } = $props()
 
     function validateVersion(param, valid) {
-        valid.value = options.includes(param.val) || param.val === ""
+        valid.value = true
     }
     
     // construct options live from the param's allowedVals and allowedLabels attributes
     let options = $derived.by(async () => {
-        // start off with just "latest"
-        let output = [
-            ["", "latest"]
-        ]
-        // replace param allowedVals with versions from GitHub
+        // use allowedVals to get versions from GitHub
         let resp = await fetch(
-            `https://api.github.com/repos/${param.allowedVals}/releases`, 
+            `https://api.github.com/repos/${param.allowedVals}/tags`, 
             {method: "GET"}
         );
-        // add GitHub versions
-        for (let ver of await resp.json()) {
-            output.push([ver.tag_name, ver.tag_name])
+        let versions = (await resp.json()).map(
+            ver => new Version(ver.name)
+        ).toSorted(
+            (a, b) => a.newer(b) ? 1 : -1 
+        )
+        // sort by version
+        options = {}
+        for (let ver of versions) {
+            // if minor version not included yet, add a field for it
+            if (!(ver.format("minor") in options)) {
+                options[ver.format("minor")] = []
+            }
+            // add to minor version's field
+            options[ver.format("minor")].push(
+                [ver.format(), ver.format()]
+            )
         }
-
-        return output
     })
 </script>
 
@@ -42,11 +51,21 @@
     {#await options}
         <option value="">Fetching versions from GitHub...</option>
     {:then options}
-        {#each options as [val, label]}
-            <option 
-                value={val} 
-                selected={param.val === val}
-            >{label}</option>
+        <option value="">latest</option>
+        {#each Object.entries(options) as [minor, versions]}
+            <optgroup label={minor}>
+                <option 
+                    value={`${minor}.*`} 
+                    selected={param.val === `${minor}.*`}
+                >latest</option>
+                {#each versions as [version, label]}
+                    <option 
+                        value={version} 
+                        selected={param.val === version}
+                    >{label}</option>
+                {/each}
+            </optgroup>
+            
         {/each}
     {/await}
 </select>

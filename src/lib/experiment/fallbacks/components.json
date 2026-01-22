@@ -11846,11 +11846,11 @@
             "Use version": {
                 "val": "",
                 "valType": "str",
-                "inputType": "choice",
+                "inputType": "version",
                 "categ": "Basic",
                 "updates": null,
                 "allowedUpdates": null,
-                "allowedVals": "python:///psychopy.experiment.components.settings:getVersions",
+                "allowedVals": "TEParsons/psychopy-lib",
                 "allowedLabels": [],
                 "ctrlParams": {},
                 "label": "Use PsychoPy version",
