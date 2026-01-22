@@ -9,9 +9,9 @@ export async function installPython(version=undefined, forceReinstall=false) {
         version = Version.parse(version)
         // oldest version we can do is 2022.1 as it's the first to use Python >3.8
         if (version.older("2022.1.0")) {
-            console.error(
+            console.warn(
                 `Version ${version.format()} of PsychoPy is not supported in PsychoPy Studio as it `
-                `cannot run in Python >=3.8. Using the oldest compatible version (2022.1).`
+                + `cannot run in Python >=3.8. Using the oldest compatible version (2022.1).`
             )
             version = new Version("2022.1.*")
         }

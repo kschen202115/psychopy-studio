@@ -1,6 +1,6 @@
 export function ppy2py(version) {
     // make sure we have a Version object
-    other = Version.parse(other)
+    version = Version.parse(version)
     // at what version of PsychoPy we updated to each version of Python
     let updates = [
         ["2022.1.0", "3.8"],

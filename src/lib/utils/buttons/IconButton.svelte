@@ -71,6 +71,7 @@
         {@render children?.()}
     </button>
 {:catch err}
+    {console.error(err)}
     <button
         onclick={evt => awaiting = Promise.resolve(false)}
         onmouseenter={() => {showTooltip = true}}
