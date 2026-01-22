@@ -1,12 +1,30 @@
 import { status } from "./globals.svelte.js"
+import { Version, ppy2py } from "$lib/utils/versions.py"
 
 
 export async function installPython(version=undefined, forceReinstall=false) {
+    let pyVersion = "3.10"
+    if (version) {
+        // make sure we have a Version object
+        version = Version.parse(version)
+        // oldest version we can do is 2022.1 as it's the first to use Python >3.8
+        if (version.older("2022.1.0")) {
+            console.error(
+                `Version ${version.format()} of PsychoPy is not supported in PsychoPy Studio as it `
+                `cannot run in Python >=3.8. Using the oldest compatible version (2022.1).`
+            )
+            version = new Version("2022.1.*")
+        }
+        // get python version matching psychopy version
+        pyVersion = ppy2py(version)
+        // convert back to string (serializable)
+        version = version.format()
+    }
     // if installed and not forcing a reinstall, do nothing
     if (!forceReinstall) {
         if (
             await python.uv.findPython(
-                {python: "3.10", psychopy: version}
+                {python: pyVersion, psychopy: version}
             ).catch(err => status.ready.reject(err?.error || err))
         ) {
             return
@@ -22,7 +40,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
     status.dlg.busy = true
     // do install
     await python.uv.installPython(
-        {python: "3.10", psychopy: version}
+        {python: pyVersion, psychopy: version}
     ).catch(
         err => status.ready.reject(err?.error || err)
     )

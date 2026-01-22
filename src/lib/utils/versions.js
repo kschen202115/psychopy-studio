@@ -1,3 +1,24 @@
+export function ppy2py(version) {
+    // make sure we have a Version object
+    other = Version.parse(other)
+    // at what version of PsychoPy we updated to each version of Python
+    let updates = [
+        ["2022.1.0", "3.8"],
+        ["2024.2.0", "3.10"]
+    ]
+    // start off as 3.8
+    let output = "3.8"
+    // increase with each version we surpass
+    for (let [ppy, py] of updates) {
+        if (version.newer(ppy)) {
+            output = py
+        }
+    }
+
+    return output
+}
+
+
 export class Version {
     // regex for a valid version
     static pattern = /(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>(?:\d+|\*))(?<extra>[\d\w]+)?)?/
@@ -75,10 +96,8 @@ export class Version {
      *   - "extra": Up to the extra version, i.e. everything (2025.1.1beta -> 2025.1.1beta)
      */
     equal(other, upto="extra") {
-        // if given a string, parse it to another Version object
-        if (typeof other === "string") {
-            other = Version.parse(string)
-        }
+        // make sure we have a Version object
+        other = Version.parse(other)
         // start off true
         let output = true
         // compare major
@@ -113,10 +132,8 @@ export class Version {
         if (this.equal(other)) {
             return equal
         }
-        // if given a string, parse it to another Version object
-        if (typeof other === "string") {
-            other = Version.parse(string)
-        }
+        // make sure we have a Version object
+        other = Version.parse(other)
         // compare major
         if (other.major > this.major) {
             return true
@@ -153,14 +170,12 @@ export class Version {
      * @param {boolean} equal Whether to accept equal versions
      */
     older(other, equal=false) {
-        // if given a string, parse it to another Version object
-        if (typeof other === "string") {
-            other = Version.parse(string)
-        }
         // if equal, return true/false based on whether this is accepted
         if (this.equal(other)) {
             return equal
         }
+        // make sure we have a Version object
+        other = Version.parse(other)
         // compare major
         if (other.major < this.major) {
             return true
