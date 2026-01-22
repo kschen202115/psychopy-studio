@@ -1,5 +1,5 @@
 import { status } from "./globals.svelte.js"
-import { Version, ppy2py } from "$lib/utils/versions.py"
+import { Version, ppy2py } from "$lib/utils/versions.js"
 
 
 export async function installPython(version=undefined, forceReinstall=false) {
