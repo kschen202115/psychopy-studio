@@ -33,7 +33,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
     // open dialog to show progress
     status.message = "Installing Python and PsychoPy library..."
     status.dlg.message = (
-        `### Installing Python (3.10) and PsychoPy library (${version ? version : "latest version"})...\n` +
+        `### Installing Python (${pyVersion}) and PsychoPy library (${version ? version : "latest version"})...\n` +
         `This may take some time and, unfortunately, cannot be done in the background. Once it's finished installing, you won't have to see this message again.`
     )
     status.dlg.shown = true

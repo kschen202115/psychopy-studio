@@ -10,7 +10,7 @@ export function ppy2py(version) {
     let output = "3.8"
     // increase with each version we surpass
     for (let [ppy, py] of updates) {
-        if (version.newer(ppy)) {
+        if (version.older(ppy)) {
             output = py
         }
     }
