@@ -39,13 +39,13 @@ async function optionsFromPython(query) {
 
     try {
         // first try calling the arg
-        options = await python.liaison.send({
+        options = await python.liaison.send("app", {
             command: "run",
             args: [query.replace("python:///", "")]
         }, 10000)
     } catch {
         // if that fails, it might be a static value, so try getting it
-        options = await python.liaison.send({
+        options = await python.liaison.send("app", {
             command: "get",
             args: [query.replace("python:///", "")]
         }, 10000)

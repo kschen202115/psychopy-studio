@@ -51,21 +51,29 @@ contextBridge.exposeInMainWorld('electron', electron)
 const python = {
   details: () => ipcRenderer.invoke("python.details").then(resp => resp),
   output: () => ipcRenderer.invoke("python.output").then(resp => resp),
-  start: () => ipcRenderer.invoke("python.start").then(resp => resp),
-  stop: () => ipcRenderer.invoke("python.stop").then(resp => resp),
-  started: () => ipcRenderer.invoke("python.started").then(resp => resp),
+  liaison: {
+    start: (venv) => ipcRenderer.invoke("python.liaison.start",venv).then(resp => resp),
+    stop: (venv) => ipcRenderer.invoke("python.liaison.stop",venv).then(resp => resp),
+    listen: (tag, lsnr) => ipcRenderer.on(`liaison:${tag}`, lsnr),
+    send: (venv, message, timeout=1000) => ipcRenderer.invoke("python.liaison.send", venv, message, timeout).then(resp => resp),
+    started: (venv) => ipcRenderer.invoke("python.liaison.started", venv).then(resp => resp),
+    ready: (venv) => ipcRenderer.invoke("python.liaison.ready", venv).then(resp => resp)
+  },
+  venv: {
+    setup: (venv) => ipcRenderer.invoke("python.venv.setup", venv).then(resp => resp),
+    installPackage: (venv, name) => ipcRenderer.invoke("python.venv.installPackage", venv, name).then(resp => resp),
+    uninstallPackage: (venv, name) => ipcRenderer.invoke("psychopy.venv.uninstallPackage", venv, name).then(resp => resp),
+    getPackages: (venv) => ipcRenderer.invoke("psychopy.venv.getPackages", venv).then(resp => resp),
+    getPackageDetails: (venv, name) => ipcRenderer.invoke("psychopy.venv.getPackageDetails", venv, name).then(resp => resp)
+  },
   uv: {
-    dir: () => ipcRenderer.invoke("python.uv.dir").then(resp => resp),
+    folder: () => ipcRenderer.invoke("python.uv.folder").then(resp => resp),
     executable: () => ipcRenderer.invoke("python.uv.executable").then(resp => resp),
     exists: () => ipcRenderer.invoke("python.uv.exists").then(resp => resp),
-    installUV: () => ipcRenderer.invoke("python.uv.installUV").then(resp => resp),
-    installPython: (version, folder) => ipcRenderer.invoke("python.uv.installPython", version, folder).then(resp => resp),
-    findPython: (version, folder) => ipcRenderer.invoke("python.uv.findPython", version, folder).then(resp => resp),
-    getEnvironments: (folder) => ipcRenderer.invoke("python.uv.getEnvironments", folder).then(resp => resp),
-    installPackage: (name, executable) => ipcRenderer.invoke("python.uv.installPackage", name, executable).then(resp => resp),
-    uninstallPackage: (name, executable) => ipcRenderer.invoke("python.uv.uninstallPackage", name, executable).then(resp => resp),
-    getPackages: (executable) => ipcRenderer.invoke("python.uv.getPackages", executable).then(resp => resp),
-    getPackageDetails: (name, executable) => ipcRenderer.invoke("python.uv.getPackageDetails", name, executable).then(resp => resp),
+    install: () => ipcRenderer.invoke("python.uv.install").then(resp => resp),
+    makeExecutable: (psychopyVersion, pythonVersion) => ipcRenderer.invoke("python.uv.makeExecutable", psychopyVersion, pythonVersion).then(resp => resp),
+    findPython: (version) => ipcRenderer.invoke("python.uv.findPython", version).then(resp => resp),
+    getEnvironments: () => ipcRenderer.invoke("python.uv.getEnvironments").then(resp => resp),
     output: {
       send: (message) => ipcRenderer.send("uv", message),
       listen: (lsnr) => ipcRenderer.on("uv", lsnr)
@@ -86,12 +94,6 @@ const python = {
     send: (id, msg) => ipcRenderer.invoke("python.shell.send", id, msg).then(resp => resp),
     open: () => ipcRenderer.invoke("python.shell.open").then(resp => resp),
     close: (id) => ipcRenderer.invoke("python.shell.close", id).then(resp => resp)
-  },
-  liaison: {
-    constants: () => ipcRenderer.invoke("python.liaison.constants").then(resp => resp),
-    listen: (tag, lsnr) => ipcRenderer.on(`liaison:${tag}`, lsnr),
-    send: (message, timeout=1000) => ipcRenderer.invoke("python.liaison.send", message, timeout).then(resp => resp),
-    ready: () => ipcRenderer.invoke("python.liaison.ready").then(resp => resp)
   },
   scripts: {
     run: (file, ...args) => ipcRenderer.invoke("python.scripts.run", file, ...args).then(resp => resp),

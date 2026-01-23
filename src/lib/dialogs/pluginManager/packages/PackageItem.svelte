@@ -24,7 +24,7 @@
     )
 
     function install(evt) {
-        python.uv.installPackage(
+        python.venv.installPackage(
             name, executable.current
         ).then(
             resp => python.uv.getPackages(

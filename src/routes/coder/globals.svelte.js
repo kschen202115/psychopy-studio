@@ -22,7 +22,7 @@ export let current = $state({
         }
         // convert psydat
         if (file.ext === ".psydat") {
-            let fileCSV = await python.liaison.send({
+            let fileCSV = await python.liaison.send("app", {
                 command: "run",
                 args: [
                     "psychopy.tools.filetools:psydat2csv",

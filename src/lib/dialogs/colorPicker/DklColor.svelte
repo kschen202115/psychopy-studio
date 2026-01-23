@@ -13,13 +13,13 @@
     // transform theDKL values into PsychoPy RGB values (-1:1) for the preview
     let preview = $derived(
         // send value to Python for conversion
-        python.liaison.send({
+        python.liaison.send("app", {
             command: "init",
             args: ["rgb", "psychopy.tools.colorspacetools:dkl2rgb", $state.snapshot(dkl)]
         }, 1000).then(
             name => {
                 // convert returned value from numpy to JSON
-                return python.liaison.send({
+                return python.liaison.send("app", {
                     command: "run",
                     args: ["numpy:ndarray.tolist", `\$${name}`]
                 }, 1000).then(

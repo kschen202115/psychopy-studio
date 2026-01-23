@@ -12,7 +12,9 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
 }
 
 const { python, startPython } = require("./python.js");
-const { uv } = require("./uv.js");
+const { uv } = require("./python/uv.js");
+const { getVenv } = require("./python/venv.js");
+const { Liaison, getLiaison } = require("./python/liaison.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
@@ -427,32 +429,38 @@ const handlers = {
   },
   python: {
     details: ipcMain.handle("python.details", (evt) => python.details),
-    start: ipcMain.handle("python.start", (evt) => python.start()),
-    stop: ipcMain.handle("python.stop", (evt) => python.stop()),
     started: ipcMain.handle("python.started", (evt) => python.started),
+    liaison: {
+      start: ipcMain.handle("python.liaison.start", (evt, venv) => getLiaison(venv).start()),
+      stop: ipcMain.handle("python.liaison.stop", (evt, venv) => getLiaison(venv).stop()),
+      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout = 1000) => {
+        await Liaison.anyReady.promise
+        getLiaison(venv).send(message, timeout)
+      }),
+      started: ipcMain.handle("python.liaison.started", (evt, venv) => getLiaison(venv).started),
+      ready: ipcMain.handle("python.liaison.ready", async (evt, venv) => await getLiaison(venv).ready.promise)
+    },
+    venv: {
+      setup: ipcMain.handle("python.venv.setup", (evt, venv) => getVenv(venv).setup()),
+      installPackage: ipcMain.handle("python.venv.installPackage", (evt, venv, name) => getVenv(venv).installPackage(name)),
+      uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", (evt, venv, name) => getVenv(venv).uninstallPackage(name)),
+      getPackages: ipcMain.handle("psychopy.venv.getPackages", (evt, venv) => getVenv(venv).getPackages()),
+      getPackageDetails: ipcMain.handle("psychopy.venv.getPackageDetails", (evt, venv, name) => getVenv(venv).getPackageDetails(name))
+    },
     uv: {
-      dir: ipcMain.handle("python.uv.dir", (evt) => python.uv.dir),
-      executable: ipcMain.handle("python.uv.executable", (evt) => python.uv.executable),
-      exists: ipcMain.handle("python.uv.exists", (evt) => python.uv.exists()),
-      installUV: ipcMain.handle("python.uv.installUV", (evt) => python.uv.installUV()),
-      installPython: ipcMain.handle("python.uv.installPython", (evt, version, folder) => python.uv.installPython(version, folder)),
-      findPython: ipcMain.handle("python.uv.findPython", (evt, version, folder) => python.uv.findPython(version, folder)),
-      getEnvironments: ipcMain.handle("python.uv.getEnvironments", (evt, folder) => python.uv.getEnvironments(folder)),
-      installPackage: ipcMain.handle("python.uv.installPackage", (evt, name, executable) => python.uv.installPackage(name, executable)),
-      uninstallPackage: ipcMain.handle("python.uv.uninstallPackage", (evt, name, executable) => python.uv.uninstallPackage(name, executable)),
-      getPackages: ipcMain.handle("python.uv.getPackages", (evt, executable) => python.uv.getPackages(executable)),
-      getPackageDetails: ipcMain.handle("python.uv.getPackageDetails", (evt, name, executable) => python.uv.getPackageDetails(name, executable)),
+      folder: ipcMain.handle("python.uv.folder", (evt) => uv.folder),
+      executable: ipcMain.handle("python.uv.executable", (evt) => uv.executable),
+      exists: ipcMain.handle("python.uv.exists", (evt) => uv.exists()),
+      install: ipcMain.handle("python.uv.install", (evt) => uv.install()),
+      makeExecutable: ipcMain.handle("python.uv.makeExecutable", (evt, psychopyVersion, pythonVersion) => uv.makeExecutable(psychopyVersion, pythonVersion)),
+      findPython: ipcMain.handle("python.uv.findPython", (evt, version) => uv.findPython(version)),
+      getEnvironments: ipcMain.handle("python.uv.getEnvironments", (evt) => uv.getEnvironments())
     },
     shell: {
       list: ipcMain.handle("python.shell.list", () => Object.keys(python.shell.shells)),
       send: ipcMain.handle("python.shell.send", (evt, id, msg) => python.shell.send(id, msg)),
       open: ipcMain.handle("python.shell.open", (evt) => python.shell.open()),
       close: ipcMain.handle("python.shell.close", (evt, id) => python.shell.close(id))
-    },
-    liaison: {
-      constants: ipcMain.handle("python.liaison.constants", (evt) => python.liaison.constants),
-      send: ipcMain.handle("python.liaison.send", (evt, message, timeout = 1000) => python.liaison.send(message, timeout)),
-      ready: ipcMain.handle("python.liaison.ready", async (evt) => await python.liaison.ready.promise)
     },
     scripts: {
       run: ipcMain.handle("python.scripts.run", (evt, file, ...args) => python.scripts.run(file, ...args)),

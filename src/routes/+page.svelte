@@ -11,39 +11,6 @@
         status: Promise.withResolvers(),
         message: ""
     })
-    
-    async function setup() {
-        // abort if on browser
-        if (!python) {
-            return
-        }
-        // do we already have UV and Python?
-        ready.message = "Checking Python..."
-        let hasUV = await python.uv.exists().catch(err => ready.status.reject(err))
-        let hasPython = await python.uv.findPython().catch(err => ready.status.reject(err))
-        // install UV
-        if (!hasUV) {
-            ready.message = "Downloading UV (a Python installer)..."
-            await python.uv.installUV().catch(err => ready.status.reject(err))
-        }
-        // install Python
-        if (!hasPython) {
-            ready.message = "Installing Python..."
-            await python.uv.installPython().catch(err => ready.status.reject(err))
-        }
-        // start python
-        ready.message = "Starting Python..."
-        await python.start().catch(err => ready.status.reject(err))
-        // activatePlugins
-        ready.message = "Activating plugins..."
-        await python.liaison.send({
-            command: "run",
-            args: ["psychopy.plugins:activatePlugins"]
-        }, 20000).catch(err => ready.status.reject(err))
-        // mark success
-        ready.status.resolve()
-    }
-    setup();
 </script>
 
 <div class=container>

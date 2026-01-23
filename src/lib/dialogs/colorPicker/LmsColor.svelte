@@ -13,13 +13,13 @@
     // transform the PsychoPy RGB values (-1:1) into CSS RGB (0:255) for the preview
     let preview = $derived(
         // send value to Python for conversion
-        python.liaison.send({
+        python.liaison.send("app", {
             command: "init",
             args: ["rgb", "psychopy.tools.colorspacetools:lms2rgb", $state.snapshot(lms)]
         }, 1000).then(
             name => {
                 // convert returned value from numpy to JSON
-                return python.liaison.send({
+                return python.liaison.send("app", {
                     command: "run",
                     args: ["numpy:ndarray.tolist", `\$${name}`]
                 }, 1000).then(

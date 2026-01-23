@@ -11,7 +11,7 @@
 
     async function calibrate() {
         // setup a window
-        await python.liaison.send({
+        await python.liaison.send("app", {
             command: "init",
             args: [
                 "calibrationWin",
@@ -25,7 +25,7 @@
         }, 10000)
         // setup a photometer
         let photometerName
-        await python.liaison.send({
+        await python.liaison.send("app", {
             // get available photometers for chosen class
             command: "run",
             args: [
@@ -37,14 +37,14 @@
                 // store device name
                 photometerName = profiles[0].deviceName;
                 // create device
-                return python.liaison.send({
+                return python.liaison.send("app", {
                     command: "run",
                     kwargs: profiles[0]
                 })
             }
         )
         // run calibration
-        let resp = await python.liaison.send({
+        let resp = await python.liaison.send("app", {
             command: "run",
             args: [
                 "psychopy.hardware.monitor:calibrateGamma",

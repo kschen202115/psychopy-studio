@@ -73,7 +73,7 @@
      */
     async function refreshProfiles() {
         if (await python?.ready) {
-            profilesPending.components = python.liaison.send({
+            profilesPending.components = python.liaison.send("app", {
                 command: "run",
                 args: ["psychopy.experiment:getElementProfiles"]
             }, 100000).then(

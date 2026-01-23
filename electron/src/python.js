@@ -3,7 +3,6 @@ import path from "path";
 const decoder = new TextDecoder();
 import logging from "./logging.js";
 import { app, BrowserWindow } from "electron";
-import { uv } from "./uv.js"
 import { randomUUID } from "node:crypto";
 import { appVersion } from "./version.js";
 
@@ -354,10 +353,9 @@ class PythonShell {
 // array with information about/from Python
 export const python = {
   details: {
-    executable: uv.findPython(),
-    dir: path.join(app.getPath("appData"), "psychopy4", ".python", appVersion.major)
+    executable: undefined,
+    dir: path.join(app.getPath("appData"), "psychopy4", ".python", appVersion)
   },
-  uv: uv,
   start: startPython,
   stop: () => stopPython(),
   started: false,

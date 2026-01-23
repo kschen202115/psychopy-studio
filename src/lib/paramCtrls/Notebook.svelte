@@ -53,7 +53,7 @@
                         // start off just saying "Translating..."
                         element.params[jskey].val = "// Translating..."
                         // do translation in Python
-                        python.liaison.send({
+                        python.liaison.send("app", {
                             command: "run",
                             args: ["psychopy.experiment.py2js_transpiler:translatePythonToJavaScript", element.params[key].val.trim()]
                         }, 10000).then(resp => {
