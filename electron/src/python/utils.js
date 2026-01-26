@@ -57,7 +57,7 @@ export function execSync(command, args, timeout=1000) {
  */
 export async function execTracked(tag, command, args, timeout=1000) {
     // execute asynchronously
-    let process = proc.spawn(command, args)
+    let process = proc.spawn(command, args, {timeout: timeout, shell: true})
     // pass output to front end
     process.stdout.on("data", evt => output(tag, evt))
     process.stderr.on("data", evt => output(tag, evt))
@@ -65,8 +65,6 @@ export async function execTracked(tag, command, args, timeout=1000) {
     let promise = Promise.withResolvers()
     process.on("close", (code, signal) => promise.resolve([code, signal]))
     process.on("error", err => promise.reject(err))
-    // kill after timeout
-    setTimeout(process.kill, timeout)
 
     return promise.promise
 }

@@ -431,21 +431,18 @@ const handlers = {
     details: ipcMain.handle("python.details", (evt) => python.details),
     started: ipcMain.handle("python.started", (evt) => python.started),
     liaison: {
-      start: ipcMain.handle("python.liaison.start", (evt, venv) => getLiaison(venv).start()),
-      stop: ipcMain.handle("python.liaison.stop", (evt, venv) => getLiaison(venv).stop()),
-      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout = 1000) => {
-        await Liaison.anyReady.promise
-        getLiaison(venv).send(message, timeout)
-      }),
-      started: ipcMain.handle("python.liaison.started", (evt, venv) => getLiaison(venv).started),
-      ready: ipcMain.handle("python.liaison.ready", async (evt, venv) => await getLiaison(venv).ready.promise)
+      start: ipcMain.handle("python.liaison.start", async (evt, venv) => (await getLiaison(venv)).start()),
+      stop: ipcMain.handle("python.liaison.stop", async (evt, venv) => (await getLiaison(venv)).stop()),
+      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout = 1000) => (await getLiaison(venv)).send(message, timeout)),
+      started: ipcMain.handle("python.liaison.started", async (evt, venv) => (await getLiaison(venv)).started),
+      ready: ipcMain.handle("python.liaison.ready", async (evt, venv) => await (await getLiaison(venv)).ready.promise)
     },
     venv: {
-      setup: ipcMain.handle("python.venv.setup", (evt, venv) => getVenv(venv).setup()),
-      installPackage: ipcMain.handle("python.venv.installPackage", (evt, venv, name) => getVenv(venv).installPackage(name)),
-      uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", (evt, venv, name) => getVenv(venv).uninstallPackage(name)),
-      getPackages: ipcMain.handle("psychopy.venv.getPackages", (evt, venv) => getVenv(venv).getPackages()),
-      getPackageDetails: ipcMain.handle("psychopy.venv.getPackageDetails", (evt, venv, name) => getVenv(venv).getPackageDetails(name))
+      setup: ipcMain.handle("python.venv.setup", async (evt, venv) => (await getVenv(venv)).setup()),
+      installPackage: ipcMain.handle("python.venv.installPackage", async (evt, venv, name) => (await getVenv(venv)).installPackage(name)),
+      uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
+      getPackages: ipcMain.handle("psychopy.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
+      getPackageDetails: ipcMain.handle("psychopy.venv.getPackageDetails", async (evt, venv, name) => (await getVenv(venv)).getPackageDetails(name))
     },
     uv: {
       folder: ipcMain.handle("python.uv.folder", (evt) => uv.folder),

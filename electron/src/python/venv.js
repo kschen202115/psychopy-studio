@@ -19,6 +19,11 @@ export class PythonVenv {
         venvs[this.psychopyVersion] = this
         // try to get Python executable
         this.executable = uv.findPython(this.psychopyVersion)
+        // if we were waiting for this venv, resolve now
+        if (psychopyVersion in awaiting) {
+            awaiting[psychopyVersion].resolve()
+            delete awaiting[psychopyVersion]
+        }
     }
 
     /**
@@ -40,7 +45,7 @@ export class PythonVenv {
             "git+https://github.com/psychopy/liaison[websocket]",
             // esprima and javascripthon are needed for py -> js translation
             "esprima", 
-            "git+https://gitlab.com/peircej/metapensiero.pj"
+            "git+https://gitlab.com/peircej/metapensiero.pj",
             // psychopy-lib is psychopy without any wx app code
             (
                 this.psychopyVersion === "dev"
@@ -73,7 +78,7 @@ export class PythonVenv {
         }
         // run uv command to install
         await uv.execTracked([
-            "pip", "install", ...name, "--python", this.executable
+            "pip", "install", ...name, "--python", `"${this.executable}"`
         ])
         // log done
         uv.output(
@@ -97,7 +102,7 @@ export class PythonVenv {
         }
         // uninstall
         await execTracked([
-            "pip", "uninstall", ...name, "--python", this.executable
+            "pip", "uninstall", ...name, "--python", `"${this.executable}"`
         ])
         // log done
         uv.output(
@@ -113,7 +118,7 @@ export class PythonVenv {
     getPackages() {
         // get package list from pip
         let resp = uv.execSync([
-            "pip", "list", "--python", this.executable, "--format", "json"
+            "pip", "list", "--python", `"${this.executable}"`, "--format", "json"
         ])
         // parse it
         let parsed = JSON.parse(resp)
@@ -136,7 +141,7 @@ export class PythonVenv {
         let all = {}
         // use pip show to get details
         let resp = uv.execSync([
-            "pip", "show", name, "--python", this.executable
+            "pip", "show", name, "--python", `"${this.executable}"`
         ])
         // parse as an object
         let local = Object.fromEntries(
@@ -184,16 +189,28 @@ export class PythonVenv {
      * 
      * @param {array<string>} args Arguments to pass on spawn
      */
-    spawn(args) {
+    spawn(args, callbacks={
+        onstdout: evt => {}, 
+        onstderr: evt => {}
+    }) {
+        // set initial onstdout and onstderr callbacks
+        this.onstdout = callbacks.onstdout || (evt => {})
+        this.onstderr = callbacks.onstderr || (evt => {})
         // spawn process
-        let process = proc.spawn(this.executable, args)
+        let process = proc.spawn(`"${this.executable}"`, args, { shell: true })
         // add listener for stdout
         process.stdout.on(
-            "data", evt => output("stderr", evt)
+            "data", evt => {
+                output("stdout", evt)
+                this.onstdout(evt)
+            }
         )
         // add listener for errors
         process.stderr.on(
-            "data", evt => output("stderr", evt)
+            "data", evt => {
+                output("stderr", evt)
+                this.onstderr(evt)
+            }
         )
         // add listener to know when process exits
         process.on("exit", evt => logging.log(
@@ -211,7 +228,7 @@ export class PythonVenv {
  * @param {string} version Version string to look for 
  * @returns {PythonVenv}
  */
-export function getVenv(version) {
+export async function getVenv(version) {
     // substitute "app" for app version
     if (version === "app") {
         version = appVersion
@@ -230,11 +247,15 @@ export function getVenv(version) {
                 )
             }
         }
-        // if none exist, error
-        throw Error(`Version ${version} of PsychoPy is not installed`)
+        // if none exist, await one's existance
+        if (!(version in awaiting)) {
+            awaiting[version] = Promise.withResolvers()
+        }
+        return awaiting[version].promise
     }
 }
 
-
+// store promises awaiting the setup of a venv here
+const awaiting = {}
 // store created venvs here
 export const venvs = {}

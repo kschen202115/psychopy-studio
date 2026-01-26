@@ -126,8 +126,10 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         status.ready.resolve(true)
     }
     // mark python global as ready once Liaison has started
-    python.liaison.ready().then(
-        evt => python.ready = true
+    python.liaison.ready(version).then(
+        evt => {
+            python.ready = true
+        }
     )
 
     return python

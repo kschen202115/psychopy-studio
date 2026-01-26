@@ -6,14 +6,7 @@ import { appVersion } from "../version.js";
 
 
 export class Liaison {
-
-    static anyReady = Promise.withResolvers()
-
     constructor(venv=appVersion, address="localhost:8002") {
-        // if given a version, get corresponding venv
-        if (typeof venv === "string") {
-            venv = getVenv(venv)
-        }
         // store venv
         this.venv = venv
         // store self in venv
@@ -28,31 +21,35 @@ export class Liaison {
         this.started = false
         this.ready = Promise.withResolvers();
         this.pending = []
-        // mark as at least one Liaison being ready
-        Liaison.anyReady.resolve()
     }
 
 
     async start() {
+        // mark started
         this.started = true
         // log start
         logging.log("Starting Liaison...")
         // get liaison constants
-        this.constants = this.venv.execSync([
-            "-m", "liaison.constants"
-        ], 10000)
+        this.constants = JSON.parse(
+            this.venv.execSync([
+                "-m", "liaison.constants"
+            ], 10000)
+        )
         // spawn a python process
-        this.process = this.venv.spawn([
-            "-m", "liaison.websocket", this.address
-        ])
-        // wait for started message
         await new Promise((resolve, reject) => {
-            // look for starrted constant in message
-            this.process.stdout.on("data", evt => {
-                if (decoder.decode(evt) === `${this.constants.START_MARKER}@${this.address}`) {
-                    resolve(evt)
+            this.process = this.venv.spawn(
+                [
+                    "-m", "liaison.websocket", this.address
+                ],
+                {
+                    // when we receive the Liaison start message, resolve this promise
+                    onstdout: evt => {
+                        if (decoder.decode(evt) === `${this.constants.START_MARKER}@${this.address}`) {
+                            resolve(evt)
+                        }
+                    }
                 }
-            })
+            )
             // timeout after 1s
             setTimeout(reject, 1000)
         })
@@ -90,19 +87,19 @@ export class Liaison {
         setInterval(
             () => this.send({
                 command: "ping"
-            }, 30000)
-        ).catch(
-            err => logging.error(`Liaison isn't responding (sent a ping and didn't receive a pong within 30s)`)
+            }, 30000).catch(
+                err => logging.error(`Liaison isn't responding (sent a ping and didn't receive a pong within 30s)`)
+            ), 30000
         )
         // setup alerts
-        await python.liaison.send({
+        await this.send({
             command: "init",
             args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
             kwargs: {
                 liaison: "$liaison"
             }
         }, 30000).then(
-            resp => python.liaison.send({
+            resp => this.send({
                 command: "run",
                 args: ["psychopy.alerts:addAlertHandler", "$alerts"]
             }, 30000).catch(
@@ -112,7 +109,7 @@ export class Liaison {
             err => logging.error(["Failed to setup alert handler", err])
         )
         // setup prefs
-        python.liaison.send({
+        this.send({
             command: "register",
             args: ["prefs", "psychopy.preferences:prefs"]
         }, 10000).catch(
@@ -120,7 +117,7 @@ export class Liaison {
         ).then(
             async resp => {
                 // point to devices json
-                await python.liaison.send({
+                await this.send({
                     command: "run",
                     args: ["prefs.setDevicesFile", path.join(
                         app.getPath("appData"), "psychopy4", "devices.json"
@@ -129,7 +126,7 @@ export class Liaison {
                     err => logging.error([`Failed to set devices file`, err])
                 )
                 // set prefs from JSON
-                await python.liaison.send({
+                await this.send({
                     command: "run",
                     args: ["prefs.fromJSON", path.join(
                         app.getPath("appData"), "psychopy4", "preferences.json"
@@ -192,24 +189,24 @@ export class Liaison {
                 return
             }
             // if ID matches, store and stop listening
-            python.socket.removeEventListener("message", lsnr)
+            this.socket.removeEventListener("message", lsnr)
             // resolve or reject
             if ("response" in data) {
                 // log reply
                 logging.log(data.response, `RECEIVED\t${msgid}`, "liaison", false)
                 // resolve
-                resolve(data.response)
+                promise.resolve(data.response)
             } else {
                 // log error
                 logging.log(data.error, `ERROR\t${msgid}`, "liaison", false)
                 // reject
-                reject(data)
+                promise.reject(data)
             }
         }
         // listen for reply
-        python.socket.addEventListener("message", lsnr)
+        this.socket.addEventListener("message", lsnr)
         
-        return promise
+        return promise.promise
     }
 
     output(tag, message) {
@@ -224,17 +221,18 @@ export class Liaison {
  * @param {string} version Version string to look for 
  * @returns {Liaison}
  */
-export function getLiaison(version) {
+export async function getLiaison(version) {
     // substitute "app" for app version
     if (version === "app") {
         version = appVersion
     }
     // get venv for this version
-    let venv = getVenv(version)
+    let venv = await getVenv(version)
     // get/make liaison for it
     if (venv.liaison) {
         return venv.liaison
     } else {
-        return new Liaison(venv)
+        let output = new Liaison(venv)
+        return output
     }
 }

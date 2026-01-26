@@ -215,7 +215,7 @@ export class UV {
      * @param {int} timeout Time (ms) after which to give up
      */
     async execTracked(args, timeout=1000) {
-        return execTracked("uv", this.executable, args, timeout)
+        return execTracked("uv", `"${this.executable}"`, args, timeout)
     }
 
     /**
