@@ -33,13 +33,14 @@ export class Script {
             console.error("Script running is not available in browser.")
             return
         }
-        // run
-        await python.scripts.run(
+        // run script
+        let id = await python.scripts.run(
             version,
             this.file.file, 
-            executable || await python.venv.executable("app"),
-            ...(this.pilotMode ? ["--pilot"] : [])
+            ...(this.pilotMode ? ["--pilot"] : []),
+            "--prefs-json", `"${await electron.paths.prefs()}"`
         )
+        await python.scripts.finished(version, id)
     }
 
     /**
