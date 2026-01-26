@@ -426,7 +426,7 @@ export class Experiment {
             return
         }
         // save to file
-        this.toFile(this.file)
+        await this.toFile(this.file)
         // construct output path
         let targetFile = path.join(
             this.file.parent,
