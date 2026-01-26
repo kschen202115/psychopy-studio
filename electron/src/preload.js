@@ -49,8 +49,6 @@ contextBridge.exposeInMainWorld('electron', electron)
 
 // details about Python process
 const python = {
-  details: () => ipcRenderer.invoke("python.details").then(resp => resp),
-  output: () => ipcRenderer.invoke("python.output").then(resp => resp),
   liaison: {
     start: (venv) => ipcRenderer.invoke("python.liaison.start",venv).then(resp => resp),
     stop: (venv) => ipcRenderer.invoke("python.liaison.stop",venv).then(resp => resp),
@@ -61,6 +59,7 @@ const python = {
   },
   venv: {
     setup: (venv) => ipcRenderer.invoke("python.venv.setup", venv).then(resp => resp),
+    executable: (venv) => ipcRenderer.invoke("python.venv.executable", venv).then(resp => resp),
     installPackage: (venv, name) => ipcRenderer.invoke("python.venv.installPackage", venv, name).then(resp => resp),
     uninstallPackage: (venv, name) => ipcRenderer.invoke("psychopy.venv.uninstallPackage", venv, name).then(resp => resp),
     getPackages: (venv) => ipcRenderer.invoke("psychopy.venv.getPackages", venv).then(resp => resp),
@@ -90,10 +89,10 @@ const python = {
     }
   },
   shell: {
-    list: () => ipcRenderer.invoke("python.shell.list").then(resp => resp),
-    send: (id, msg) => ipcRenderer.invoke("python.shell.send", id, msg).then(resp => resp),
-    open: () => ipcRenderer.invoke("python.shell.open").then(resp => resp),
-    close: (id) => ipcRenderer.invoke("python.shell.close", id).then(resp => resp)
+    list: (venv) => ipcRenderer.invoke("python.shell.list", venv).then(resp => resp),
+    send: (venv, id, msg) => ipcRenderer.invoke("python.shell.send", venv, id, msg).then(resp => resp),
+    open: (venv) => ipcRenderer.invoke("python.shell.open", venv).then(resp => resp),
+    close: (venv, id) => ipcRenderer.invoke("python.shell.close", venv, id).then(resp => resp)
   },
   scripts: {
     run: (file, ...args) => ipcRenderer.invoke("python.scripts.run", file, ...args).then(resp => resp),

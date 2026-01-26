@@ -33,7 +33,7 @@
         onkeypress={evt => {
             if (evt.key === "Enter") {
                 // send message
-                let resp = python.shell.send(id, $state.snapshot(message))
+                let resp = python.shell.send("app", id, $state.snapshot(message))
                 // clear ctrl
                 message = ""
                 // show resp

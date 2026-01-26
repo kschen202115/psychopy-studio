@@ -15,7 +15,7 @@ export class PythonVenv {
         // stores refs to running liaison, scripts and shells
         this.liaison = undefined
         this.scripts = []
-        this.shells = []
+        this.shells = {}
         // store in venvs object
         venvs[this.psychopyVersion] = this
         // try to get Python executable

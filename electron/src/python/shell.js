@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { getVenv } from "./venv.js"
+
+
 export class PythonShell {
 
   tokens = {
@@ -11,25 +15,21 @@ export class PythonShell {
     },
   }
 
-  constructor() {
-    // if given a version, get corresponding venv
-    if (typeof venv === "string") {
-        venv = getVenv(venv)
-    }
+  constructor(venv) {
     // store venv
     this.venv = venv
     // populated upon start
     this.process = undefined
+    // create a random id
+    this.id = randomUUID();
     // setup completion promises
     this.started = Promise.withResolvers()
     this.started.promise.finally(
-        evt => this.venv.shells.push(this)
+        evt => this.venv.shells[this.id] = this
     )
     this.finished = Promise.withResolvers()
     this.finished.promise.finally(
-        evt => delete this.venv.shells[
-            this.venv.shells.indexOf(this)
-        ]
+        evt => delete this.venv.shells[this.id]
     )
   }
 

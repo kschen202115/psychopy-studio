@@ -6,7 +6,7 @@ import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
 import { Component } from "./component.svelte";
 import { Flow, LoopInitiator } from "./flow.svelte";
-import { installPython } from "$lib/python";
+import { setupPython } from "$lib/python";
 
 
 export class Experiment {
@@ -435,12 +435,12 @@ export class Experiment {
         // make sure relevant Python version is setup
         let version = $state.snapshot(this.settings.params['Use version'].val)
         if (version) {
-            await installPython(version)
+            await setupPython(version)
         }
         // write script
         await python.scripts.run(
             "-m",
-            executable || await python.details().then(resp => resp.executable),
+            executable || await python.venv.executable(),
             "psychopy.scripts.psyexpCompile",
             $state.snapshot(this.file.file),
             "--outfile", targetFile,
@@ -484,7 +484,7 @@ export class Experiment {
         // run script
         await python.scripts.run(
             target, 
-            executable || await python.details().then(resp => resp.executable),
+            executable || await python.venv.executable(),
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
             await electron.paths.prefs()

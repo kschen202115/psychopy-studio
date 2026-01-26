@@ -432,8 +432,6 @@ const handlers = {
     quit: ipcMain.handle("electron.quit", (evt) => app.quit())
   },
   python: {
-    details: ipcMain.handle("python.details", (evt) => python.details),
-    started: ipcMain.handle("python.started", (evt) => python.started),
     liaison: {
       start: ipcMain.handle("python.liaison.start", async (evt, venv) => (await getLiaison(venv)).start()),
       stop: ipcMain.handle("python.liaison.stop", async (evt, venv) => (await getLiaison(venv)).stop()),
@@ -443,6 +441,7 @@ const handlers = {
     },
     venv: {
       setup: ipcMain.handle("python.venv.setup", async (evt, venv) => (await getVenv(venv)).setup()),
+      executable: ipcMain.handle("python.venv.executable", async (evt, venv) => (await getVenv()).executable),
       installPackage: ipcMain.handle("python.venv.installPackage", async (evt, venv, name) => (await getVenv(venv)).installPackage(name)),
       uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
       getPackages: ipcMain.handle("psychopy.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
@@ -458,10 +457,15 @@ const handlers = {
       getEnvironments: ipcMain.handle("python.uv.getEnvironments", (evt) => uv.getEnvironments())
     },
     shell: {
-      list: ipcMain.handle("python.shell.list", () => Object.keys(python.shell.shells)),
-      send: ipcMain.handle("python.shell.send", (evt, id, msg) => python.shell.send(id, msg)),
-      open: ipcMain.handle("python.shell.open", (evt) => python.shell.open()),
-      close: ipcMain.handle("python.shell.close", (evt, id) => python.shell.close(id))
+      list: ipcMain.handle("python.shell.list", async (venv) => Object.keys((await getVenv(venv)).shells)),
+      send: ipcMain.handle("python.shell.send", async (evt, venv, id, msg) => (await getVenv(venv)).shells[id].send(msg)),
+      open: ipcMain.handle("python.shell.open", async (evt, venv) => {
+        let shell = new PythonShell(await getVenv(venv))
+        shell.start()
+
+        return shell.id
+      }),
+      close: ipcMain.handle("python.shell.close", async (evt, venv, id) => (await getVenv(venv)).shells[id].close())
     },
     scripts: {
       run: ipcMain.handle("python.scripts.run", (evt, file, ...args) => python.scripts.run(file, ...args)),

@@ -36,7 +36,7 @@ export class Script {
         // run
         await python.scripts.run(
             this.file.file, 
-            executable || await python.details().then(resp => resp.executable),
+            executable || await python.venv.executable("app"),
             ...(this.pilotMode ? ["--pilot"] : [])
         )
     }
