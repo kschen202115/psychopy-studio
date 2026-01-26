@@ -17,7 +17,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
         // make sure we have a Version object
         version = Version.parse(version)
         // oldest version we can do is 2022.1 as it's the first to use Python >3.8
-        if (version.older("2022.1.0")) {
+        if (version.olderThan("2022.1.0")) {
             console.warn(
                 `Version ${version.format()} of PsychoPy is not supported in PsychoPy Studio as it `
                 + `cannot run in Python >=3.8. Using the oldest compatible version (2022.1).`
@@ -86,7 +86,7 @@ export async function setupPython(version=undefined, forceReinstall=false) {
     // install UV
     if (!hasUV || forceReinstall) {
         // kill any existing process
-        await python.liaison.stop("app")
+        await python.liaison.stop(version)
         // open dialog to show progress
         status.message = "Downloading UV (a Python installer)..."
         status.dlg.message = (

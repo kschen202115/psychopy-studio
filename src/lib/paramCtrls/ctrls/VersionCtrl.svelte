@@ -23,7 +23,7 @@
         let versions = (await resp.json()).map(
             ver => new Version(ver.name)
         ).toSorted(
-            (a, b) => a.newer(b) ? 1 : -1 
+            (a, b) => a.olderThan(b) ? 1 : -1 
         )
         // sort by version
         options = {}

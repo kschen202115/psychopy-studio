@@ -132,6 +132,10 @@ export class UV {
         )
         // iterate through subfolders in the python folder
         for (let subfolder of fs.readdirSync(folder)) {
+            // reinstate .* syntax
+            if (subfolder.match(/$\d+\.\d+^/)) {
+                subfolder += ".*"
+            }
             // look for an executable in this folder
             let executable = this.findPython(subfolder)
             // skip this folder if it doesn't have one
@@ -161,7 +165,7 @@ export class UV {
     findPython(psychopyVersion=appVersion) {
         // get specific folder for this version
         let folder = path.join(
-            app.getPath("appData"), "psychopy4", ".python", psychopyVersion
+            app.getPath("appData"), "psychopy4", ".python", psychopyVersion.replaceAll(".*", "")
         )
         // try using UV to search for a Python executable
         try {
@@ -182,7 +186,7 @@ export class UV {
     async makeExecutable(psychopyVersion=appVersion, pythonVersion="3.10") {
         // get specific folder for this version
         let folder = path.join(
-            app.getPath("appData"), "psychopy4", ".python", psychopyVersion
+            app.getPath("appData"), "psychopy4", ".python", psychopyVersion.replaceAll(".*", "")
         )
         // make sure folder exists
         if (!fs.existsSync(folder)) {
