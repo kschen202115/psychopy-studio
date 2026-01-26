@@ -3,17 +3,36 @@ import { getVenv } from "./venv.js";
 import logging from "../logging.js";
 import { output, decoder } from "./utils.js";
 import { appVersion } from "../version.js";
+import tcp from "tcp-port-used";
+import path from "path";
+
+/**
+ * Get an unused localhost address which is safe to start Liaison at
+ */
+async function getSafeAddress() {
+    // start with 8002
+    let port = 8002
+    // check initially
+    let inUse = await tcp.check(port, "localhost")
+    // if in use, iterate and try again
+    while (inUse) {
+        port += 1
+        inUse = await tcp.check(port, "localhost")
+        console.log(port, inUse)
+    }
+
+    return `localhost:${port}`
+}
 
 
 export class Liaison {
-    constructor(venv=appVersion, address="localhost:8002") {
+    constructor(venv=appVersion) {
         // store venv
         this.venv = venv
         // store self in venv
         this.venv.liaison = this
-        // store websocket address
-        this.address = address
         // populated upon start
+        this.address = undefined
         this.constants = undefined
         this.process = undefined
         this.socket = undefined
@@ -27,14 +46,16 @@ export class Liaison {
     async start() {
         // mark started
         this.started = true
-        // log start
-        logging.log("Starting Liaison...")
         // get liaison constants
         this.constants = JSON.parse(
             this.venv.execSync([
                 "-m", "liaison.constants"
             ], 10000)
         )
+        // get a safe address
+        this.address = await getSafeAddress()
+        // log start
+        logging.log(`Starting Liaison at ${this.address}`)
         // spawn a python process
         await new Promise((resolve, reject) => {
             this.process = this.venv.spawn(
@@ -92,52 +113,59 @@ export class Liaison {
             ), 30000
         )
         // setup alerts
-        await this.send({
-            command: "init",
-            args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
-            kwargs: {
-                liaison: "$liaison"
-            }
-        }, 30000).then(
-            resp => this.send({
-                command: "run",
-                args: ["psychopy.alerts:addAlertHandler", "$alerts"]
-            }, 30000).catch(
-                err => logging.error(["Failed to add alert handler", err])
+        try {
+            await this.send({
+                command: "init",
+                args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
+                kwargs: {
+                    liaison: "$liaison"
+                }
+            }, 30000).then(
+                resp => this.send({
+                    command: "run",
+                    args: ["psychopy.alerts:addAlertHandler", "$alerts"]
+                }, 30000).catch(
+                    err => logging.error(["Failed to add alert handler", err])
+                )
             )
-        ).catch(
-            err => logging.error(["Failed to setup alert handler", err])
-        )
+        } catch {
+            // note: this fails in <2026.1, but in prior versions alerts went to stdout, so this is fine
+            err => console.error("Failed to setup alerts", err)
+        }
+        
         // setup prefs
-        this.send({
-            command: "register",
-            args: ["prefs", "psychopy.preferences:prefs"]
-        }, 10000).catch(
-            err => logging.error([`Failed to load prefs`, err])
-        ).then(
-            async resp => {
-                // point to devices json
-                await this.send({
-                    command: "run",
-                    args: ["prefs.setDevicesFile", path.join(
-                        app.getPath("appData"), "psychopy4", "devices.json"
-                    )]
-                }, 10000).catch(
-                    err => logging.error([`Failed to set devices file`, err])
-                )
-                // set prefs from JSON
-                await this.send({
-                    command: "run",
-                    args: ["prefs.fromJSON", path.join(
-                        app.getPath("appData"), "psychopy4", "preferences.json"
-                    )]
-                }, 10000).catch(
-                    err => logging.error([`Failed to load preferences`, err])
-                )
-            }
-        ).catch(
+        try {
+            this.send({
+                command: "register",
+                args: ["prefs", "psychopy.preferences:prefs"]
+            }, 10000).catch(
+                err => logging.error([`Failed to load prefs`, err])
+            ).then(
+                async resp => {
+                    // point to devices json
+                    await this.send({
+                        command: "run",
+                        args: ["prefs.setDevicesFile", path.join(
+                            app.getPath("appData"), "psychopy4", "devices.json"
+                        )]
+                    }, 10000).catch(
+                        err => logging.error([`Failed to set devices file`, err])
+                    )
+                    // set prefs from JSON
+                    await this.send({
+                        command: "run",
+                        args: ["prefs.fromJSON", path.join(
+                            app.getPath("appData"), "psychopy4", "preferences.json"
+                        )]
+                    }, 10000).catch(
+                        err => logging.error([`Failed to load preferences`, err])
+                    )
+                }
+            )
+        } catch (err) {
+            // todo: this fails on <2026.0, how can we get prefs otherwise?
             err => logging.error(`Failed to setup preferences`, err)
-        )
+        }
     }
 
     async stop() {
