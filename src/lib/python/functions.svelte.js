@@ -5,13 +5,13 @@ import { Version, ppy2py } from "$lib/utils/versions.js"
 
 export async function installPython(version=undefined, forceReinstall=false) {
     // make sure we have a psychopy version
-    if (!version) {
+    if (!version || version === "app") {
         version = await electron.version()
     }
     // get python version
     let pyVersion
     if (version === "dev") {
-        // for dev, assume python 3.10
+        // for dev or app, assume python 3.10
         pyVersion = "3.10"
     } else {
         // make sure we have a Version object
@@ -76,7 +76,7 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         val => setTimeout(evt => status.dismiss.resolve(val), 2000)
     )
     // make sure we have a psychopy version
-    if (!version) {
+    if (!version || version === "app") {
         version = await electron.version()
     }
     // do we already have UV and Python?

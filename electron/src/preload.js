@@ -95,8 +95,9 @@ const python = {
     close: (venv, id) => ipcRenderer.invoke("python.shell.close", venv, id).then(resp => resp)
   },
   scripts: {
-    run: (file, ...args) => ipcRenderer.invoke("python.scripts.run", file, ...args).then(resp => resp),
-    stop: () => ipcRenderer.invoke("python.scripts.stop").then(resp => resp),
+    run: (venv, file, ...args) => ipcRenderer.invoke("python.scripts.run", venv, file, ...args).then(resp => resp),
+    finished: (venv, id) => ipcRenderer.invoke("python.scripts.finished", venv, id).then(resp => resp),
+    stop: (venv, id) => ipcRenderer.invoke("python.scripts.stop", venv, id).then(resp => resp),
   }
 }
 contextBridge.exposeInMainWorld('python', python)

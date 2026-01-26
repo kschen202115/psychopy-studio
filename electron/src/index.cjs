@@ -11,11 +11,11 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
   )
 }
 
-const { python, startPython } = require("./python.js");
 const { uv } = require("./python/uv.js");
 const { venvs, getVenv } = require("./python/venv.js");
 const { Liaison, getLiaison } = require("./python/liaison.js");
 const { PythonShell } = require("./python/shell.js");
+const { PythonScript } = require("./python/script.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
@@ -469,8 +469,14 @@ const handlers = {
       close: ipcMain.handle("python.shell.close", async (evt, venv, id) => (await getVenv(venv)).shells[id].close())
     },
     scripts: {
-      run: ipcMain.handle("python.scripts.run", (evt, file, ...args) => python.scripts.run(file, ...args)),
-      stop: ipcMain.handle("python.scripts.stop", (evt) => python.scripts.stop())
+      run: ipcMain.handle("python.scripts.run", async (evt, venv, file, ...args) => {
+        let script = new PythonScript(await getVenv(venv), file, args);
+        script.start()
+
+        return script.id
+      }),
+      finished: ipcMain.handle("python.scripts.finished", async (evt, venv, id) => await (await getVenv(venv)).scripts[id].finished.promise),
+      stop: ipcMain.handle("python.scripts.stop", async (evt, venv, id) => (await getVenv(venv)).scripts[id].stop())
     }
   },
   git: {

@@ -1,9 +1,11 @@
-class PythonScript {
+import { randomUUID } from "node:crypto";
+import { output } from "./utils.js";
+import proc from "child_process";
+import path from "path";
+
+
+export class PythonScript {
     constructor(venv, file, args) {
-        // if given a version, get corresponding venv
-        if (typeof venv === "string") {
-            venv = getVenv(venv)
-        }
         // store venv
         this.venv = venv
         // store file and args
@@ -11,12 +13,15 @@ class PythonScript {
         this.args = args
         // populated upon start
         this.process = undefined
+        // generate random id
+        this.id = randomUUID()
         // setup completion promises
         this.started = Promise.withResolvers()
-        this.started.promise.then(
-            evt => output("stdout", `Running ${this.file}...`)
-        ).finally(
-            evt => this.venv.scripts.push(this)
+        this.started.promise.finally(
+            evt => {
+                output("stdout", `Running ${this.file}...`)
+                this.venv.scripts[this.id] = this
+            }
         )
         this.finished = Promise.withResolvers()
         this.finished.promise.then(
@@ -24,31 +29,25 @@ class PythonScript {
         ).catch(
             err => output("stderr", `Failed to run ${file}: ${err.message}`)
         ).finally(
-            evt => delete this.venv.scripts[
-                this.venv.scripts.indexOf(this)
-            ]
+            evt => delete this.venv.shells[this.id]
         )
     }
 
     start() {
-        // spawn a process
-        this.process = proc.execFile(this.venv.executable, [
-            this.file, ...this.args
-        ], {cwd: path.dirname(this.file)})
+        // execute asynchronously
+        this.process = proc.spawn(
+            `"${this.venv.executable}"`, 
+            [`"${this.file}"`, ...this.args], 
+            {shell: true, cwd: path.dirname(this.file)}
+        )
         // log start
-        this.process.on(
-            "spawn", this.started.resolve
-        )
-        // log stdout
-        this.process.stdout.on(
-            "data", evt => output("stdout", evt)
-        )
-        this.process.stderr.on(
-            "data", evt => output("stderr", evt)
-        )
-        // on finish...
-        this.process.on("exit", this.finished.resolve)
-        this.process.on("error", this.finished.reject)
+        this.started.resolve()
+        // pass output to front end
+        this.process.stdout.on("data", evt => output("stdout", evt))
+        this.process.stderr.on("data", evt => output("stderr", evt))
+        // await completion/error
+        this.process.on("exit", (code, signal) => this.finished.resolve([code, signal]))
+        this.process.on("error", err => this.finished.reject(err))
     }
 
     stop() {
