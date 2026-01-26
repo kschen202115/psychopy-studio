@@ -15,6 +15,7 @@ const { python, startPython } = require("./python.js");
 const { uv } = require("./python/uv.js");
 const { venvs, getVenv } = require("./python/venv.js");
 const { Liaison, getLiaison } = require("./python/liaison.js");
+const { PythonShell } = require("./python/shell.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
@@ -457,7 +458,7 @@ const handlers = {
       getEnvironments: ipcMain.handle("python.uv.getEnvironments", (evt) => uv.getEnvironments())
     },
     shell: {
-      list: ipcMain.handle("python.shell.list", async (venv) => Object.keys((await getVenv(venv)).shells)),
+      list: ipcMain.handle("python.shell.list", async (evt, venv) => Object.keys((await getVenv(venv)).shells)),
       send: ipcMain.handle("python.shell.send", async (evt, venv, id, msg) => (await getVenv(venv)).shells[id].send(msg)),
       open: ipcMain.handle("python.shell.open", async (evt, venv) => {
         let shell = new PythonShell(await getVenv(venv))

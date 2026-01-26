@@ -8,11 +8,14 @@
 
     // start off with a Python shell
     let currentTab = $state.raw();
-    onMount(async () => {
-        let id = await python.shell.open("app");
-        shells[id] = "Python";
-        currentTab = id;
-    });
+    
+    // start off with one shell
+    python.shell.open("app").then(
+        id => {
+            shells[id] = "Python";
+            currentTab = id;
+        }
+    );
 </script>
 
 

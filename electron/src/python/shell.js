@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { getVenv } from "./venv.js"
+import { decoder } from "./utils.js";
+import logging from "../logging.js";
+import proc from "child_process";
 
 
 export class PythonShell {
@@ -25,21 +27,31 @@ export class PythonShell {
     // setup completion promises
     this.started = Promise.withResolvers()
     this.started.promise.finally(
-        evt => this.venv.shells[this.id] = this
+        evt => {
+          logging.log(`Started shell ${this.id} (python=${this.venv.pythonVersion}, psychopy=${this.venv.psychopyVersion})`)
+          this.venv.shells[this.id] = this
+        }
     )
     this.finished = Promise.withResolvers()
     this.finished.promise.finally(
-        evt => delete this.venv.shells[this.id]
+        evt => {
+          logging.log(`Closed shell ${this.id}`)
+          delete this.venv.shells[this.id]
+        }
     )
   }
 
   start() {
     // create process
     this.process = proc.spawn(
-      this.venv.executable, 
+      `"${this.venv.executable}"`, 
       ['-i'],
       { shell: true }
     );
+    // mark started 
+    this.started.resolve()
+    // map finished callback
+    this.process.on("close", this.finished.resolve)
     // import sys from start
     this.send("import sys")
   }
