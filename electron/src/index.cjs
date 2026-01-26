@@ -329,11 +329,11 @@ app.on("quit", (evt, code) => {
   // close svelte
   svelte.process.kill(0);
   // close python
-  for (let venv of Object.items(venvs)) {
-    venv.process.kill(0)
-    if (process.platform !== 'win32') {
+  for (let venv of Object.entries(venvs)) {
+    venv.liaison?.process?.kill(0)
+    if (process.platform !== 'win32' && venv.liaison?.process) {
       // on Linux and Mac, killing the Python process doesn't kill PTB, it has to be killed by PID
-      require("process").kill(venv.process.pid)
+      require("process").kill(venv.liaison.process.pid)
     }
   }
 

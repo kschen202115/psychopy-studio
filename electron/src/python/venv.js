@@ -1,6 +1,7 @@
 import { uv } from "./uv.js";
 import { execSync, execTracked, output } from "./utils.js";
 import { appVersion } from "../version.js";
+import logging from "../logging.js";
 import proc from "child_process";
 import path from "path";
 
