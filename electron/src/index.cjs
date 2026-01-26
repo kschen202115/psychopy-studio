@@ -13,7 +13,7 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
 
 const { python, startPython } = require("./python.js");
 const { uv } = require("./python/uv.js");
-const { getVenv } = require("./python/venv.js");
+const { venvs, getVenv } = require("./python/venv.js");
 const { Liaison, getLiaison } = require("./python/liaison.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
@@ -329,11 +329,15 @@ app.on("quit", (evt, code) => {
   // close svelte
   svelte.process.kill(0);
   // close python
-  python.process.kill(0);
-  if (process.platform !== 'win32') {
-    // on Linux and Mac, killing the Python process doesn't kill PTB, it has to be killed by PID
-    require("process").kill(python.process.pid)
+  for (let venv of Object.items(venvs)) {
+    venv.process.kill(0)
+    if (process.platform !== 'win32') {
+      // on Linux and Mac, killing the Python process doesn't kill PTB, it has to be killed by PID
+      require("process").kill(venv.process.pid)
+    }
   }
+
+  
 })
 
 
