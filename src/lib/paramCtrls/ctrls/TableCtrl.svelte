@@ -27,7 +27,7 @@
             electron.files.openPath(param.ctrlParams.template)
         } else {
             // otherwise, get the default from Python...
-            python.liaison.send({
+            python.liaison.send("app", {
                 command: "run",
                 args: [
                     "psychopy.experiment.utils:getBlankTemplate"

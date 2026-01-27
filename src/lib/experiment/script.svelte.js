@@ -27,18 +27,20 @@ export class Script {
      * @param {string || undefined} executable Path to the Python executable to run in (leave 
      * undefined to use default executable)
      */
-    async runPython(executable=undefined) {
+    async runPython(version="app") {
         // fail if there's no Python to run in
         if (!python) {
             console.error("Script running is not available in browser.")
             return
         }
-        // run
-        await python.scripts.run(
+        // run script
+        let id = await python.scripts.run(
+            version,
             this.file.file, 
-            executable || await python.details().then(resp => resp.executable),
-            ...(this.pilotMode ? ["--pilot"] : [])
+            ...(this.pilotMode ? ["--pilot"] : []),
+            "--prefs-json", `"${await electron.paths.prefs()}"`
         )
+        await python.scripts.finished(version, id)
     }
 
     /**

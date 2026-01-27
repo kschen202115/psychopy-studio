@@ -134,7 +134,7 @@ export class CalibrationSetup {
             hint: "How many calibration points to use"
         })
         // get photometer classes
-        this.ready = python.liaison.send({
+        this.ready = python.liaison.send("app", {
             command: "run",
             args: [
                 "psychopy.experiment.monitor:BasePhotometerDeviceBackend.__subclasses__"
@@ -149,7 +149,7 @@ export class CalibrationSetup {
                 // add values for each cls
                 for (let cls of resp) {
                     // add device cls to allowedVals
-                    await python.liaison.send({
+                    await python.liaison.send("app", {
                         command: "get",
                         args: [
                             cls.match(/python\:\/\/\/(.*)/)[1] + ".deviceClass"
@@ -158,7 +158,7 @@ export class CalibrationSetup {
                         resp => temp.allowedVals.push(resp)
                     )
                     // add device lbl to allowedLabels
-                    await python.liaison.send({
+                    await python.liaison.send("app", {
                         command: "get",
                         args: [
                             cls.match(/python\:\/\/\/(.*)/)[1] + ".backendLabel"

@@ -28,7 +28,7 @@
     let timeout = $state.raw(60000)
 
     function refresh(evt) {
-        profilesPending.devices = python.liaison.send({
+        profilesPending.devices = python.liaison.send("app", {
             command: "run",
             args: [
                 "psychopy.experiment:getDeviceProfiles"
@@ -95,7 +95,7 @@
                 {:then}
                     {#if profiles.devices}
                         {#each Object.values(profiles.devices).filter(profile => profile.device) as backend}
-                            {#await python.liaison.send({
+                            {#await python.liaison.send("app", {
                                 command: "run",
                                 args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
                             }, timeout)}

@@ -10,7 +10,7 @@ export function ppy2py(version) {
     let output = "3.8"
     // increase with each version we surpass
     for (let [ppy, py] of updates) {
-        if (version.older(ppy)) {
+        if (version.newerThan(ppy)) {
             output = py
         }
     }
@@ -122,12 +122,12 @@ export class Version {
     }
 
     /**
-     * Returns true if the given version is newer than this one.
+     * Returns true if this version is newer than the given version
      * 
      * @param {Version|string} other Version to compare against
      * @param {boolean} equal Whether to accept equal versions
      */
-    newer(other, equal=false) {
+    newerThan(other, equal=false) {
         // if equal, return true/false based on whether this is accepted
         if (this.equal(other)) {
             return equal
@@ -135,28 +135,28 @@ export class Version {
         // make sure we have a Version object
         other = Version.parse(other)
         // compare major
-        if (other.major > this.major) {
+        if (this.major > other.major) {
             return true
         }
-        if (other.major < this.major) {
+        if (this.major < other.major) {
             return false
         }
         // if major is the same, compare minor
-        if ((other.minor || 0) > this.minor) {
+        if ((this.minor || 0) > (other.minor || 0)) {
             return true
         }
-        if ((other.minor || 0) < this.minor) {
+        if ((this.minor || 0) < (other.minor || 0)) {
             return false
         }
         // if minor is the same, compare patch
-        if ((other.patch || 0) > this.patch) {
+        if ((this.patch || 0) > (other.patch || 0)) {
             return true
         }
-        if ((other.patch || 0) < this.patch) {
+        if ((this.patch || 0) < (other.patch || 0)) {
             return false
         }
         // if other has extra and this doesn't, it's newer
-        if (other.extra & !this.extra) {
+        if (this.extra & !other.extra) {
             return true
         }
 
@@ -164,12 +164,12 @@ export class Version {
     }
 
     /**
-     * Returns true if the given version is older than this one.
+     * Returns true if this version is older than the given version.
      * 
      * @param {Version|string} other Version to compare against
      * @param {boolean} equal Whether to accept equal versions
      */
-    older(other, equal=false) {
+    olderThan(other, equal=false) {
         // if equal, return true/false based on whether this is accepted
         if (this.equal(other)) {
             return equal
@@ -177,28 +177,28 @@ export class Version {
         // make sure we have a Version object
         other = Version.parse(other)
         // compare major
-        if (other.major < this.major) {
+        if (this.major < other.major) {
             return true
         }
-        if (other.major > this.major) {
+        if (this.major > other.major) {
             return false
         }
         // if major is the same, compare minor
-        if ((other.minor || 0) < this.minor) {
+        if ((this.minor || 0) < (other.minor || 0)) {
             return true
         }
-        if ((other.minor || 0) > this.minor) {
+        if ((this.minor || 0) > (other.minor || 0)) {
             return false
         }
         // if minor is the same, compare patch
-        if ((other.patch || 0) < this.patch) {
+        if ((this.patch || 0) < (other.patch || 0)) {
             return true
         }
-        if ((other.patch || 0) > this.patch) {
+        if ((this.patch || 0) > (other.patch || 0)) {
             return false
         }
         // if other doesn't have extra and this does, it's older
-        if (!other.extra & this.extra) {
+        if (this.extra & !other.extra) {
             return false
         }
 

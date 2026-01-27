@@ -8,11 +8,14 @@
 
     // start off with a Python shell
     let currentTab = $state.raw();
-    onMount(async () => {
-        let id = await python.shell.open();
-        shells[id] = "Python";
-        currentTab = id;
-    });
+    
+    // start off with one shell
+    python.shell.open("app").then(
+        id => {
+            shells[id] = "Python";
+            currentTab = id;
+        }
+    );
 </script>
 
 
@@ -21,7 +24,7 @@
         <NotebookPage
             label={label}
             close={(evt) => {
-                python.shell.close(id)
+                python.shell.close("app", id)
                 delete shells[id]
             }}
             bind:selected={
@@ -37,6 +40,6 @@
         </NotebookPage>
     {/each}
     <ButtonTab 
-        callback={async evt => shells[await python.shell.open()] = "Python"}
+        callback={async evt => shells[await python.shell.open("app")] = "Python"}
     />
 </Notebook>

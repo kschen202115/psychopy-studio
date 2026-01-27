@@ -48,10 +48,10 @@ export class UsageReport {
         }
     }
     get version() {
-        if (appVersion.major === "dev") {
-            return `Studio ${appVersion.major}`
+        if (appVersion === "dev") {
+            return `Studio ${appVersion}`
         } else {
-            return `Studio ${appVersion.major}.${appVersion.minor}`
+            return `Studio ${appVersion}.${appVersion}`
         }
     }
     

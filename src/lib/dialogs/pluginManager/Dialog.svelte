@@ -20,9 +20,9 @@
         default: undefined,
         current: undefined
     })
-    python.details().then(resp => {
-        executable.default = resp.executable;
-        executable.current = resp.executable;
+    python.venv.executable("app").then(resp => {
+        executable.current = resp
+        executable.default = resp
     })
     setContext("executable", () => executable)
 

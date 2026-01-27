@@ -22,7 +22,7 @@ export var pending = $state({
 // get from Python if possible
 if (python) {
     // get components
-    pending.components = python.liaison.send({
+    pending.components = python.liaison.send("app", {
         command: "run",
         args: [
             "psychopy.experiment:getElementProfiles"
@@ -32,7 +32,7 @@ if (python) {
     )
     // todo: get loops
     // get devices
-    pending.devices = python.liaison.send({
+    pending.devices = python.liaison.send("app", {
         command: "run",
         args: [
             "psychopy.experiment:getDeviceProfiles"

@@ -6,7 +6,7 @@ import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
 import { Component } from "./component.svelte";
 import { Flow, LoopInitiator } from "./flow.svelte";
-import { installPython } from "$lib/python";
+import { setupPython } from "$lib/python";
 
 
 export class Experiment {
@@ -426,7 +426,7 @@ export class Experiment {
             return
         }
         // save to file
-        this.toFile(this.file)
+        await this.toFile(this.file)
         // construct output path
         let targetFile = path.join(
             this.file.parent,
@@ -435,20 +435,50 @@ export class Experiment {
         // make sure relevant Python version is setup
         let version = $state.snapshot(this.settings.params['Use version'].val)
         if (version) {
-            await installPython(version)
+            await setupPython(version)
         }
-        // write script
-        await python.scripts.run(
-            "-m",
-            executable || await python.details().then(resp => resp.executable),
-            "psychopy.scripts.psyexpCompile",
-            $state.snapshot(this.file.file),
-            "--outfile", targetFile,
-            // "--target", target,
-            // "--prefs-json", await electron.paths.prefs(),
-        ).catch(
-            err => console.error(err)
+        version = version || "app"
+
+        // create experiment object via Liaison
+        await python.liaison.send(version, {
+            command: "init",
+            args: [
+                "currentExperiment",
+                "psychopy.experiment:Experiment"
+            ]
+        }, 10000).catch(
+            reason => console.error(reason)
         )
+        // load from file
+        await python.liaison.send(version, {
+            command: "run",
+            args: [
+                "currentExperiment.loadFromXML",
+                $state.snapshot(this.file.file)
+            ]
+        }, 10000).catch(
+            reason => console.error(reason)
+        )
+        // write script
+        let script = await python.liaison.send(version, {
+            command: "run",
+            args: [
+                "currentExperiment.writeScript",
+            ],
+            kwargs: {
+                target: target, 
+                modular: true,
+                expPath: this.file.file
+            }
+        }, 10000).catch(
+            reason => console.error(reason)
+        )
+        // save to python/js file
+        if (typeof script === "string") {
+            await electron.files.save(targetFile, script)
+        } else {
+            console.error(script)
+        }
 
         return targetFile
     }
@@ -477,18 +507,24 @@ export class Experiment {
                 this.file.stem + ".py"
             )
         }
+        // make sure relevant Python version is setup
+        let version = $state.snapshot(this.settings.params['Use version'].val) || "app"
+        if (version) {
+            await setupPython(version)
+        }
         // mark started
         await python.output.stdout.send(
             `--- Started experiment ${this.file.name} ---`
         )
         // run script
-        await python.scripts.run(
+        let id = await python.scripts.run(
+            version,
             target, 
-            executable || await python.details().then(resp => resp.executable),
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
-            await electron.paths.prefs()
+            `"${await electron.paths.prefs()}"`
         )
+        await python.scripts.finished(version, id)
         // mark finished
         await python.output.stdout.send(
             `--- Finished experiment ${this.file.name} ---`

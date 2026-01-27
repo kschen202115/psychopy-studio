@@ -30,7 +30,7 @@
     />
     <div class=output>
         {#if param.val}
-            {#await python.liaison.send({
+            {#await python.liaison.send("app", {
                 command: "run",
                 args: [
                     "psychopy.data.utils:importConditions"

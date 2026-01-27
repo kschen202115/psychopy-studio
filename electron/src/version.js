@@ -11,6 +11,6 @@ export function parseVersion(version) {
     }
 }
 
-export const appVersion = app.isPackaged ? parseVersion(app.getVersion()) : {major: "dev", minor: app.getVersion()};
+export const appVersion = app.isPackaged ? app.getVersion() : "dev";
 
 export const isDev = !app.isPackaged;

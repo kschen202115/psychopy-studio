@@ -19,7 +19,7 @@
         save: () => {
             // iterate through monitors
             for (let [name, monitor] of Object.entries(monitors.all)) {
-                python.liaison.send({
+                python.liaison.send("app", {
                     // create monitor
                     command: "init",
                     args: [
@@ -29,7 +29,7 @@
                     ]
                 }, 100000)
                 .then(
-                    resp => python.liaison.send({
+                    resp => python.liaison.send("app", {
                         // apply json
                         command: "run",
                         args: [
@@ -44,7 +44,7 @@
                     }, 100000)
                 )
                 .then(
-                    resp => python.liaison.send({
+                    resp => python.liaison.send("app", {
                         // save monitor
                         command: "run",
                         args: [
@@ -58,7 +58,7 @@
             // clear monitors
             monitors.all = {}
             // request names
-            monitors.promise = python.liaison.send({
+            monitors.promise = python.liaison.send("app", {
                 command: "run",
                 args: [
                     "psychopy.monitors.calibTools:getAllMonitors"
@@ -68,7 +68,7 @@
                     // iterate through names
                     for (let name of monitorNames) {
                         // get monitor details for each
-                        python.liaison.send({
+                        python.liaison.send("app", {
                             command: "run",
                             args: [
                                 "psychopy.monitors.calibTools:Monitor",
