@@ -66,15 +66,15 @@ export class Version {
             return output
         }
         // add minor
-        output += `.${this.minor || ""}`
+        output += `.${this.minor}`
         if (upto === "minor") {
             return output
         }
         // add patch
         if (this.patch === Infinity) {
             output += ".*"
-        } else {
-            output += `.${this.patch || ""}`
+        } else if (this.patch !== undefined) {
+            output += `.${this.patch}`
         }
         if (upto === "patch") {
             return output
