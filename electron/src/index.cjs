@@ -326,6 +326,9 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+// make sure the Python process is killed on exit
+process.on('SIGINT', app.quit);
+process.on('SIGTERM', app.quit);
 app.on("quit", (evt, code) => {
   // close svelte
   svelte.process.kill(0);
@@ -337,8 +340,6 @@ app.on("quit", (evt, code) => {
       require("process").kill(venv.liaison.process.pid)
     }
   }
-
-  
 })
 
 
