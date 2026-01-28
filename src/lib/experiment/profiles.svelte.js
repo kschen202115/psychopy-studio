@@ -19,26 +19,30 @@ export var pending = $state({
     preferences: undefined
 })
 
-// get from Python if possible
-if (python) {
-    // get components
-    pending.components = python.liaison.send("app", {
-        command: "run",
-        args: [
-            "psychopy.experiment:getElementProfiles"
-        ]
-    }, 100000).then(
-        data => Object.assign(profiles.components, data)
+// populate on Liaison starting (if it ever does)
+if ( python ) {
+    python.liaison.ready("app").then(
+        () => {
+            // get components
+            pending.components = python.liaison.send("app", {
+                command: "run",
+                args: [
+                    "psychopy.experiment:getElementProfiles"
+                ]
+            }, 100000).then(
+                data => Object.assign(profiles.components, data)
+            )
+            // todo: get loops
+            // get devices
+            pending.devices = python.liaison.send("app", {
+                command: "run",
+                args: [
+                    "psychopy.experiment:getDeviceProfiles"
+                ]
+            }, 10000).then(
+                resp => Object.assign(profiles.devices, resp)
+            )
+            // todo: get prefs
+        }
     )
-    // todo: get loops
-    // get devices
-    pending.devices = python.liaison.send("app", {
-        command: "run",
-        args: [
-            "psychopy.experiment:getDeviceProfiles"
-        ]
-    }, 10000).then(
-        resp => Object.assign(profiles.devices, resp)
-    )
-    // todo: get prefs
 }
