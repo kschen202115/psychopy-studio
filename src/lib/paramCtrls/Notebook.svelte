@@ -54,14 +54,13 @@
                         element.params[jskey].val = "// Translating..."
                         // do translation in Python
                         python.liaison.send("app", {
-                            command: "run",
+                            command: "try",
                             args: ["psychopy.experiment.py2js_transpiler:translatePythonToJavaScript", element.params[key].val.trim()]
                         }, 10000).then(resp => {
-                            // set value to returned value (or error)
-                            if (resp?.error) {
-                                element.params[jskey].val = "Translation error:\n\n" + resp.error.slice(-1)
+                            if (resp.success) {
+                                element.params[jskey].val = resp.result
                             } else {
-                                element.params[jskey].val = resp
+                                element.params[jskey].val = `// Error in Python code`
                             }
                         }).catch(
                             err => element.params[jskey].val = `// Error in Python code`
