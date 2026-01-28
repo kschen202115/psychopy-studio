@@ -13,6 +13,7 @@
         canUndo=$bindable(),
         canRedo=$bindable(),
         readonly=$bindable(false),
+        language=undefined,
         resize="none",
         file
     } = $props();
@@ -98,7 +99,9 @@
             // initialise monaco loader
             monaco = await loader.init();
             // figure out language from file
-            let language = languages[file?.ext] || "text"
+            if (!language) {
+                language = languages[file?.ext] || "text"
+            }
             // initialise editor
             editor = monaco.editor.create(container, {
                 value,
