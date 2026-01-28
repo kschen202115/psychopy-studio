@@ -18,7 +18,6 @@ async function getSafeAddress() {
     while (inUse) {
         port += 1
         inUse = await tcp.check(port, "localhost")
-        console.log(port, inUse)
     }
 
     return `localhost:${port}`
