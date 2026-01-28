@@ -20,7 +20,7 @@
 		},
 		"win": {
 			"target": [
-				"zip"
+				"nsis"
 			],
 			"icon": "./static/branding/favicon.ico",
 			"fileAssociations": [
