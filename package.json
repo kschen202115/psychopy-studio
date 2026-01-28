@@ -12,7 +12,7 @@
 		"executableName": "PsychoPy Studio",
 		"copyright": "Copyright PsychoPy® 2024 Open Science Tools Ltd.",
 		"asar": true,
-		"publish": "never",
+		"publish": [],
 		"directories": {
 			"output": "out"
 		},
@@ -84,17 +84,17 @@
 			"background": "./static/branding/mac-install-backboard.png",
 			"iconSize": 60,
 			"contents": [
-			{
-				"x": 120,
-				"y": 260,
-				"type": "file"
-			},
-			{
-				"x": 360,
-				"y": 260,
-				"type": "link",
-				"path": "/Applications"
-			}
+				{
+					"x": 120,
+					"y": 260,
+					"type": "file"
+				},
+				{
+					"x": 360,
+					"y": 260,
+					"type": "link",
+					"path": "/Applications"
+				}
 			],
 			"window": {
 				"width": 540,
