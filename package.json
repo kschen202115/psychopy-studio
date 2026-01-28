@@ -12,6 +12,7 @@
 		"executableName": "PsychoPy Studio",
 		"copyright": "Copyright PsychoPy® 2024 Open Science Tools Ltd.",
 		"asar": true,
+		"publish": "never",
 		"directories": {
 			"output": "out"
 		},
@@ -112,7 +113,7 @@
 		"electron:lint": "echo \"No linting configured\"",
 		"velopack:pack": "vpk pack --packId OpenScienceTools.PsychoPyStudio --packTitle \"PsychoPy Studio\" --packVersion $npm_package_version --packDir ./out/win-unpacked --mainExe \"PsychoPy Studio.exe\" --outputDir ./out/releases",
 		"velopack:pack:win": "vpk pack --packId OpenScienceTools.PsychoPyStudio --packTitle \"PsychoPy Studio\" --packVersion %npm_package_version% --packDir ./out/win-unpacked --mainExe \"PsychoPy Studio.exe\" --outputDir ./out/releases",
-		"build": "npm run svelte:build && electron-builder build --publish never",
+		"build": "npm run svelte:build && electron-builder build",
 		"dev": "concurrently \"npm run svelte:dev\" \"wait-on http://localhost:5173 && npm run electron:start\""
 	},
 	"devDependencies": {
