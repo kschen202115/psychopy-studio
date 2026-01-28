@@ -80,7 +80,25 @@
 			]
 		},
 		"dmg": {
-			"background": "./static/branding/mac-install-backboard.png"
+			"background": "./static/branding/mac-install-backboard.png",
+			"iconSize": 60,
+			"contents": [
+			{
+				"x": 120,
+				"y": 260,
+				"type": "file"
+			},
+			{
+				"x": 360,
+				"y": 260,
+				"type": "link",
+				"path": "/Applications"
+			}
+			],
+			"window": {
+				"width": 540,
+				"height": 380
+			}
 		}
 	},
 	"scripts": {
@@ -94,7 +112,7 @@
 		"electron:lint": "echo \"No linting configured\"",
 		"velopack:pack": "vpk pack --packId OpenScienceTools.PsychoPyStudio --packTitle \"PsychoPy Studio\" --packVersion $npm_package_version --packDir ./out/win-unpacked --mainExe \"PsychoPy Studio.exe\" --outputDir ./out/releases",
 		"velopack:pack:win": "vpk pack --packId OpenScienceTools.PsychoPyStudio --packTitle \"PsychoPy Studio\" --packVersion %npm_package_version% --packDir ./out/win-unpacked --mainExe \"PsychoPy Studio.exe\" --outputDir ./out/releases",
-		"build": "npm run svelte:build && electron-builder build",
+		"build": "npm run svelte:build && electron-builder build --publish never",
 		"dev": "concurrently \"npm run svelte:dev\" \"wait-on http://localhost:5173 && npm run electron:start\""
 	},
 	"devDependencies": {
