@@ -65,15 +65,11 @@ jobs:
           else
             echo "DOGFOOD=$(git rev-list HEAD --count --branches ${{ github.event.inputs.branch }})" >> $GITHUB_ENV
           fi
+          echo $DOGFOOD
       
       - name: Modify version
         if: ${{ github.event.inputs.dogfood }}
         run: |
-          if [ $(git tag -l) ]; then
-            git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *
-          else
-            git rev-list HEAD --count --branches ${{ github.event.inputs.branch }}
-          fi
           npm pkg set "version"="$(npm pkg get "version"| tr -d '"')${{ github.event.inputs.branch }}$DOGFOOD"
       
       - name: Build installer
