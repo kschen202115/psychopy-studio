@@ -66,7 +66,7 @@ jobs:
       - name: Modify version
         if: ${{ github.event.inputs.dogfood }}
         run: |
-          npm pkg set "version"="${{ steps.tests.version.stdout }}${{ github.event.inputs.branch }}${{ vars.DOGFOOD }}"
+          npm pkg set "version"="${{ steps.version.stdout }}${{ github.event.inputs.branch }}${{ vars.DOGFOOD }}"
       
       - name: Build installer
         env:
