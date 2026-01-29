@@ -22,7 +22,7 @@ export class PythonVenv {
         this.executable = uv.findPython(this.psychopyVersion)
         // if we were waiting for this venv, resolve now
         if (psychopyVersion in awaiting) {
-            awaiting[psychopyVersion].resolve()
+            awaiting[psychopyVersion].resolve(this)
             delete awaiting[psychopyVersion]
         }
     }

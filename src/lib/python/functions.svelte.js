@@ -83,26 +83,25 @@ export async function setupPython(version=undefined, forceReinstall=false) {
     if (!version || version === "app") {
         version = await electron.version()
     }
-    // do we already have UV and Python?
+    // do we already have UV?
     status.message = "Checking Python..."
     let hasUV = await python.uv.exists().catch(err => status.ready.reject(err?.error || err))
-    let hasPython = await python.uv.findPython(version).catch(err => status.ready.reject(err?.error || err))
     // install UV
     if (!hasUV || forceReinstall) {
-        // kill any existing process
-        await python.liaison.stop(version)
         // open dialog to show progress
         status.message = "Downloading UV (a Python installer)..."
         status.dlg.message = (
-            "### Downloading UV...\n (a Python installer)...\n" + 
+            "### Downloading UV (a Python installer)...\n" + 
             "This is a program we use to install Python. Once it's finished installing, you won't have to see this message again."
         )
         status.dlg.shown = true
         status.dlg.busy = true
         // do install
-        await python.uv.installUV().catch(err => status.ready.reject(err?.error || err))
+        await python.uv.install().catch(err => status.ready.reject(err?.error || err))
         status.dlg.busy = false
     }
+    // do we already have Python?
+    let hasPython = await python.uv.findPython(version).catch(err => status.ready.reject(err?.error || err))
     // install Python
     if (!hasPython || forceReinstall) {
         // kill any existing process

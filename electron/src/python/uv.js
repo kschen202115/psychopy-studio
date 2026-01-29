@@ -86,6 +86,7 @@ export class UV {
             }
         }
         // get relevant executable 
+        this.output(`Downloading UV for ${platform} (${arch})...`)
         try {
             await fetch(
                 `https://github.com/astral-sh/uv/releases/download/0.8.18/${installers[platform][arch]}`
@@ -93,6 +94,7 @@ export class UV {
                 resp => resp.blob()
             ).then(
                 async blob => {
+                    this.output(`Finished downloading ${installers[platform][arch]}, extracting executable...`)
                     // write to a zipped file
                     let zipfile = path.join(this.folder, installers[platform][arch]);
                     fs.writeFileSync(zipfile, await blob.bytes());
@@ -114,6 +116,7 @@ export class UV {
                     }
                     // delete zip file
                     fs.unlink(zipfile, err => {if (err) throw err})
+                    this.output(`Finished installing UV.`)
                 }
             )
         } catch (err) {
