@@ -13,6 +13,10 @@ export class UV {
     folder = path.join(
         app.getPath("appData"), "psychopy4", ".uv"
     )
+    // folder containing Python venvs
+    pyFolder = path.join(
+        app.getPath("appData"), "psychopy4", ".python"
+    )
     // path to the uv executable
     executable = path.join(
         app.getPath("appData"), "psychopy4", ".uv", "uv"
@@ -29,11 +33,13 @@ export class UV {
      * Setup uv; will install if not already installed
      */
     async setup() {
-        // make sure folder exists
-        if (!fs.existsSync(this.folder)) {
-            fs.mkdirSync(this.folder, {
-                recursive: true
-            })
+        // make sure folders exist
+        for (let folder of [this.folder, this.pyFolder]) {
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder, {
+                    recursive: true
+                })
+            }
         }
         // make sure executables exist
         if (!this.exists()) {
@@ -45,11 +51,13 @@ export class UV {
      * Install the uv executables
      */
     async install() {
-        // make sure folder exists
-        if (!fs.existsSync(this.folder)) {
-            fs.mkdirSync(this.folder, {
-                recursive: true
-            })
+        // make sure folders exist
+        for (let folder of [this.folder, this.pyFolder]) {
+            if (!fs.existsSync(folder)) {
+                fs.mkdirSync(folder, {
+                    recursive: true
+                })
+            }
         }
         // map installers to system architectures
         let installers = {
