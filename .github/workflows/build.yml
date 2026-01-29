@@ -28,7 +28,7 @@ jobs:
       - name: Increment dogfood variable
         if: ${{ github.event.inputs.dogfood }}
         run: |
-          echo "DOGFOOD=${{ vars.DOGFOOD + 1 }}" >> "$GITHUB_ENV"
+          echo "DOGFOOD=${{ vars.DOGFOOD }} + 1" >> "$GITHUB_ENV"
 
 
   build:
