@@ -58,15 +58,10 @@ jobs:
         run: |
           npm i
       
-      - name: Get version
-        id: version
-        run: |
-          echo npm pkg get "version"
-      
       - name: Modify version
         if: ${{ github.event.inputs.dogfood }}
         run: |
-          npm pkg set "version"="${{ steps.version.stdout }}${{ github.event.inputs.branch }}${{ vars.DOGFOOD }}"
+          npm pkg set "version"="$(npm pkg get "version")${{ github.event.inputs.branch }}${{ vars.DOGFOOD }}"
       
       - name: Build installer
         env:
