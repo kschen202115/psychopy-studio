@@ -121,7 +121,7 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         // activatePlugins
         status.message = "Activating plugins..."
         await python.liaison.send(version, {
-            command: "run",
+            command: "try",
             args: ["psychopy.plugins:activatePlugins"]
         }, 20000).catch(err => status.ready.reject(err?.error || err))
         // mark success
