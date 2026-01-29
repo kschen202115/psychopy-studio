@@ -112,7 +112,10 @@ export class Liaison {
             ), 30000
         )
         // setup alerts
-        try {
+        if (await this.send({
+            command: "exists",
+            args: ["psychopy.alerts.liaison:LiaisonAlertHandler"]
+        }, 1000)) {
             await this.send({
                 command: "init",
                 args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
@@ -127,9 +130,6 @@ export class Liaison {
                     err => logging.error(["Failed to add alert handler", err])
                 )
             )
-        } catch {
-            // note: this fails in <2026.1, but in prior versions alerts went to stdout, so this is fine
-            err => console.error("Failed to setup alerts", err)
         }
         
         // setup prefs
@@ -143,7 +143,7 @@ export class Liaison {
                 async resp => {
                     // point to devices json
                     await this.send({
-                        command: "run",
+                        command: "try",
                         args: ["prefs.setDevicesFile", path.join(
                             app.getPath("appData"), "psychopy4", "devices.json"
                         )]
@@ -152,7 +152,7 @@ export class Liaison {
                     )
                     // set prefs from JSON
                     await this.send({
-                        command: "run",
+                        command: "try",
                         args: ["prefs.fromJSON", path.join(
                             app.getPath("appData"), "psychopy4", "preferences.json"
                         )]
