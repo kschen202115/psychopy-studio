@@ -19,6 +19,7 @@ export class PythonScript {
         this.started = Promise.withResolvers()
         this.started.promise.finally(
             evt => {
+                output("stdout", "---")
                 output("stdout", `Running ${this.file}...`)
                 this.venv.scripts[this.id] = this
             }
@@ -29,7 +30,10 @@ export class PythonScript {
         ).catch(
             err => output("stderr", `Failed to run ${file}: ${err.message}`)
         ).finally(
-            evt => delete this.venv.shells[this.id]
+            evt => {
+                delete this.venv.shells[this.id]
+                output("stdout", "---")
+            }
         )
     }
 
