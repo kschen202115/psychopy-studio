@@ -1,7 +1,6 @@
 const path = require('node:path');
 const fs = require("fs");
 const proc = require("child_process");
-const { VelopackApp } = require('velopack');
 const { app, dialog, BrowserWindow, ipcMain, shell } = require('electron');
 
 // make sure psychopy4 folder exists before importing subpackages
@@ -20,8 +19,6 @@ const git = require("./git.js");
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
 const { appVersion, isDev } = require('./version.js');
-
-VelopackApp.build().run();
 
 // figure out best file to use for a favicon
 var favicon = path.join(__dirname, 'favicon')
