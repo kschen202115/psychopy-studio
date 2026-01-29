@@ -8,6 +8,10 @@ export async function installPython(version=undefined, forceReinstall=false) {
     if (!version || version === "app") {
         version = await electron.version()
     }
+    // remove any dogfood details from version
+    try {
+        version = Version.parse(version).format("patch")
+    } catch {}
     // get python version
     let pyVersion
     if (version === "dev") {

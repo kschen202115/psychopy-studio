@@ -1,0 +1,88 @@
+name: Build PsychoPy Studio 
+
+on:
+  # manual
+  workflow_dispatch:  
+    inputs:
+      branch:
+        description: 'PsychoPy Studio branch to build'
+        required: true
+        type: choice
+        options:
+          - dev
+          - release
+      dogfood:
+        description: 'Building a dogfood intaller to test?'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  increment:
+    name: Increment dogfood version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Increment dogfood variable
+        uses: action-pack/increment@v2
+        if: ${{ github.event.inputs.dogfood }}
+        with:
+          name: DOGFOOD
+          amount: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+
+  build:
+    name: Build PsychoPy Studio
+    needs: increment
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    defaults:
+      run:
+        shell: bash
+  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+      
+      - name: Install dependencies
+        run: |
+          npm i
+      
+      - name: Get version
+        id: version
+        run: |
+          echo npm pkg get "version"
+      
+      - name: Modify version
+        if: ${{ github.event.inputs.dogfood }}
+        run: |
+          npm pkg set "version"="${{ steps.tests.version.stdout }}${{ github.event.inputs.branch }}${{ vars.DOGFOOD }}"
+      
+      - name: Build installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        run: |
+          npm run build
+      
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'out/'
+
+
+
+
+
