@@ -283,7 +283,7 @@
         {#if electron}
             {#await electron.version() then version}
                 <MenuItem
-                    label="PsychoPy {version.major}.{version.minor}"
+                    label="PsychoPy {version}"
                     disabled
                 />
             {/await}
