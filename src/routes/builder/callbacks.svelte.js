@@ -5,6 +5,7 @@ import path from "path-browserify";
 import { newWindow, openIn, showDevTools } from "$lib/utils/views.svelte"
 import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
 import { Routine, HasParams } from "$lib/experiment"
+import { prefs } from "$lib/preferences.svelte";
 
 
 /* File */
@@ -256,7 +257,7 @@ export async function runPython(executable) {
     // send to runner
     await sendToRunner()
     // run script
-    await current.experiment.runPython(false, executable)
+    await current.experiment.runPython(true, executable)
 
     return true
 }
@@ -268,7 +269,7 @@ export async function runJS() {
     // compile to JS
     await compileJS()
     // run
-    await current.experiment.runJS(false)
+    await current.experiment.runJS(true)
 }
 
 /** Views */
