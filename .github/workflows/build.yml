@@ -26,12 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Increment dogfood variable
-        uses: action-pack/increment@v2
         if: ${{ github.event.inputs.dogfood }}
-        with:
-          name: DOGFOOD
-          amount: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "DOGFOOD=${{ vars.DOGFOOD + 1 }}" >> "$GITHUB_ENV"
 
 
   build:
