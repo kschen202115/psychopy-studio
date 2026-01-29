@@ -72,7 +72,9 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
+          name: ${{ matrix.os }}_build
           path: 'out/'
+          retention-days: 30
 
 
 
