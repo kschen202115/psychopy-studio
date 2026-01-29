@@ -7,7 +7,7 @@ export const decoder = new TextDecoder();
 /**
  * Send some output to the front end
  * 
- * @param {string} tag Channel to send over
+ * @param {string} tag Channel to send over (use undefined to not emit an event)
  * @param {string|Buffer} message Message to send, can be either bytes or a string
  */
 export function output(tag, message) {
@@ -16,21 +16,24 @@ export function output(tag, message) {
         message = decoder.decode(message)
     }
     // log message
-    logging.log(message, tag.toUpperCase())
+    logging.log(message, tag?.toUpperCase?.())
     // emit event
-    BrowserWindow.getAllWindows().forEach(
-        win => win.webContents.send(tag, message)
-    )
+    if (tag) {
+        BrowserWindow.getAllWindows().forEach(
+            win => win.webContents.send(tag, message)
+        )
+    }
 }
 
 /**
- * Execute a function synchronously
+ * Execute a function synchronously with output sent to the front end
  * 
+ * @param {string} tag Channel to send any output over
  * @param {string} command Command to run
  * @param {array<string>} args Arguments to pass to child process
  * @param {int} timeout Time (ms) after which to give up
  */
-export function execSync(command, args, timeout=1000) {
+export function execSync(tag, command, args, timeout=1000) {
     // join args 
     let cmd = [command, ...args].join(" ")
     // execute
@@ -43,6 +46,8 @@ export function execSync(command, args, timeout=1000) {
     if (typeof resp === "string") {
         resp = resp.trim()
     }
+    // pass output to front end
+    output(tag, resp)
 
     return resp
 }

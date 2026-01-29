@@ -154,7 +154,7 @@ export class UV {
                 continue
             }
             // get Python version
-            let pyVersion = execSync(`"${executable}"`, ["--version"]).match(/Python (\d+\.\d+)/)[1]
+            let pyVersion = execSync(undefined, `"${executable}"`, ["--version"]).match(/Python (\d+\.\d+)/)[1]
             // store
             output.push({
                 executable: executable,
@@ -220,7 +220,7 @@ export class UV {
      * @param {int} timeout Time (ms) after which to give up
      */
     execSync(args, timeout=1000) {
-        return execSync(`"${this.executable}"`, args, timeout)
+        return execSync("uv", `"${this.executable}"`, args, timeout)
     }
 
     /**
