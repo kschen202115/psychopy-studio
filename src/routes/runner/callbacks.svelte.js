@@ -14,6 +14,12 @@ export async function addFile(file, pilotMode=undefined) {
     if (typeof file === "string") {
         file = parsePath(file)
     }
+    // if file is already present, do nothing
+    if (current.runlist.some(
+        item => item.file.file === file.file
+    )) {
+        return
+    }
     // if given a .psyrun, add all files contained
     if (file.ext === ".psyrun") {
         for (let subfile of await loadPsyrun(file)) {
