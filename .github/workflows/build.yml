@@ -78,11 +78,11 @@ jobs:
         run: |
           npm run build
       
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload installers as artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}_build
-          path: 'out/'
+          name: "${{ matrix.os }}_installer"
+          path: 'out/PsychoPy_Studio_*.*'
           retention-days: 30
 
 

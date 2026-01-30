@@ -10,6 +10,7 @@
 		"appId": "OpenScienceTools.PsychoPyStudio",
 		"productName": "PsychoPy Studio",
 		"executableName": "PsychoPy Studio",
+		"artifactName": "PsychoPy_Studio_${version}.${ext}",
 		"copyright": "Copyright PsychoPy® 2024 Open Science Tools Ltd.",
 		"asar": true,
 		"publish": [],
