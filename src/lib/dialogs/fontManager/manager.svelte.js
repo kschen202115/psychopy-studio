@@ -12,7 +12,7 @@ class _FontManager {
             // clear fonts
             this.system.fonts.length = 0
             // scan for fonts
-            this.system.scanning = python.liaison.send(
+            this.system.scanning = python.liaison.send("app",
                 {
                     command: "run",
                     args: [
@@ -37,7 +37,7 @@ class _FontManager {
             // clear fonts
             this.packaged.fonts.length = 0
             // scan for fonts
-            this.packaged.scanning = python.liaison.send(
+            this.packaged.scanning = python.liaison.send("app",
                 {
                     command: "run",
                     args: [
@@ -62,7 +62,7 @@ class _FontManager {
             // clear fonts
             this.user.fonts.length = 0
             // scan for fonts
-            this.user.scanning = python.liaison.send(
+            this.user.scanning = python.liaison.send("app",
                 {
                     command: "run",
                     args: [
@@ -93,7 +93,7 @@ class _FontManager {
             let folder = experiment.file.parent
             if (folder) {
                 // search in fonts and assets/fonts subfolders
-                this.experiment.scanning = python.liaison.send(
+                this.experiment.scanning = python.liaison.send("app",
                     {
                         command: "run",
                         args: [

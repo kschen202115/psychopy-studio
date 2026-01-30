@@ -556,7 +556,7 @@ export class Experiment {
                 return
             }
             // get PsychoJS library
-            await python.liaison.send(
+            await python.liaison.send("app",
                 {
                     command: "run",
                     args: [
@@ -570,7 +570,7 @@ export class Experiment {
                 100000
             )
             // start a server
-            await python.liaison.send(
+            await python.liaison.send("app",
                 {
                     command: "init",
                     args: [
@@ -587,7 +587,7 @@ export class Experiment {
                 err => console.error(err)
             )
             // open experiment in browser
-            await python.liaison.send(
+            await python.liaison.send("app",
                 {
                     command: "run",
                     args: [
