@@ -32,7 +32,7 @@
     {#each errors as error}
         {#await error.dismiss}
             <Message
-                message="Python error, click to show error"
+                message="Python error, click to show"
                 icon="/icons/sym-error.svg"
                 onclick={evt => showDlg = true}
             />
@@ -49,6 +49,6 @@
     }}
 >
     <div class=output-container>
-        <CodeOutput value={errors.map(err => err.content).join("\n")} />
+        <CodeOutput value={errors.map(err => err.content.error).join("\n")} />
     </div>
 </MessageDialog>
