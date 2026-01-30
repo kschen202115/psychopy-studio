@@ -43,7 +43,7 @@ export function input(tag, message, timeout=undefined) {
     message = `>> ${message}`
     // append timeout
     if (timeout) {
-        message = `${message} (timout = ${timeout}ms)`
+        message = `${message} (timeout = ${timeout}ms)`
     }
     // send as output with prepended >>
     output(tag, message)
