@@ -52,7 +52,7 @@ jobs:
         run: |
           version=$(npm pkg get "version"| tr -d '"')
           if [ $(git tag -l) ]; then
-            dogfood=$(echo git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *
+            dogfood=$(echo git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *)
           else
             dogfood=$(git rev-list HEAD --count --branches ${{ github.event.inputs.branch }})
           fi
