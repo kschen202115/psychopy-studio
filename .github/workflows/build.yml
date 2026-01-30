@@ -52,9 +52,12 @@ jobs:
         run: |
           version=$(npm pkg get "version"| tr -d '"')
           if [ $(git tag -l) ]; then
-            dogfood=$(echo git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *)
+            last=$(git describe --tags --abbrev=0)
+            dogfood=$(git rev-list ${last}..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *)
+            echo "${last} is ${dogfood} commits behind HEAD"
           else
             dogfood=$(git rev-list HEAD --count --branches ${{ github.event.inputs.branch }})
+            echo "Repo has ${dogfood} commits"
           fi
           echo "version=${version}${{ github.event.inputs.branch }}${dogfood}" >> $GITHUB_OUTPUT
       
