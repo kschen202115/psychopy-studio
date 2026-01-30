@@ -38,11 +38,14 @@ export class PythonScript {
     }
 
     start() {
+        // split file into name and dir
+        let folder = path.dirname(this.file)
+        let file = path.basename(this.file)
         // execute asynchronously
         this.process = proc.spawn(
             this.venv.executable, 
-            [`"${this.file}"`, ...this.args], 
-            {cwd: path.dirname(this.file)}
+            [file, ...this.args], 
+            {cwd: folder}
         )
         // log start
         this.started.resolve()

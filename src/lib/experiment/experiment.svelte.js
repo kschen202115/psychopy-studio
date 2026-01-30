@@ -522,7 +522,7 @@ export class Experiment {
             target, 
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
-            `"${await electron.paths.prefs()}"`
+            await electron.paths.prefs()
         )
         await python.scripts.finished(version, id)
         // mark finished
