@@ -241,7 +241,7 @@ export async function getVenv(version) {
     } else {
         // if environment exists but no object, make one
         for (let env of uv.getEnvironments()) {
-            if (env.psychopyVersion === version) {
+            if (version.startsWith(env.psychopyVersion)) {
                 return new PythonVenv(
                     env.pythonVersion, 
                     env.psychopyVersion

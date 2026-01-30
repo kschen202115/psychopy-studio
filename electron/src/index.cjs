@@ -440,7 +440,7 @@ const handlers = {
     },
     venv: {
       setup: ipcMain.handle("python.venv.setup", async (evt, venv) => (await getVenv(venv)).setup()),
-      executable: ipcMain.handle("python.venv.executable", async (evt, venv) => (await getVenv()).executable),
+      executable: ipcMain.handle("python.venv.executable", async (evt, venv) => (await getVenv(venv)).executable),
       installPackage: ipcMain.handle("python.venv.installPackage", async (evt, venv, name) => (await getVenv(venv)).installPackage(name)),
       uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
       getPackages: ipcMain.handle("psychopy.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
