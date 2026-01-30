@@ -21,16 +21,6 @@ permissions:
   contents: write
 
 jobs:
-  increment:
-    name: Increment dogfood version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Increment dogfood variable
-        if: ${{ github.event.inputs.dogfood }}
-        run: |
-          echo "DOGFOOD=${{ vars.DOGFOOD }} + 1" >> "$GITHUB_ENV"
-
-
   build:
     name: Build PsychoPy Studio
     needs: increment
