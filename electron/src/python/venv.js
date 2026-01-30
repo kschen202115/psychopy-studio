@@ -181,7 +181,7 @@ export class PythonVenv {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      */
-    execSync(args, timeout=1000) {
+    execSync(args, timeout=undefined) {
         return execSync("stdout", `"${this.executable}"`, args, timeout)
     }
 

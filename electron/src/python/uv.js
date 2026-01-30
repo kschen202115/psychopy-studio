@@ -219,7 +219,7 @@ export class UV {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      */
-    execSync(args, timeout=1000) {
+    execSync(args, timeout=undefined) {
         return execSync("uv", `"${this.executable}"`, args, timeout)
     }
 
@@ -229,7 +229,7 @@ export class UV {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      */
-    async execTracked(args, timeout=1000) {
+    async execTracked(args, timeout=undefined) {
         return execTracked("uv", `"${this.executable}"`, args, timeout)
     }
 
