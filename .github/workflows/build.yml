@@ -62,7 +62,7 @@ jobs:
         if: ${{ github.event.inputs.dogfood }}
         run: |
           npm pkg set "version"="${{ steps.dogfood.outputs.version }}"
-          echo npm pkg get "version"
+          echo $(npm pkg get "version")
       
       - name: Build installer
         env:
