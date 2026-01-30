@@ -25,6 +25,31 @@ export function output(tag, message) {
     }
 }
 
+
+/**
+ * Log some input to the front end (works the same as logging output, only formatted differently). 
+ * 
+ * NOTE: this doesn't call the command, just tells the front end what was called.
+ * 
+ * @param {string} tag Channel to send over (use undefined to not emit an event)
+ * @param {string|Buffer} message Message to send, can be either bytes or a string
+ */
+export function input(tag, message, timeout=undefined) {
+    // if given a buffer, decode it
+    if (message instanceof Buffer) {
+        message = decoder.decode(message)
+    }
+    // prepend >>
+    message = `>> ${message}`
+    // append timeout
+    if (timeout) {
+        message = `${message} (timout = ${timeout}ms)`
+    }
+    // send as output with prepended >>
+    output(tag, message)
+}
+
+
 /**
  * Execute a function synchronously with output sent to the front end
  * 
@@ -36,6 +61,8 @@ export function output(tag, message) {
 export function execSync(tag, command, args, timeout=1000) {
     // join args 
     let cmd = [command, ...args].join(" ")
+    // log input in front end
+    input(tag, cmd, timeout)
     // execute
     let resp = proc.execSync(cmd, {timeout: timeout})
     // decode resp if necessary
@@ -61,6 +88,8 @@ export function execSync(tag, command, args, timeout=1000) {
  * @param {int} timeout Time (ms) after which to give up
  */
 export async function execTracked(tag, command, args, timeout=1000) {
+    // log input in front end
+    input(tag, `${command} ${args.join(" ")}`, timeout)
     // execute asynchronously
     let process = proc.spawn(command, args, {timeout: timeout, shell: true})
     // pass output to front end
