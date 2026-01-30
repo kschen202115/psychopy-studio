@@ -58,7 +58,7 @@ export function input(tag, message, timeout=undefined) {
  * @param {array<string>} args Arguments to pass to child process
  * @param {int} timeout Time (ms) after which to give up
  */
-export function execSync(tag, command, args, timeout=1000) {
+export function execSync(tag, command, args, timeout=undefined) {
     // join args 
     let cmd = [command, ...args].join(" ")
     // log input in front end
@@ -85,9 +85,9 @@ export function execSync(tag, command, args, timeout=1000) {
  * @param {string} tag Channel to send any output over
  * @param {string} command Command to run
  * @param {array<string>} args Arguments to pass to child process
- * @param {int} timeout Time (ms) after which to give up
+ * @param {int} timeout Time (ms) after which to give up, leave undefined to not timeout
  */
-export async function execTracked(tag, command, args, timeout=1000) {
+export async function execTracked(tag, command, args, timeout=undefined) {
     // log input in front end
     input(tag, `${command} ${args.join(" ")}`, timeout)
     // execute asynchronously
