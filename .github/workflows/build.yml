@@ -47,19 +47,21 @@ jobs:
         run: |
           npm i
       
-      - name: Calculate dogfood number
+      - name: Calculate dogfood version number
+        id: dogfood
         run: |
           if [ $(git tag -l) ]; then
-            echo "DOGFOOD=$(echo git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *)" >> $GITHUB_ENV
+            dogfood = echo git rev-list $(git describe --tags --abbrev=0)..HEAD --count --branches ${{ github.event.inputs.branch }} --tags *
           else
-            echo "DOGFOOD=$(git rev-list HEAD --count --branches ${{ github.event.inputs.branch }})" >> $GITHUB_ENV
+            dogfood = git rev-list HEAD --count --branches ${{ github.event.inputs.branch }}
           fi
-          echo $DOGFOOD
+          echo "version=$(npm pkg get "version"| tr -d '"')${{ github.event.inputs.branch }}$(dogfood)" >> $GITHUB_OUTPUT
       
       - name: Modify version
         if: ${{ github.event.inputs.dogfood }}
         run: |
-          npm pkg set "version"="$(npm pkg get "version"| tr -d '"')${{ github.event.inputs.branch }}$DOGFOOD"
+          npm pkg set "version"="${{ steps.dogfood.outputs.version }}"
+          echo npm pkg get "version"
       
       - name: Build installer
         env:
