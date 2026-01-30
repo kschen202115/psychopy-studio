@@ -79,7 +79,7 @@ jobs:
           npm run build
       
       - name: Upload installers as artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact
         with:
           name: "${{ matrix.os }}_installer"
           path: 'out/PsychoPy_Studio_*.*'
