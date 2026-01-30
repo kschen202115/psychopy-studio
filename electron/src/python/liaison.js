@@ -73,8 +73,6 @@ export class Liaison {
             // timeout after 1s
             setTimeout(reject, 1000)
         })
-        // log started
-        logging.log("Liaison started")
         // create websocket connection
         this.socket = new WebSocket(`ws://${this.address}`);
         // resolve/reject on open/error
@@ -84,6 +82,8 @@ export class Liaison {
         setTimeout(this.ready.reject, 1000)
         // wait for websocket open/error
         await this.ready.promise
+        // log started
+        logging.log("Liaison started")
         // listen for websocket closing
         this.socket.onclose = evt => logging.error(`Closed websocket on ws://${this.address}`, evt.reason)
         // listen for websocket messages
@@ -201,7 +201,7 @@ export class Liaison {
         );
         // create promise and store it in Liaison's array of pending
         let promise = Promise.withResolvers()
-        this.pending.push(promise)
+        this.pending.push(promise.promise)
         // setup timeout
         if (timeout) {
             setTimeout(evt => promise.reject({

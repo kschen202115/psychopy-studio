@@ -234,6 +234,10 @@ export async function getVenv(version) {
     if (version === "app") {
         version = appVersion
     }
+    // strip extras from version
+    if (version.match(/\d*\.\d*\.\d*/)) {
+        version = version.match(/\d*\.\d*\.\d*/)[0]
+    }
     
     if (version in venvs) {
         // if made, return it
@@ -241,7 +245,7 @@ export async function getVenv(version) {
     } else {
         // if environment exists but no object, make one
         for (let env of uv.getEnvironments()) {
-            if (version.startsWith(env.psychopyVersion)) {
+            if (env.psychopyVersion === version) {
                 return new PythonVenv(
                     env.pythonVersion, 
                     env.psychopyVersion
