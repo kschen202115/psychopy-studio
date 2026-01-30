@@ -40,9 +40,9 @@ export class PythonScript {
     start() {
         // execute asynchronously
         this.process = proc.spawn(
-            `"${this.venv.executable}"`, 
+            this.venv.executable, 
             [`"${this.file}"`, ...this.args], 
-            {shell: true, cwd: path.dirname(this.file)}
+            {cwd: path.dirname(this.file)}
         )
         // log start
         this.started.resolve()

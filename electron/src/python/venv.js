@@ -198,7 +198,7 @@ export class PythonVenv {
         this.onstdout = callbacks.onstdout || (evt => {})
         this.onstderr = callbacks.onstderr || (evt => {})
         // spawn process
-        let process = proc.spawn(`"${this.executable}"`, args, { shell: true })
+        let process = proc.spawn(this.executable, args)
         // add listener for stdout
         process.stdout.on(
             "data", evt => {

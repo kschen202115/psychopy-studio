@@ -44,9 +44,8 @@ export class PythonShell {
   start() {
     // create process
     this.process = proc.spawn(
-      `"${this.venv.executable}"`, 
-      ['-i'],
-      { shell: true }
+      this.venv.executable, 
+      ['-i']
     );
     // mark started 
     this.started.resolve()
