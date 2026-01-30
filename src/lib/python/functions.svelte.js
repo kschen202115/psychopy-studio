@@ -1,6 +1,24 @@
 import { status } from "./globals.svelte.js"
 import { electron, python } from "$lib/globals.svelte";
-import { Version, ppy2py } from "$lib/utils/versions.js"
+import { Version, ppy2py } from "$lib/utils/versions.js";
+
+
+/**
+ * Tries to safely convert an error to a string which can be displayed in the small popup, while 
+ * also printing the full thing to console
+ * 
+ * @param {error} err 
+ */
+function handleError(err) {
+    // get error attribute if there is one
+    if ("error" in err) {
+        err = err.error
+    }
+    // log to console
+    console.error(err)
+    // send to popup
+    status.ready.reject(err)
+}
 
 
 export async function installPython(version=undefined, forceReinstall=false) {
@@ -38,9 +56,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
         if (
             await python.uv.findPython(
                 version
-            ).catch(
-                err => status.ready.reject(err?.error || err)
-            )
+            ).catch(handleError)
         ) {
             return
         }
@@ -56,9 +72,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
     // create venv
     await python.uv.makeExecutable(
         version, pyVersion
-    ).catch(
-        err => status.ready.reject(err?.error || err)
-    )
+    ).catch(handleError)
     // install packages
     await python.venv.setup(version)
     // mark as done
@@ -85,7 +99,7 @@ export async function setupPython(version=undefined, forceReinstall=false) {
     }
     // do we already have UV?
     status.message = "Checking Python..."
-    let hasUV = await python.uv.exists().catch(err => status.ready.reject(err?.error || err))
+    let hasUV = await python.uv.exists().catch(handleError)
     // install UV
     if (!hasUV || forceReinstall) {
         // open dialog to show progress
@@ -97,11 +111,11 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         status.dlg.shown = true
         status.dlg.busy = true
         // do install
-        await python.uv.install().catch(err => status.ready.reject(err?.error || err))
+        await python.uv.install().catch(handleError)
         status.dlg.busy = false
     }
     // do we already have Python?
-    let hasPython = await python.uv.findPython(version).catch(err => status.ready.reject(err?.error || err))
+    let hasPython = await python.uv.findPython(version).catch(handleError)
     // install Python
     if (!hasPython || forceReinstall) {
         // kill any existing process
@@ -117,13 +131,13 @@ export async function setupPython(version=undefined, forceReinstall=false) {
     } else {
         // start python
         status.message = "Starting Python..."
-        await python.liaison.start(version).catch(err => status.ready.reject(err?.error || err))
+        await python.liaison.start(version).catch(handleError)
         // activatePlugins
         status.message = "Activating plugins..."
         await python.liaison.send(version, {
             command: "try",
             args: ["psychopy.plugins:activatePlugins"]
-        }, 20000).catch(err => status.ready.reject(err?.error || err))
+        }, 20000).catch(handleError)
         // mark success
         status.message = "Successfully started Python"
         status.ready.resolve(true)

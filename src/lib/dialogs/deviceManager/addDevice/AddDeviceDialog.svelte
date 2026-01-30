@@ -33,7 +33,7 @@
             args: [
                 "psychopy.experiment:getDeviceProfiles"
             ]
-        }, 10000).then(
+        }).then(
             resp => Object.assign(profiles.devices, resp)
         )
     }

@@ -29,7 +29,7 @@ if ( python ) {
                 args: [
                     "psychopy.experiment:getElementProfiles"
                 ]
-            }, 100000).then(
+            }).then(
                 data => Object.assign(profiles.components, data)
             )
             // todo: get loops
@@ -39,7 +39,7 @@ if ( python ) {
                 args: [
                     "psychopy.experiment:getDeviceProfiles"
                 ]
-            }, 10000).then(
+            }).then(
                 resp => Object.assign(profiles.devices, resp)
             )
             // todo: get prefs

@@ -434,7 +434,7 @@ const handlers = {
     liaison: {
       start: ipcMain.handle("python.liaison.start", async (evt, venv) => (await getLiaison(venv)).start()),
       stop: ipcMain.handle("python.liaison.stop", async (evt, venv) => (await getLiaison(venv)).stop()),
-      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout = 1000) => (await getLiaison(venv)).send(message, timeout)),
+      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout) => (await getLiaison(venv)).send(message, timeout)),
       started: ipcMain.handle("python.liaison.started", async (evt, venv) => (await getLiaison(venv)).started),
       ready: ipcMain.handle("python.liaison.ready", async (evt, venv) => await (await getLiaison(venv)).ready.promise)
     },

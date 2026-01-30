@@ -115,7 +115,7 @@ export class Liaison {
         if (await this.send({
             command: "exists",
             args: ["psychopy.alerts.liaison:LiaisonAlertHandler"]
-        }, 1000)) {
+        }, 10000)) {
             await this.send({
                 command: "init",
                 args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
@@ -183,7 +183,7 @@ export class Liaison {
         this.pending = []
     }
 
-    async send(msg, timeout=1000) {
+    async send(msg, timeout=undefined) {
         // wait for liaison to exist before sending messages
         await this.ready.promise
         // wait for other messages to finish (without inheriting their failures)
@@ -203,10 +203,12 @@ export class Liaison {
         let promise = Promise.withResolvers()
         this.pending.push(promise)
         // setup timeout
-        setTimeout(evt => promise.reject({
-            error: [`Message timed out: ${JSON.stringify(msg, undefined, 4)}`],
-            evt: evt
-        }), timeout)
+        if (timeout) {
+            setTimeout(evt => promise.reject({
+                error: [`Message timed out: ${JSON.stringify(msg, undefined, 4)}`],
+                evt: evt
+            }), timeout)
+        }
         // define listener to find reply then remove itself
         let lsnr = evt => {
             // parse reply

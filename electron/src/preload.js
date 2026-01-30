@@ -53,7 +53,7 @@ const python = {
     start: (venv) => ipcRenderer.invoke("python.liaison.start",venv).then(resp => resp),
     stop: (venv) => ipcRenderer.invoke("python.liaison.stop",venv).then(resp => resp),
     listen: (tag, lsnr) => ipcRenderer.on(`liaison:${tag}`, lsnr),
-    send: (venv, message, timeout=1000) => ipcRenderer.invoke("python.liaison.send", venv, message, timeout).then(resp => resp),
+    send: (venv, message, timeout) => ipcRenderer.invoke("python.liaison.send", venv, message, timeout).then(resp => resp),
     started: (venv) => ipcRenderer.invoke("python.liaison.started", venv).then(resp => resp),
     ready: (venv) => ipcRenderer.invoke("python.liaison.ready", venv).then(resp => resp)
   },
