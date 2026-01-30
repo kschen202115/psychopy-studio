@@ -23,7 +23,6 @@ permissions:
 jobs:
   build:
     name: Build PsychoPy Studio
-    needs: increment
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
