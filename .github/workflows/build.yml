@@ -55,7 +55,7 @@ jobs:
           else
             dogfood = git rev-list HEAD --count --branches ${{ github.event.inputs.branch }}
           fi
-          echo "version=$(npm pkg get "version"| tr -d '"')${{ github.event.inputs.branch }}$(dogfood)" >> $GITHUB_OUTPUT
+          echo "version=$(npm pkg get "version"| tr -d '"')${{ github.event.inputs.branch }}${dogfood}" >> $GITHUB_OUTPUT
       
       - name: Modify version
         if: ${{ github.event.inputs.dogfood }}
