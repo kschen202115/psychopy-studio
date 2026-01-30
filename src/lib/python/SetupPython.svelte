@@ -20,12 +20,13 @@
     {#await status.ready.promise}
         <Message
             message={status.message}
+            onclick={evt => status.dlg.shown = true}
         />
     {:then didSetup}
         {#await status.dismiss.promise}
             <Message
                 message={status.message}
-                onclick={evt => status.logs.shown = true}
+                onclick={evt => status.dlg.shown = true}
                 icon="/icons/sym-python.svg"
             />
         {/await}
