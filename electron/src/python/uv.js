@@ -207,7 +207,7 @@ export class UV {
         }
         // make a new venv
         await this.execTracked([
-            "venv", `"${folder}"`, "--python", pythonVersion, "--clear"
+            "venv", folder, "--python", pythonVersion, "--clear"
         ])
         // return its path
         return this.findPython(psychopyVersion)
@@ -230,7 +230,7 @@ export class UV {
      * @param {int} timeout Time (ms) after which to give up
      */
     async execTracked(args, timeout=undefined) {
-        return execTracked("uv", `"${this.executable}"`, args, timeout)
+        return execTracked("uv", this.executable, args, timeout)
     }
 
     /**

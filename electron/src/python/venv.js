@@ -79,7 +79,7 @@ export class PythonVenv {
         }
         // run uv command to install
         await uv.execTracked([
-            "pip", "install", ...name, "--python", `"${this.executable}"`
+            "pip", "install", ...name, "--python", this.executable
         ])
         // log done
         uv.output(
