@@ -50,15 +50,15 @@
         right: false
     })
 
-    let valid = $state({})
+    let valid = $derived(
+        Object.values(element.params).every(
+            param => param.valid?.value
+        )
+    )
 
     let btnsDisabled = $derived({
-        OK: Object.values(valid).some(
-            (val) => !val.state
-        ),
-        APPLY: Object.values(valid).some(
-            (val) => !val.state
-        )
+        OK: !valid,
+        APPLY: !valid
     })
 </script>
 

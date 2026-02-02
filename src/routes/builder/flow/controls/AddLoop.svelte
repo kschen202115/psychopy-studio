@@ -20,15 +20,19 @@
         ).toLowerCase();
     }
 
-    let valid = $state({})
+    let valid = $derived.by(() => {
+        if (current.inserting) {
+            return Object.values(current.inserting.params).every(
+                param => param.valid?.value
+            )
+        } else {
+            true
+        }
+    })
 
     let btnsDisabled = $derived({
-        OK: Object.values(valid).some(
-            (val) => !val.state
-        ),
-        APPLY: Object.values(valid).some(
-            (val) => !val.state
-        )
+        OK: !valid,
+        APPLY: !valid
     })
 
 </script>
