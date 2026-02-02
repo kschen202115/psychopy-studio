@@ -61,9 +61,9 @@ const python = {
     setup: (venv) => ipcRenderer.invoke("python.venv.setup", venv).then(resp => resp),
     executable: (venv) => ipcRenderer.invoke("python.venv.executable", venv).then(resp => resp),
     installPackage: (venv, name) => ipcRenderer.invoke("python.venv.installPackage", venv, name).then(resp => resp),
-    uninstallPackage: (venv, name) => ipcRenderer.invoke("psychopy.venv.uninstallPackage", venv, name).then(resp => resp),
-    getPackages: (venv) => ipcRenderer.invoke("psychopy.venv.getPackages", venv).then(resp => resp),
-    getPackageDetails: (venv, name) => ipcRenderer.invoke("psychopy.venv.getPackageDetails", venv, name).then(resp => resp)
+    uninstallPackage: (venv, name) => ipcRenderer.invoke("python.venv.uninstallPackage", venv, name).then(resp => resp),
+    getPackages: (venv) => ipcRenderer.invoke("python.venv.getPackages", venv).then(resp => resp),
+    getPackageDetails: (venv, name) => ipcRenderer.invoke("python.venv.getPackageDetails", venv, name).then(resp => resp)
   },
   uv: {
     folder: () => ipcRenderer.invoke("python.uv.folder").then(resp => resp),

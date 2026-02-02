@@ -442,9 +442,9 @@ const handlers = {
       setup: ipcMain.handle("python.venv.setup", async (evt, venv) => (await getVenv(venv)).setup()),
       executable: ipcMain.handle("python.venv.executable", async (evt, venv) => (await getVenv(venv)).executable),
       installPackage: ipcMain.handle("python.venv.installPackage", async (evt, venv, name) => (await getVenv(venv)).installPackage(name)),
-      uninstallPackage: ipcMain.handle("psychopy.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
-      getPackages: ipcMain.handle("psychopy.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
-      getPackageDetails: ipcMain.handle("psychopy.venv.getPackageDetails", async (evt, venv, name) => (await getVenv(venv)).getPackageDetails(name))
+      uninstallPackage: ipcMain.handle("python.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
+      getPackages: ipcMain.handle("python.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
+      getPackageDetails: ipcMain.handle("python.venv.getPackageDetails", async (evt, venv, name) => (await getVenv(venv)).getPackageDetails(name))
     },
     uv: {
       folder: ipcMain.handle("python.uv.folder", (evt) => uv.folder),
