@@ -5,7 +5,7 @@
 
     let {
         plugin,
-        executable=$bindable()
+        venv=$bindable()
     } = $props()
 
     let siblings = getContext("siblings")
@@ -21,11 +21,11 @@
     )
 
     function install(evt) {
-        python.uv.installPackage(
-            plugin.pipname, executable.current
+        python.venv.installPackage(
+            venv, plugin.pipname
         ).then(
-            resp => python.uv.getPackages(
-                executable.current
+            resp => python.venv.getPackages(
+                venv
             ).then(
                 packages => siblings.installed = packages
             )
@@ -33,11 +33,11 @@
     }
 
     function uninstall(evt) {
-        python.uv.uninstallPackage(
-            plugin.pipname, executable.current
+        python.venv.uninstallPackage(
+            venv, plugin.pipname
         ).then(
-            resp => python.uv.getPackages(
-                executable.current
+            resp => python.venv.getPackages(
+                venv
             ).then(
                 packages => siblings.installed = packages
             )
@@ -60,6 +60,7 @@
                         onclick={install}
                         bind:awaiting={siblings.installed}
                         horizontal
+                        disabled={venv === undefined}
                     />
                 {:else}
                     <Button
@@ -68,6 +69,7 @@
                         onclick={uninstall}
                         bind:awaiting={siblings.installed}
                         horizontal
+                        disabled={venv === undefined}
                     />
                 {/if}
             </div>

@@ -102,8 +102,8 @@ export class PythonVenv {
             name = [name]
         }
         // uninstall
-        await execTracked([
-            "pip", "uninstall", ...name, "--python", `"${this.executable}"`
+        await uv.execTracked([
+            "pip", "uninstall", ...name, "--python", this.executable
         ])
         // log done
         uv.output(
@@ -172,7 +172,7 @@ export class PythonVenv {
         // apply
         Object.assign(all, online)
     
-        return pypi
+        return all
     }
 
     /**

@@ -7,7 +7,7 @@
     import { setContext, untrack } from "svelte";
 
     let {
-        executable=$bindable()
+        venv=$bindable()
     } = $props()
 
     let children = $state({
@@ -19,7 +19,7 @@
 
     // cached list of pypi packages
     const pypi = $state([]);
-    python.uv.getPackages(executable.current).then(
+    python.venv.getPackages(venv).then(
         resp => {
             for (let key in resp) {
                 if (!pypi.includes(key)) {
@@ -30,8 +30,8 @@
     )
 
     $effect(() => {
-        if (executable.current) {
-            python.uv.getPackages(executable.current).then(packages => children.installed = packages)
+        if (venv) {
+            python.venv.getPackages(venv).then(packages => children.installed = packages)
         }
     })
 
@@ -64,8 +64,8 @@
             {#if matches(searchterm, name)}
                 <PackageItem 
                     name={name}
-                    bind:executable={executable} 
-                    getProfile={name => python.uv.getPackageDetails(name, executable.current)} 
+                    bind:venv={venv} 
+                    getProfile={name => python.venv.getPackageDetails(venv, name)} 
                 />
             {/if}
         {/each}
@@ -77,7 +77,7 @@
                 {#if profile}
                     <PackageItem 
                         name={searchterm} 
-                        bind:executable={executable} 
+                        bind:venv={venv} 
                         getProfile={name => profile} 
                     />
                 {/if}

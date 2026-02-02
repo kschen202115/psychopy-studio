@@ -174,6 +174,10 @@ export class UV {
      * @returns {string|undefined} Path to the found executable, or undefined if there is none
      */
     findPython(psychopyVersion=appVersion) {
+        // substitute "app" for app version
+        if (psychopyVersion === "app") {
+            psychopyVersion = appVersion
+        }
         // get specific folder for this version
         let folder = path.join(
             app.getPath("appData"), "psychopy4", ".python", psychopyVersion.replaceAll(".*", "")

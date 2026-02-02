@@ -16,15 +16,8 @@
         current: undefined
     });
 
-    let executable = $state({
-        default: undefined,
-        current: undefined
-    })
-    python.venv.executable("app").then(resp => {
-        executable.current = resp
-        executable.default = resp
-    })
-    setContext("executable", () => executable)
+    let venv = $state.raw()
+    setContext("venv", () => venv)
 
     let output = $state.raw("");
     python.uv.output.listen(
@@ -44,27 +37,30 @@
     <div class=container>
         <div class=environment-ctrl>
             Python environment:
-            <select bind:value={executable.current}>
-                {#await python.uv.getEnvironments()}
-                    <option>
-                        Scanning Python environments...
-                    </option>
-                {:then environments}
-                    {#each environments as venv}
-                        <option value={venv.executable}>
-                            {venv.psychopyVersion}
-                            {#if venv.executable === executable.default}
-                            (default)
-                            {/if}
+            <select bind:value={venv}>
+                {#await python.venv.executable("app") then appExecutable}
+                    {#await python.uv.getEnvironments()}
+                        <option>
+                            Scanning Python environments...
                         </option>
-                    {/each}
-                {:catch err}
-                    <option>{err}</option>
+                    {:then environments}
+                        {#each environments as env}
+                            <option value={env.psychopyVersion} selected={env.executable === appExecutable}>
+                                {env.psychopyVersion}
+                                {#if env.executable === appExecutable}
+                                    (default)
+                                {/if}
+                            </option>
+                        {/each}
+                    {:catch err}
+                        <option>{err}</option>
+                    {/await}
                 {/await}
-                
             </select>
         </div>
+
         <Notebook>
+
             <NotebookPage
                 label="Plugins"
                 bind:selected={
@@ -72,7 +68,7 @@
                     value => pages.current = "plugins"
                 }
             >
-                <PluginsPanel bind:executable={executable} />
+                <PluginsPanel bind:venv={venv} />
             </NotebookPage>
             <NotebookPage
                 label="Packages"
@@ -81,7 +77,7 @@
                     value => pages.current = "packages"
                 }
             >
-                <PackagesPanel bind:executable={executable} />
+                <PackagesPanel bind:venv={venv} />
             </NotebookPage>
             <NotebookPage
                 label="Output"

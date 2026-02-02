@@ -7,7 +7,7 @@
     let {
         name,
         getProfile=name => {},
-        executable=$bindable()
+        venv=$bindable()
     } = $props()
 
     let siblings = getContext("siblings");
@@ -25,10 +25,10 @@
 
     function install(evt) {
         python.venv.installPackage(
-            name, executable.current
+            venv, name
         ).then(
-            resp => python.uv.getPackages(
-                executable.current
+            resp => python.venv.getPackages(
+                venv
             ).then(
                 packages => siblings.installed = packages
             )
@@ -36,11 +36,11 @@
     }
 
     function uninstall(evt) {
-        python.uv.uninstallPackage(
-            name, executable.current
+        python.venv.uninstallPackage(
+            venv, name
         ).then(
-            resp => python.uv.getPackages(
-                executable.current
+            resp => python.venv.getPackages(
+                venv
             ).then(
                 packages => siblings.installed = packages
             )

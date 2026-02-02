@@ -4,7 +4,7 @@
     import { onMount, setContext, untrack } from "svelte";
 
     let {
-        executable=$bindable()
+        venv=$bindable()
     } = $props()
 
     let children = $state({
@@ -12,11 +12,12 @@
         installed: {},
         all: []
     });
+    $inspect(children)
     setContext("siblings", children)
 
     $effect(() => {
-        if (executable.current) {
-            python.uv.getPackages(executable.current).then(
+        if (venv) {
+            python.venv.getPackages(venv).then(
                 resp => children.installed = resp
             )
         }
@@ -51,7 +52,7 @@
                         {#if matches(searchterm, profile)}
                             <PluginItem 
                                 plugin={profile} 
-                                bind:executable={executable} 
+                                bind:venv={venv} 
                             />
                         {/if}
                     {/each}

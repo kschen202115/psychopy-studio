@@ -89,7 +89,7 @@ export function execSync(tag, command, args, timeout=undefined) {
  */
 export async function execTracked(tag, command, args, timeout=undefined) {
     // log input in front end
-    input(tag, `${command} ${args.join(" ")}`, timeout)
+    input(tag, `${command} ${(args || []).join(" ")}`, timeout)
     // execute asynchronously
     let process = proc.spawn(command, args, {timeout: timeout})
     // pass output to front end
