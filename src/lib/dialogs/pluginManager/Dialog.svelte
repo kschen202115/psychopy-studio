@@ -50,10 +50,10 @@
                         Scanning Python environments...
                     </option>
                 {:then environments}
-                    {#each Object.entries(environments) as [label, details]}
-                        <option value={details.executable}>
-                            {label}
-                            {#if details.executable === executable.default}
+                    {#each environments as venv}
+                        <option value={venv.executable}>
+                            {venv.psychopyVersion}
+                            {#if venv.executable === executable.default}
                             (default)
                             {/if}
                         </option>
