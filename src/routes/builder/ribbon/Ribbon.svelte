@@ -236,7 +236,7 @@
                     icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}js.svg" 
                     label="{current.experiment.pilotMode ? "Pilot" : "Run"} experiment in browser" 
                     onclick={(evt) => runJS()}
-                    disabled={!current.experiment.file.file}
+                    disabled={!current.experiment.file.file || (!current.experiment.pilotMode && !current.project)}
                     bind:awaiting={awaiting.runjs}
                     borderless
                 />

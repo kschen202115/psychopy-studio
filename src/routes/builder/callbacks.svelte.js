@@ -274,7 +274,11 @@ export async function runJS() {
     // compile to JS
     await compileJS()
     // run
-    await current.experiment.runJS(true)
+    if (current.experiment.pilotMode) {
+        await current.experiment.runJS(true)
+    } else {
+        await window.open(`https://run.pavlovia.org/${current.project.namespace?.path}/${current.project.path}`)
+    }
 }
 
 /** Views */
