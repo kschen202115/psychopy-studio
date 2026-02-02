@@ -12,7 +12,6 @@
         installed: {},
         all: []
     });
-    $inspect(children)
     setContext("siblings", children)
 
     $effect(() => {
