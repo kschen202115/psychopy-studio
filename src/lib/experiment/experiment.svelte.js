@@ -158,7 +158,7 @@ export class Experiment {
      * Get a path relative to this experiment's root folder 
      */
     relativePath(value) {
-        if (this.file?.parent) {
+        if (this.file?.parent && !path.isAbsolute(value)) {
             return path.join(this.file?.parent, value) 
         } else {
             return value
