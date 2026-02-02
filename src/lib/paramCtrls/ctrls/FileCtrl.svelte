@@ -1,7 +1,9 @@
 <script>
-    import SingleLineCtrl from "./SingleLineCtrl.svelte"
-    import { Button, CompactButton } from "$lib/utils/buttons"
+    import SingleLineCtrl from "./SingleLineCtrl.svelte";
+    import { Button, CompactButton } from "$lib/utils/buttons";
     import { mimeTypesFromParam } from "./utils";
+    import { browseFileOpen } from "$lib/utils/files.js";
+    import { getContext } from "svelte";
 
     let {
         /** @prop @type {import("$lib/experiment").Param} Param object to which this ctrl pertains */
@@ -13,6 +15,8 @@
         /** @interface */
         ...attachments
     } = $props()
+
+    let current = getContext("current");
 
     function validateFile(param, valid) {
         // check file extension
@@ -30,14 +34,18 @@
     async function getFile(evt) {
         // do we have mime types from the param?
         let types = mimeTypesFromParam(param)
-        // get file handle from system dialog
-        let handle = await window.showOpenFilePicker({
-            types: types
-        });
-        // get file blob from handle
-        let file = await handle[0].getFile();
-        // get name from blob
-        param.val = file.name
+        // get file
+        let file = await browseFileOpen(types, current.experiment?.file?.parent);
+        // if one was selected, use it
+        if (file) {
+            if (current.experiment?.file?.parent) {
+                // make relative to experiment path if possible
+                param.val = file.file.replace(current.experiment.file.parent, "").replace(/^\//, "")
+            } else {
+                // otherwise use as absolute
+                param.val = file.file
+            }
+        }
     }
 </script>
 
