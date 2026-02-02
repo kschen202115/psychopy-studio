@@ -71,7 +71,7 @@ export class Liaison {
                 }
             )
             // timeout after 1s
-            setTimeout(reject, 1000)
+            setTimeout(reject, 10000)
         })
         // create websocket connection
         this.socket = new WebSocket(`ws://${this.address}`);
