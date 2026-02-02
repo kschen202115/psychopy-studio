@@ -253,13 +253,18 @@ export async function compileJS() {
     return target
 }
 
-export async function runPython(executable) {
+export async function runPython() {
     // send to runner
     await sendToRunner()
     // run script
-    await current.experiment.runPython(true, executable)
+    await current.experiment.runPython(true)
 
     return true
+}
+
+export async function stopPython(executable) {
+    // cancel running
+    await current.experiment.stopPython()
 }
 
 export async function runJS() {
@@ -290,6 +295,7 @@ export var shortcuts = {
     sendToRunner: sendToRunner,
     compilePython: compilePython,
     runPython: runPython,
+    stopPython: stopPython,
     compileJS: compileJS,
     runJS: runJS,
     showDevTools: showDevTools

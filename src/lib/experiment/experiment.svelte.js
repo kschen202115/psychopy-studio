@@ -16,6 +16,7 @@ export class Experiment {
     routines = $state({})
     loops = $state({})
     file = $state(undefined)
+    running = $state.raw(undefined)
 
     /** store past and future states for this experiment */
     history = $state({
@@ -490,7 +491,7 @@ export class Experiment {
      * @param {string || undefined} executable Path to the Python executable to run in (leave 
      * undefined to use default executable)
      */
-    async runPython(compile=true, executable=undefined) {
+    async runPython(compile=true) {
         // fail if there's no Python to run in
         if (!python) {
             console.error("Script running is not available in browser.")
@@ -517,17 +518,39 @@ export class Experiment {
             `--- Started experiment ${this.file.name} ---`
         )
         // run script
-        let id = await python.scripts.run(
+        this.running = await python.scripts.run(
             version,
             target, 
             ...(this.pilotMode ? ["--pilot"] : []),
             "--prefs-json",
             await electron.paths.prefs()
         )
-        await python.scripts.finished(version, id)
+        await python.scripts.finished(version, this.running)
         // mark finished
+        this.running = undefined
         await python.output.stdout.send(
             `--- Finished experiment ${this.file.name} ---`
+        )
+    }
+
+    async stopPython() {
+        // do nothing if nothing is running
+        if (this.runnings === undefined) {
+            return
+        }
+        // fail if there's no Python to run in
+        if (!python) {
+            console.error("Script running is not available in browser.")
+            return
+        }
+        // figure out version
+        let version = $state.snapshot(this.settings.params['Use version'].val) || "app"
+        // request stop from electron
+        await python.scripts.stop(version, this.running)
+        // mark finished
+        this.running = undefined
+        await python.output.stdout.send(
+            `--- Stopped experiment ${this.file.name} ---`
         )
     }
 

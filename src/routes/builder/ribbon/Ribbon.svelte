@@ -15,6 +15,7 @@
         runPython,
         showWindow,
         runJS,
+        stopPython,
     } from '../callbacks.svelte.js'
     
     import Menu from "./Menu.svelte";
@@ -217,7 +218,7 @@
                 onclick={evt => runPython()}
                 disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.runpy}
-                cancel={python.scripts.stop}
+                cancel={evt => stopPython()}
                 borderless
             />
         </RibbonSection>

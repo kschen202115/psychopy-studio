@@ -981,6 +981,26 @@
                 "enabled": []
             }
         },
+        "stopPython": {
+            "val": [
+                "CONTROL",
+                "."
+            ],
+            "valType": "keypress",
+            "inputType": "keypress",
+            "categ": "Key Bindings",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [],
+            "allowedLabels": [],
+            "label": "Stop Python run",
+            "hint": "Stop the currently running experiment in Python",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "compileJS": {
             "val": [
                 "CONTROL",
