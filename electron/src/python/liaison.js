@@ -1,31 +1,13 @@
 import { app } from 'electron';
 import { getVenv } from "./venv.js";
 import logging from "../logging.js";
-import { output, decoder } from "./utils.js";
+import { output, decoder, getSafeAddress } from "./utils.js";
 import { appVersion } from "../version.js";
-import tcp from "tcp-port-used";
 import path from "path";
-
-/**
- * Get an unused localhost address which is safe to start Liaison at
- */
-async function getSafeAddress() {
-    // start with 8002
-    let port = 8002
-    // check initially
-    let inUse = await tcp.check(port, "localhost")
-    // if in use, iterate and try again
-    while (inUse) {
-        port += 1
-        inUse = await tcp.check(port, "localhost")
-    }
-
-    return `localhost:${port}`
-}
 
 
 export class Liaison {
-    constructor(venv=appVersion) {
+    constructor(venv) {
         // store venv
         this.venv = venv
         // store self in venv

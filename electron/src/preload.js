@@ -98,6 +98,10 @@ const python = {
     run: (venv, file, ...args) => ipcRenderer.invoke("python.scripts.run", venv, file, ...args).then(resp => resp),
     finished: (venv, id) => ipcRenderer.invoke("python.scripts.finished", venv, id).then(resp => resp),
     stop: (venv, id) => ipcRenderer.invoke("python.scripts.stop", venv, id).then(resp => resp),
+  },
+  psychojs: {
+    run: (cwd) => ipcRenderer.invoke("python.psychojs.run", cwd).then(resp => resp),
+    stop: (address) => ipcRenderer.invoke("python.psychojs.stop", address).then(resp => resp),
   }
 }
 contextBridge.exposeInMainWorld('python', python)

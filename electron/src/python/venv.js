@@ -3,7 +3,7 @@ import { execSync, execTracked, output } from "./utils.js";
 import { appVersion } from "../version.js";
 import logging from "../logging.js";
 import proc from "child_process";
-import path from "path";
+import process from "process";
 
 
 export class PythonVenv {
@@ -14,8 +14,9 @@ export class PythonVenv {
         this.executable = undefined
         // stores refs to running liaison, scripts and shells
         this.liaison = undefined
-        this.scripts = []
+        this.scripts = {}
         this.shells = {}
+        this.psychojs = {}
         // store in venvs object
         venvs[this.psychopyVersion] = this
         // try to get Python executable
@@ -24,6 +25,39 @@ export class PythonVenv {
         if (psychopyVersion in awaiting) {
             awaiting[psychopyVersion].resolve(this)
             delete awaiting[psychopyVersion]
+        }
+    }
+
+    /**
+     * Kill all instances of this venv
+     */
+    killAll() {
+        /**
+         * On Linux and Mac, killing the Python process doesn't kill PTB, it has to be killed by PID
+         * 
+         * @param {ChildProcess} _process 
+         */
+        function hardkill(_process) {
+            _process.kill(0)
+            if (process.platform !== 'win32') {
+                process.kill(_process.pid)
+            }
+        }
+        // kill liaison
+        if (this.liaison) {
+            hardkill(this.liaison.process)
+        }
+        // kill any scripts
+        for (let script of Object.values(this.scripts)) {
+            hardkill(script.process)
+        }
+        // kill any shells
+        for (let shell of Object.values(this.shells)) {
+            hardkill(shell.process)
+        }
+        // kill any PsychoJS servers
+        for (let server of Object.values(this.psychojs)) {
+            hardkill(server.process)
         }
     }
 

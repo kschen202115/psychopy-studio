@@ -15,6 +15,7 @@ const { venvs, getVenv } = require("./python/venv.js");
 const { Liaison, getLiaison } = require("./python/liaison.js");
 const { PythonShell } = require("./python/shell.js");
 const { PythonScript } = require("./python/script.js");
+const { PsychoJSServer, getPsychoJSServer } = require("./python/psychojs.js");
 const git = require("./git.js");
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
@@ -330,12 +331,8 @@ app.on("quit", (evt, code) => {
   // close svelte
   svelte.process.kill(0);
   // close python
-  for (let venv of Object.entries(venvs)) {
-    venv.liaison?.process?.kill(0)
-    if (process.platform !== 'win32' && venv.liaison?.process) {
-      // on Linux and Mac, killing the Python process doesn't kill PTB, it has to be killed by PID
-      require("process").kill(venv.liaison.process.pid)
-    }
+  for (let venv of Object.values(venvs)) {
+    venv.killAll()
   }
 })
 
@@ -475,6 +472,10 @@ const handlers = {
       }),
       finished: ipcMain.handle("python.scripts.finished", async (evt, venv, id) => await (await getVenv(venv)).scripts[id].finished.promise),
       stop: ipcMain.handle("python.scripts.stop", async (evt, venv, id) => (await getVenv(venv)).scripts[id].stop())
+    },
+    psychojs: {
+      run: ipcMain.handle("python.psychojs.run", async (evt, cwd) => await PsychoJSServer.run(cwd)),
+      stop: ipcMain.handle("python.psychojs.stop", (evt, address) => getPsychoJSServer(address).stop()),
     }
   },
   git: {

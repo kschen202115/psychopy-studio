@@ -1,8 +1,28 @@
 import proc from "child_process";
 import logging from "../logging.js";
 import { BrowserWindow } from "electron";
+import tcp from "tcp-port-used";
 
 export const decoder = new TextDecoder();
+
+
+/**
+ * Get an unused localhost address which is safe to start Liaison at
+ */
+export async function getSafeAddress() {
+    // start with 8002
+    let port = 8002
+    // check initially
+    let inUse = await tcp.check(port, "localhost")
+    // if in use, iterate and try again
+    while (inUse) {
+        port += 1
+        inUse = await tcp.check(port, "localhost")
+    }
+
+    return `localhost:${port}`
+}
+
 
 /**
  * Send some output to the front end
