@@ -33,7 +33,10 @@
                     () => routine.name,
                     (value) => routine.settings.params['name'].val = value
                 }
-                close={() => delete current.experiment.routines[name]}
+                close={() => {
+                    current.experiment.history.update()
+                    delete current.experiment.routines[name]
+                }}
                 closeTooltip="Delete {name}"
                 data={routine}
             >
