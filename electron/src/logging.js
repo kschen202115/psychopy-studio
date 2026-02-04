@@ -49,7 +49,7 @@ export function log(msg, tag=undefined, target="lastAppLoad", echo=true) {
         msg = msg.join("\t")
     } else if (typeof msg === "object") {
         // if given an object, stringify
-        msg = JSON.stringify(msg)
+        msg = JSON.stringify(msg, undefined, 4)
     } else {
         // anything else, convert to String
         msg = String(msg)
