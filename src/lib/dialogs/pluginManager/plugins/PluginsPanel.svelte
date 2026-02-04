@@ -37,13 +37,13 @@
 </script>
 
 
-{#await fetch("/api/plugins").then(resp => resp.json())}
-    Getting plugins...
-{:then plugins}
     <div class=plugins-ctrl>
         <div class=plugin-list-ctrl>
             <input type=search bind:value={searchterm} />
-                <div class=plugins-list>
+            <div class=plugins-list>
+                {#await fetch("/api/plugins").then(resp => resp.json())}
+                    <div class=message>Getting plugins...</div>
+                {:then plugins}
                     {#each plugins.sort(
                         // installed packages at the top
                         (x, y) => +Object.keys(children.installed).includes(y.pipname) - +Object.keys(children.installed).includes(x.pipname)
@@ -55,15 +55,16 @@
                             />
                         {/if}
                     {/each}
-                </div>
+                {:catch err}
+                    <div class=message>Failed to get plugins</div>
+                    <pre>{err}</pre>
+                {/await}
+            </div>
         </div>
         <div class=selected-plugin>
             {@render children.selected?.()}
         </div>
     </div>
-{:catch}
-    <div class=message>Failed</div>
-{/await}
 
 
 <style>
