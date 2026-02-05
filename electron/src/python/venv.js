@@ -38,8 +38,9 @@ export class PythonVenv {
          * @param {ChildProcess} _process 
          */
         function hardkill(_process) {
-            _process.kill(0)
-            if (process.platform !== 'win32') {
+            if (process.platform === 'win32') {
+                _process.kill(0)
+            } else {
                 process.kill(_process.pid)
             }
         }
