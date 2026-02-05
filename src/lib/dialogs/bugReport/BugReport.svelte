@@ -13,6 +13,7 @@
     } = $props();
 
     let report = $state({
+        version: "",
         username: "",
         email: "",
         title: "",
@@ -35,6 +36,8 @@
         report.title = ""
         report.message = ""
         report.priority = ""
+        // get version from electron
+        report.version = await electron.version()
         // populate user from Pavlovia login if possible
         report.username = user?.profile?.username
         report.email = user?.profile?.email || ""
@@ -59,6 +62,7 @@
     }
 
     async function submit(evt) {
+        console.log("Sending bug report:", $state.snapshot(report))
         // send to ClickUp via HTTP
         let resp = await fetch("/api/report", {
             method: "POST",
@@ -66,6 +70,7 @@
         }).then(
             resp => resp.json()
         )
+        console.log("Bug report sent", resp)
         // catch error
         if (resp.err) {
             err.shown = true
@@ -116,7 +121,9 @@
 <MessageDialog
     bind:shown={err.shown}
 >
-    <p>Failed to send report. Click below to download the report so you can send it manually:</p>
+    <p>Failed to send report.</p>
+    <pre>{err.ECODE}: {err.message}</pre>
+    <p>Click below to download the report so you can send it manually:</p>
     <Button 
         label="Download"
         icon="/icons/btn-download.svg"
