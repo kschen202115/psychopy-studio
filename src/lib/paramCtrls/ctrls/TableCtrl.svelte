@@ -24,7 +24,9 @@
     function newTable() {
         if (param?.ctrlParams?.template) {
             // if a table is given, open it
-            electron.files.openPath(param.ctrlParams.template)
+            electron.files.openPath(param.ctrlParams.template).then(
+                resp => console.log(resp, param.ctrlParams.template)
+            )
         } else {
             // otherwise, get the default from Python...
             python.liaison.send("app", {

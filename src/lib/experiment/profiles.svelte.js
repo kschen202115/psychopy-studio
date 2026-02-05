@@ -32,7 +32,15 @@ if ( python ) {
             }).then(
                 data => Object.assign(profiles.components, data)
             )
-            // todo: get loops
+            // get loops
+            pending.loops = python.liaison.send("app", {
+                command: "run",
+                args: [
+                    "psychopy.experiment:getLoopProfiles"
+                ]
+            }).then(
+                data => Object.assign(profiles.loops, data)
+            )
             // get devices
             pending.devices = python.liaison.send("app", {
                 command: "run",
