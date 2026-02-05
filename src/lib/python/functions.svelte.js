@@ -132,12 +132,6 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         // start python
         status.message = "Starting Python..."
         await python.liaison.start(version).catch(handleError)
-        // activatePlugins
-        status.message = "Activating plugins..."
-        await python.liaison.send(version, {
-            command: "try",
-            args: ["psychopy.plugins:activatePlugins"]
-        }, 20000).catch(handleError)
         // mark success
         status.message = "Successfully started Python"
         status.ready.resolve(true)

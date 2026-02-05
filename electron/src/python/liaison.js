@@ -19,6 +19,7 @@ export class Liaison {
         this.socket = undefined
         // ready markers
         this.started = false
+        this.open = Promise.withResolvers();
         this.ready = Promise.withResolvers();
         this.pending = []
     }
@@ -58,12 +59,12 @@ export class Liaison {
         // create websocket connection
         this.socket = new WebSocket(`ws://${this.address}`);
         // resolve/reject on open/error
-        this.socket.onopen = this.ready.resolve
-        this.socket.onerror = this.ready.reject
+        this.socket.onopen = this.open.resolve
+        this.socket.onerror = this.open.reject
         // timeout after 1s
-        setTimeout(this.ready.reject, 1000)
+        setTimeout(this.open.reject, 1000)
         // wait for websocket open/error
-        await this.ready.promise
+        await this.open.promise
         // log started
         logging.log("Liaison started")
         // listen for websocket closing
@@ -89,64 +90,77 @@ export class Liaison {
         setInterval(
             () => this.send({
                 command: "ping"
-            }, 30000).catch(
+            }, 30000, true).catch(
                 err => logging.error(`Liaison isn't responding (sent a ping and didn't receive a pong within 30s)`)
             ), 30000
         )
+
         // setup alerts
         if (await this.send({
             command: "exists",
             args: ["psychopy.alerts.liaison:LiaisonAlertHandler"]
-        }, 10000)) {
+        }, 10000, true)) {
             await this.send({
                 command: "init",
                 args: ["alerts", "psychopy.alerts.liaison:LiaisonAlertHandler"],
                 kwargs: {
                     liaison: "$liaison"
                 }
-            }, 30000).then(
-                resp => this.send({
-                    command: "run",
-                    args: ["psychopy.alerts:addAlertHandler", "$alerts"]
-                }, 30000).catch(
-                    err => logging.error(["Failed to add alert handler", err])
-                )
+            }, 30000, true)
+            await this.send({
+                command: "run",
+                args: ["psychopy.alerts:addAlertHandler", "$alerts"]
+            }, 30000, true).catch(
+                err => logging.error(["Failed to add alert handler", err])
             )
         }
         
         // setup prefs
         try {
-            this.send({
+            await this.send({
                 command: "register",
                 args: ["prefs", "psychopy.preferences:prefs"]
-            }, 10000).catch(
+            }, 10000, true).catch(
                 err => logging.error([`Failed to load prefs`, err])
-            ).then(
-                async resp => {
-                    // point to devices json
-                    await this.send({
-                        command: "try",
-                        args: ["prefs.setDevicesFile", path.join(
-                            app.getPath("appData"), "psychopy4", "devices.json"
-                        )]
-                    }, 10000).catch(
-                        err => logging.error([`Failed to set devices file`, err])
-                    )
-                    // set prefs from JSON
-                    await this.send({
-                        command: "try",
-                        args: ["prefs.fromJSON", path.join(
-                            app.getPath("appData"), "psychopy4", "preferences.json"
-                        )]
-                    }, 10000).catch(
-                        err => logging.error([`Failed to load preferences`, err])
-                    )
-                }
+            )
+            // point to devices json
+            await this.send({
+                command: "try",
+                args: ["prefs.setDevicesFile", path.join(
+                    app.getPath("appData"), "psychopy4", "devices.json"
+                )]
+            }, 10000, true).catch(
+                err => logging.error([`Failed to set devices file`, err])
+            )
+            // set prefs from JSON
+            await this.send({
+                command: "try",
+                args: ["prefs.fromJSON", path.join(
+                    app.getPath("appData"), "psychopy4", "preferences.json"
+                )]
+            }, 10000, true).catch(
+                err => logging.error([`Failed to load preferences`, err])
             )
         } catch (err) {
             // todo: this fails on <2026.0, how can we get prefs otherwise?
             err => logging.error(`Failed to setup preferences`, err)
         }
+
+        // activate plugins
+        if (await this.send({
+            command: "exists",
+            args: ["psychopy.plugins:activatePlugins"]
+        }, 10000, true)) {
+            await this.send({
+                command: "run",
+                args: ["psychopy.plugins:activatePlugins"]
+            }, undefined, true).catch(
+                err => logging.error(["Failed to activate plugins", err])
+            )
+        }
+
+        // mark ready
+        this.ready.resolve()
     }
 
     async stop() {
@@ -165,9 +179,22 @@ export class Liaison {
         this.pending = []
     }
 
-    async send(msg, timeout=undefined) {
+    /**
+     * Send a message to this Liaison
+     * 
+     * @param {object} msg Message to send, should be a JSON stringifiable object
+     * @param {*} timeout Time after which to give up if Liaison doesn't respond, leave undefined for no limit
+     * @param {*} ignoreReady If true, will not wait for setup to complete - this should only be used for messages sent during setup
+     * 
+     * @returns {Promise} Resolves to the response when Liaison responds, rejects on timeout or error
+     */
+    async send(msg, timeout=undefined, ignoreReady=false) {
         // wait for liaison to exist before sending messages
-        await this.ready.promise
+        await this.open.promise
+        // if not calling during setup, wait for setup to complete
+        if (!ignoreReady) {
+            await this.ready.promise
+        }
         // wait for other messages to finish (without inheriting their failures)
         await Promise.allSettled(this.pending).catch(err => {})
         // generate random ID
