@@ -10,13 +10,8 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
   )
 }
 
-const { uv } = require("./python/uv.js");
-const { venvs, getVenv } = require("./python/venv.js");
-const { Liaison, getLiaison } = require("./python/liaison.js");
-const { PythonShell } = require("./python/shell.js");
-const { PythonScript } = require("./python/script.js");
-const { PsychoJSServer, getPsychoJSServer } = require("./python/psychojs.js");
-const git = require("./git.js");
+const { handlers: pythonHandlers } = require("./python");
+const { handlers: gitHandlers } = require("./git.js")
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
 const { appVersion, isDev } = require('./version.js');
@@ -324,16 +319,12 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-// make sure the Python process is killed on exit
+// make sure the Svelte process is killed on exit
 process.on('SIGINT', app.quit);
 process.on('SIGTERM', app.quit);
 app.on("quit", (evt, code) => {
   // close svelte
   svelte.process.kill(0);
-  // close python
-  for (let venv of Object.values(venvs)) {
-    venv.killAll()
-  }
 })
 
 
@@ -342,7 +333,6 @@ function getFileTree(folder, recursive = false) {
 
   try {
     for (let item of fs.readdirSync(folder, { recursive: false })) {
-      console.log(item)
       // construct absolute path
       let abspath = path.join(folder, item);
       // get stats
@@ -427,66 +417,8 @@ const handlers = {
     version: ipcMain.handle("electron.version", (evt) => appVersion),
     quit: ipcMain.handle("electron.quit", (evt) => app.quit())
   },
-  python: {
-    liaison: {
-      start: ipcMain.handle("python.liaison.start", async (evt, venv) => (await getLiaison(venv)).start()),
-      stop: ipcMain.handle("python.liaison.stop", async (evt, venv) => (await getLiaison(venv)).stop()),
-      send: ipcMain.handle("python.liaison.send", async (evt, venv, message, timeout) => (await getLiaison(venv)).send(message, timeout)),
-      started: ipcMain.handle("python.liaison.started", async (evt, venv) => (await getLiaison(venv)).started),
-      ready: ipcMain.handle("python.liaison.ready", async (evt, venv) => await (await getLiaison(venv)).ready.promise)
-    },
-    venv: {
-      setup: ipcMain.handle("python.venv.setup", async (evt, venv) => (await getVenv(venv)).setup()),
-      executable: ipcMain.handle("python.venv.executable", async (evt, venv) => (await getVenv(venv)).executable),
-      installPackage: ipcMain.handle("python.venv.installPackage", async (evt, venv, name) => (await getVenv(venv)).installPackage(name)),
-      uninstallPackage: ipcMain.handle("python.venv.uninstallPackage", async (evt, venv, name) => (await getVenv(venv)).uninstallPackage(name)),
-      getPackages: ipcMain.handle("python.venv.getPackages", async (evt, venv) => (await getVenv(venv)).getPackages()),
-      getPackageDetails: ipcMain.handle("python.venv.getPackageDetails", async (evt, venv, name) => (await getVenv(venv)).getPackageDetails(name))
-    },
-    uv: {
-      folder: ipcMain.handle("python.uv.folder", (evt) => uv.folder),
-      executable: ipcMain.handle("python.uv.executable", (evt) => uv.executable),
-      exists: ipcMain.handle("python.uv.exists", (evt) => uv.exists()),
-      install: ipcMain.handle("python.uv.install", (evt) => uv.install()),
-      makeExecutable: ipcMain.handle("python.uv.makeExecutable", (evt, psychopyVersion, pythonVersion) => uv.makeExecutable(psychopyVersion, pythonVersion)),
-      findPython: ipcMain.handle("python.uv.findPython", (evt, version) => uv.findPython(version)),
-      getEnvironments: ipcMain.handle("python.uv.getEnvironments", (evt) => uv.getEnvironments())
-    },
-    shell: {
-      list: ipcMain.handle("python.shell.list", async (evt, venv) => Object.keys((await getVenv(venv)).shells)),
-      send: ipcMain.handle("python.shell.send", async (evt, venv, id, msg) => (await getVenv(venv)).shells[id].send(msg)),
-      open: ipcMain.handle("python.shell.open", async (evt, venv) => {
-        let shell = new PythonShell(await getVenv(venv))
-        shell.start()
-
-        return shell.id
-      }),
-      close: ipcMain.handle("python.shell.close", async (evt, venv, id) => (await getVenv(venv)).shells[id].close())
-    },
-    scripts: {
-      run: ipcMain.handle("python.scripts.run", async (evt, venv, file, ...args) => {
-        let script = new PythonScript(await getVenv(venv), file, args);
-        script.start()
-
-        return script.id
-      }),
-      finished: ipcMain.handle("python.scripts.finished", async (evt, venv, id) => await (await getVenv(venv)).scripts[id].finished.promise),
-      stop: ipcMain.handle("python.scripts.stop", async (evt, venv, id) => (await getVenv(venv)).scripts[id].stop())
-    },
-    psychojs: {
-      run: ipcMain.handle("python.psychojs.run", async (evt, cwd) => await PsychoJSServer.run(cwd)),
-      stop: ipcMain.handle("python.psychojs.stop", (evt, address) => getPsychoJSServer(address).stop()),
-    }
-  },
-  git: {
-    output: ipcMain.handle("git.output", (evt, message) => git.output(message)),
-    getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => git.getRemote(folder, user)),
-    pull: ipcMain.handle("git.pull", (evt, folder, user, force=true) => git.pull(folder, user, force)),
-    stage: ipcMain.handle("git.stage", (evt, folder) => git.stage(folder)),
-    commit: ipcMain.handle("git.commit", (evt, message, folder, user) => git.commit(message, folder, user)),
-    push: ipcMain.handle("git.push", (evt, folder, user, force=false) => git.push(folder, user, force)),
-    newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => git.newProject(details, folder, user))
-  }
+  python: pythonHandlers,
+  git: gitHandlers
 };
 
 // make sure user folder exists

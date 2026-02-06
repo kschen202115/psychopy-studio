@@ -1,3 +1,4 @@
+import { ipcMain } from "electron";
 import git from "isomorphic-git";
 import logging from "./logging.js";
 import http from "isomorphic-git/http/node";
@@ -225,4 +226,15 @@ export function output(message) {
     BrowserWindow.getAllWindows().forEach(
         win => win.webContents.send("git", message)
     )
+}
+
+
+export const handlers = {
+    output: ipcMain.handle("git.output", (evt, message) => git.output(message)),
+    getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => git.getRemote(folder, user)),
+    pull: ipcMain.handle("git.pull", (evt, folder, user, force=true) => git.pull(folder, user, force)),
+    stage: ipcMain.handle("git.stage", (evt, folder) => git.stage(folder)),
+    commit: ipcMain.handle("git.commit", (evt, message, folder, user) => git.commit(message, folder, user)),
+    push: ipcMain.handle("git.push", (evt, folder, user, force=false) => git.push(folder, user, force)),
+    newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => git.newProject(details, folder, user))
 }
