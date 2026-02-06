@@ -132,7 +132,10 @@
             onfocusin={() => {closeHovered = true}}
             onfocusout={() => {closeHovered = false}}
         >
-            🞪
+            <Icon 
+                src="/icons/sym-close.svg"
+                size=.75rem
+            />
             {#if closeTooltip}
                 <Tooltip
                     bind:shown={closeHovered}

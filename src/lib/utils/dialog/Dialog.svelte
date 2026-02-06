@@ -1,5 +1,6 @@
 <script>
     import { Button } from "$lib/utils/buttons";
+    import { Icon } from "$lib/utils/icons";
     import { untrack } from "svelte";
 
     let {
@@ -62,7 +63,10 @@
                         }
                     }}
                 >
-                    🞪
+                    <Icon 
+                        src="/icons/sym-close.svg"
+                        size=.75rem
+                    />
                 </button>
             </div>
         </div>
@@ -183,7 +187,7 @@
     dialog .title {
         display: grid;
         grid-template-columns: [title] max-content [gap] auto [close] min-content;
-        align-items: center;
+        align-items: stretch;
         justify-items: start;
         padding: .3em 1rem;
         background-color: var(--overlay);
@@ -202,6 +206,7 @@
         border-radius: 0;
         background-color: var(--overlay);
         color: var(--text);
+        line-height: 0;
     }
     .title-btns button:enabled:hover {
         background-color: var(--base);
