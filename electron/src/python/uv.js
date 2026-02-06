@@ -209,6 +209,10 @@ export class UV {
                 recursive: true
             })
         }
+        // on MacOS ARM, enforce an Intel executable
+        if (platform === "darwin" && arch === "arm64") {
+            pythonVersion = `cpython-${pythonVersion}-macos-x86_64-none`
+        }
         // make a new venv
         await this.execTracked([
             "venv", folder, "--python", pythonVersion, "--clear"
