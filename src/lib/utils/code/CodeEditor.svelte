@@ -13,6 +13,8 @@
         canUndo=$bindable(),
         canRedo=$bindable(),
         readonly=$bindable(false),
+        disabled=$bindable(false),
+        lineNumbers=true,
         language=undefined,
         resize="none",
         file
@@ -106,6 +108,7 @@
             editor = monaco.editor.create(container, {
                 value,
                 language,
+                lineNumbers: lineNumbers ? "on" : "off",
                 fontFamily: prefs.params['coderFont'].val || "JetBrains Mono",
                 colorDecorators: false,
                 lineHeight: 1.6,
@@ -165,7 +168,7 @@
     style:resize={resize}
     style:overflow-y={resize !== "horizontal" ? "auto" : "hidden"}
     style:overflow-x={resize !== "vertical" ? "auto" : "hidden"}
-    style:opacity={readonly ? "50%" : "100%"}
+    style:opacity={disabled ? "50%" : "100%"}
 ></div>
 
 <style>

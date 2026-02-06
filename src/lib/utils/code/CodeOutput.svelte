@@ -1,5 +1,5 @@
 <script>
-    import CompactButton from "../buttons/CompactButton.svelte";
+    import CodeEditor from "./CodeEditor.svelte";
 
     let {
         value=$bindable(),
@@ -9,11 +9,12 @@
 </script>
 
 <div class=code-output>
-    <pre>
-        {#each value.split("\n") as line}
-            <code>{line}</code>
-        {/each}
-    </pre>
+    <CodeEditor 
+        value={value}
+        language=shell
+        lineNumbers={false}
+        readonly
+    />
     {#if ctrls}
         <div class=ctrls>
             {@render ctrls()}
@@ -40,14 +41,5 @@
         box-sizing: border-box;
         border-left: 1px solid var(--overlay);
         flex-grow: 0;
-    }
-    pre {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        overflow-y: auto;
-        overflow-anchor: auto;
-        margin: 0;
-        flex-grow: 1;
     }
 </style>

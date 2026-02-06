@@ -29,6 +29,7 @@
         resize=vertical
         language={language}
         readonly={disabled}
+        disabled={disabled}
     />
 </div>
 
