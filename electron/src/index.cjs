@@ -99,7 +99,7 @@ const createWindow = () => {
     // only show if requested via prefs
     windows.splash.show();
   }
-  
+
   // keep track of ready statuses
   let ready = {
     svelte: Promise.withResolvers()
@@ -142,6 +142,117 @@ const createWindow = () => {
     const app = express();
 
     app.use(express.static(path.join(__dirname, '../../dist')));
+
+    // API routes
+    app.get('/api/plugins', async (req, res) => {
+      try {
+        const response = await fetch('https://psychopy.org/plugins.json');
+        const data = await response.json();
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    app.post('/api/report', express.json(), async (req, res) => {
+      try {
+        const snapshot = req.body;
+        const response = await fetch("https://api.clickup.com/api/v2/list/128673336/task", {
+          method: "POST",
+          headers: {
+            "Authorization": snapshot.token,
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: snapshot.title,
+            description: snapshot.description,
+            priority: snapshot.priority,
+            custom_fields: [
+              { id: "1cc82c18-79c6-470b-aa63-b39a108afe90", value: ["39244b7f-eea7-47d2-8760-418d86dc525d"] },
+              { id: "90ee49a2-01ce-49be-a3bb-c7b12160eb03", value: snapshot.email },
+              { id: "e649173f-4f1a-4275-abff-1e699962eda1", value: snapshot.version.match(/(?<=\w+)\d+$/)?.[0] || "" }
+            ]
+          })
+        });
+        const data = await response.json();
+
+        for (let [name, content] of [
+          ["last_app_load.log", snapshot.logs.app],
+          ["liaison.log", snapshot.logs.liaison],
+          ["context.json", JSON.stringify(snapshot.context, undefined, 4)]
+        ]) {
+          await fetch(`https://api.clickup.com/api/v2/task/${data.id}/comment`, {
+            method: "POST",
+            headers: {
+              "Authorization": snapshot.token,
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              notify_all: false,
+              comment_text: `${name}\n---\n${content}\n`
+            })
+          });
+        }
+
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    app.get('/api/surveys', async (req, res) => {
+      try {
+        const response = await fetch(`https://pavlovia.org/api/v2/surveys?oauthToken=${req.headers.access}`);
+        const data = await response.json();
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    app.post('/api/token/authorize', express.json(), async (req, res) => {
+      try {
+        const params = req.query;
+        const response = await fetch(`${params.root}/oauth/token`, {
+          method: "POST",
+          body: JSON.stringify({
+            client_id: params.client,
+            code: params.code,
+            grant_type: "authorization_code",
+            redirect_uri: params.redirect,
+            code_verifier: params.verifier
+          }),
+          headers: { "Content-type": "application/json; charset=UTF-8" }
+        });
+        const data = await response.json();
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    app.post('/api/token/refresh', express.json(), async (req, res) => {
+      try {
+        const params = req.query;
+        const response = await fetch(`${params.root}/oauth/token`, {
+          method: "POST",
+          body: JSON.stringify({
+            client_id: params.client,
+            refresh_token: params.refresh,
+            grant_type: "refresh_token",
+            redirect_uri: params.redirect,
+            code_verifier: params.verifier
+          }),
+          headers: { "Content-type": "application/json; charset=UTF-8" }
+        });
+        const data = await response.json();
+        res.json(data);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
 
     // Handle SPA fallback without wildcard
     app.use((req, res) => {
