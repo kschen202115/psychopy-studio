@@ -96,6 +96,8 @@
         }
     })
 
+    $effect(() => monaco?.editor?.setValue?.(value))
+
     onMount(() => {
         (async () => {
             // initialise monaco loader
