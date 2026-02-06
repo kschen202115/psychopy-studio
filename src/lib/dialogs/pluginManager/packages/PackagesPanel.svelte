@@ -17,18 +17,6 @@
     });
     setContext("siblings", children)
 
-    // cached list of pypi packages
-    const pypi = $state([]);
-    python.venv.getPackages(venv).then(
-        resp => {
-            for (let key in resp) {
-                if (!pypi.includes(key)) {
-                    pypi.push(key)
-                }
-            }
-        }
-    )
-
     $effect(() => {
         if (venv) {
             python.venv.getPackages(venv).then(packages => children.installed = packages)
