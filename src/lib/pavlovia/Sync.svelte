@@ -1,5 +1,6 @@
 <script>
     import { git } from "$lib/globals.svelte";
+    import { showWindow } from "$lib/utils/views.svelte";
     import { getContext } from "svelte";
     import CommitDlg from "./CommitDlg.svelte";
     import NewProjectDlg from "./NewProjectDlg.svelte";
@@ -13,6 +14,8 @@
 
 
     export async function sync(folder, user, force=false) {
+        // open runner to capture output
+        showWindow("runner")
         // get remote
         let remote = await git.getRemote(folder, user);
         // if there is no remote, create one
