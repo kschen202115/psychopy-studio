@@ -114,7 +114,7 @@
                 key = iterateName(key)
             }
             // add field
-            param.val[key] = "\"default\"";
+            param.val[key] = "";
         }}
         tooltip="Add item"
         disabled={disabled}
