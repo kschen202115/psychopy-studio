@@ -40,5 +40,7 @@
     .dlg-message {
         padding: 1rem;
         max-width: 45rem;
+        min-width: 30rem;
+        min-height: 10rem;
     }
 </style>

@@ -52,10 +52,3 @@
         <CodeOutput value={errors.map(err => err.content.error).join("\n")} />
     </div>
 </MessageDialog>
-
-<style>
-    .output-container {
-        min-width: 30rem;
-        min-height: 20rem;
-    }
-</style>

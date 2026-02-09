@@ -14,7 +14,7 @@
         flex-direction: column;
         align-items: center;
         gap: .5rem;
-        position: absolute;
+        position: fixed;
         bottom: 1rem;
         right: 1rem;
         z-index: 10;

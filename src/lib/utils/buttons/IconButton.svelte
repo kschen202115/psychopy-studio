@@ -1,6 +1,8 @@
 <script>
     import Icon from "$lib/utils/icons/Icon.svelte";
     import Tooltip from "$lib/utils/tooltip/Tooltip.svelte";
+    import { Message, MessageArray } from "$lib/utils/message";
+    import { MessageDialog } from "$lib/utils/dialog";
 
     let {
         /** @prop @type {string} Text label for this button, if any */
@@ -22,77 +24,80 @@
     } = $props()
 
     let showTooltip = $state(false);
+    let showError = $state.raw(false)
 </script>
 
+{#snippet button(status)}
+    <button
+        disabled={disabled} 
+        onclick={{
+            // if completed/not started, execute method
+            ready: evt => awaiting = onclick(evt),
+            // if awaiting, execute cancel method
+            awaiting: evt => cancel?.(evt),
+            // if errored, show error
+            error: evt => showError = true
+        }[status]}
+        onmouseenter={() => {showTooltip = true}}
+        onmouseleave={() => {showTooltip = false}}
+        onfocusin={() => {showTooltip = true}}
+        onfocusout={() => {showTooltip = false}}
+        class:borderless={borderless}
+    >
+        <Icon 
+            src={{
+                // if completed/not started, regular icon
+                ready: icon,
+                // if awaiting, ... icon and cancel icon if hovered
+                awaiting: showTooltip ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
+                // if error, error icon
+                error: "/icons/sym-error.svg"
+            }[status]}
+            size=2.25rem
+        />
+        <Tooltip
+            bind:shown={showTooltip}
+            position="bottom"
+        >
+            {{
+                // if completed/not started, regular label
+                ready: label,
+                // if awaiting, regular label + cancel (if possible)
+                awaiting: label + (cancel ? " (cancel)" : ""),
+                // if error, error icon
+                error: "Failed, click to show error"
+            }[status]}            
+        </Tooltip>
+
+        {@render children?.()}
+    </button>
+{/snippet}
+
 {#await awaiting}
-    <button
-        disabled={disabled} 
-        onclick={evt => cancel?.(evt)}
-        onmouseenter={() => {showTooltip = true}}
-        onmouseleave={() => {showTooltip = false}}
-        onfocusin={() => {showTooltip = true}}
-        onfocusout={() => {showTooltip = false}}
-        class:borderless={borderless}
-    >
-        <Icon 
-            src="/icons/sym-{cancel && showTooltip ? "cancel" : "pending"}.svg"
-            size=2.25rem
-        />
-        <Tooltip
-            bind:shown={showTooltip}
-            position="bottom"
-        >
-            {label}{cancel ? " (cancel)" : ""}
-        </Tooltip>
-
-        {@render children?.()}
-    </button>
+    {@render button("awaiting")}
 {:then}
-    <button
-        disabled={disabled} 
-        onclick={evt => awaiting = onclick(evt)}
-        onmouseenter={() => {showTooltip = true}}
-        onmouseleave={() => {showTooltip = false}}
-        onfocusin={() => {showTooltip = true}}
-        onfocusout={() => {showTooltip = false}}
-        class:borderless={borderless}
-    >
-        <Icon 
-            src={icon}
-            size=2.25rem
-        />
-        <Tooltip
-            bind:shown={showTooltip}
-            position="bottom"
-        >
-            {label}
-        </Tooltip>
-
-        {@render children?.()}
-    </button>
+    {@render button("ready")}
 {:catch err}
-    {console.error(err)}
-    <button
-        onclick={evt => awaiting = Promise.resolve(false)}
-        onmouseenter={() => {showTooltip = true}}
-        onmouseleave={() => {showTooltip = false}}
-        onfocusin={() => {showTooltip = true}}
-        onfocusout={() => {showTooltip = false}}
-        class:borderless={borderless}
-    >
-        <Icon 
-            src="/icons/sym-error.svg"
-            size=2.25rem
+    {@render button("error")}
+    <!-- error message -->
+    <MessageArray>
+        <Message
+            message="Error, click to show"
+            icon="/icons/sym-error.svg"
+            onclick={evt => showError = true}
         />
-        <Tooltip
-            bind:shown={showTooltip}
-            position="bottom"
-        >
-            {err}
-        </Tooltip>
+    </MessageArray>
+    <!-- error dialog -->
+    <MessageDialog
+        bind:shown={showError}
+        title="Error in '{label}'"
+        buttons={{
+            OK: evt => awaiting = Promise.resolve(false)
+        }}
+    >
+        {err.message}
+    </MessageDialog>
 
-        {@render children?.()}
-    </button>
 {/await}
 
 
