@@ -139,7 +139,11 @@ export async function login(username, current) {
         }
 
         // request actual auth and refresh tokens
-        const tokensResp = await fetch(
+        console.log(
+            "Login successful, requesting authentication code from Pavlovia...",
+            $state.snapshot(auth)
+        )
+        let tokens = await fetch(
             `/api/token/authorize?${new URLSearchParams({
                 root: auth.root,
                 redirect: electron ? auth.root : window.location.href,
@@ -148,19 +152,18 @@ export async function login(username, current) {
                 verifier: auth.verifier
             }).toString()}`,
             { method: "post" }
+        ).then(
+            resp => resp.json()
         );
-
-        if (!tokensResp.ok) {
-            throw new Error(`Token request failed: ${tokensResp.statusText}`);
+        if (tokens.error) {
+            throw new Error(`Token request failed: ${tokens.error}, ${tokens.error_description}`);
         }
-
-        const tokens = await tokensResp.json();
 
         // discard code now we're done with it (so we can log in as different users later)
         auth.code = undefined;
 
         // update profile
-        const profileResp = await fetch(
+        let profileResp = await fetch(
             `${auth.root}/api/v4/user?access_token=${tokens.access_token}`
         );
 
@@ -168,7 +171,7 @@ export async function login(username, current) {
             throw new Error(`Profile request failed: ${profileResp.statusText}`);
         }
 
-        const profile = await profileResp.json();
+        let profile = await profileResp.json();
 
         // get username incase they logged in as a different user
         username = profile.username;
