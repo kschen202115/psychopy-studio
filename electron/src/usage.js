@@ -7,7 +7,7 @@ export class UsageReport {
         // create base URL object
         this.url = new URL("https://usage.psychopy.org/submit.php")
         // set URL params
-        this.url.searchParams.set("time", this.time)
+        this.url.searchParams.set("date", this.time)
         this.url.searchParams.set("sys", this.sys)
         this.url.searchParams.set("version", this.version)
         this.url.searchParams.set("misc", this.misc)
