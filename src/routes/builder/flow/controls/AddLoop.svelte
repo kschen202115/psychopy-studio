@@ -76,10 +76,7 @@
         bind:shown={showDialog} 
         onopen={() => current.inserting.restore.set()}
         buttons={{
-            OK: (evt) => {
-                // add to experiment
-                current.experiment.loops[current.inserting.name] = current.inserting
-            }, 
+            OK: (evt) => {}, 
             CANCEL: (evt) => {
                 current.inserting.restore.apply()
                 // stop inserting

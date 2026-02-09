@@ -14,7 +14,6 @@ export class Experiment {
     version = "2026.1.0"
 
     routines = $state({})
-    loops = $state({})
     file = $state(undefined)
     running = $state.raw(undefined)
 
@@ -99,7 +98,7 @@ export class Experiment {
             }
         }
         // iterate through all loops
-        for (let loop of Object.values(this.loops)) {
+        for (let loop of Object.values(this.flow.loops)) {
             // add Loop name
             names[loop.name] = loop.params['name']
         }

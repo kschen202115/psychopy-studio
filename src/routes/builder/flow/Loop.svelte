@@ -26,10 +26,6 @@
     function removeLoop(evt) {
         // update history
         current.experiment.history.update(`remove ${element.name}`);
-        // remove from experiment
-        if (element.name in current.experiment.loops) {
-            delete current.experiment.loops[element.name]
-        }
         // remove from flow
         if (current.experiment.flow.flat.includes(element.initiator)) {
             current.experiment.flow.flat.splice(

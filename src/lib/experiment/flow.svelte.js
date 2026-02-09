@@ -47,6 +47,13 @@ export class Flow {
         return dynamic;
     });
 
+    // dynamic list of all loop objects in this flow
+    loops = $derived(
+        this.flat.filter(
+            item => item instanceof LoopInitiator
+        )
+    )
+
     constructor(exp) {
         this.exp = exp;
     }
