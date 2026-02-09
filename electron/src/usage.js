@@ -22,7 +22,7 @@ export class UsageReport {
         ).then(
             resp => resp.text()
         ).then(
-            resp => console.log("Sent usage statistics", this.asJSON(), resp)
+            resp => console.log("Sent usage statistics", this.asJSON())
         )
     }
 
