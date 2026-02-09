@@ -69,6 +69,6 @@ export class UsageReport {
     }
     
     get misc() {
-        return ""
+        return arch
     }
 }
