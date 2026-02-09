@@ -96,8 +96,6 @@
         }
     })
 
-    $effect(() => monaco?.editor?.setValue?.(value))
-
     onMount(() => {
         (async () => {
             // initialise monaco loader
@@ -140,28 +138,11 @@
         })();
     });
 
-    $effect(() => {
-        if (editor) {
-            editor.updateOptions({ readOnly: readonly })
-        }
-    })
+    // dynamically update value
+    $effect(() => editor?.setValue?.(value))
 
-    $effect(() => {
-        if (value) {
-            if (editor) {
-                // only do this if the editor doesn't have focus (as a focused editor will already update the value)
-                if (!editor.hasWidgetFocus()) {
-                    // update editor value
-                    if (editor?.getValue() ?? ' ' !== value) {
-                        editor?.setValue(value);
-                    }
-                }
-            }
-        } else {
-            // make sure there's always at least 1 char
-            editor?.setValue(' ');
-        }
-    });
+    // dynamically update readonly
+    $effect(() => editor?.updateOptions?.({ readOnly: readonly }))
 </script>
 
 <div 
