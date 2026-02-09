@@ -20,28 +20,41 @@ class Preferences extends HasParams {
         this.ready = this.load()
     }
 
-    load() {
+    async load() {
+        let data
         if (electron) {
-            return electron.paths.prefs()
-                .then(
-                    // make sure prefs file exists
-                    async file => {
-                        if (!(await electron.files.exists(file))) {
-                            await this.save()
-                        }
-
-                        return file
-                    }
-                ).then(
-                    // load data from file
-                    file => electron.files.load(file)
-                ).then(
-                    // setup params from file content
-                    data => this.fromJSON(JSON.parse(data))
-                )
+            // get prefs file
+            let file = await electron.paths.prefs()
+            // make sure it exists
+            if (!(await electron.files.exists(file))) {
+                await this.save()
+            }
+            // load data from file
+            data = JSON.parse(
+                await electron.files.load(file)
+            )
         } else {
-            return FallbackPreferences
+            // use fallback prefs for online
+            data = FallbackPreferences
         }
+        // setup params from file content
+        this.fromJSON(data)
+        // choose appropriate command key for OS
+        let cmd = "CONTROL"
+        if (await electron?.platform?.() === "darwin") {
+            cmd = "COMMAND"
+        }
+        // iterate through keypress params
+        for (let param of Object.values(this.params)) {
+            if (param.valType === "keypress") {
+                // substitute placeholder {CMD} for OS-specific command key
+                for (let [i, value] of Object.entries(param.val)) {
+                    console.log(param.val[i], i, value)
+                    param.val[i] = value.replaceAll("{CMD}", cmd)
+                }
+            }
+        }
+        
     }
 
     save() {

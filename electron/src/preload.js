@@ -43,6 +43,7 @@ const electron = {
   },
   authenticatePavlovia: (url) => ipcRenderer.invoke("electron.authenticatePavlovia", url).then(resp => resp),
   version: () => ipcRenderer.invoke("electron.version").then(resp => resp),
+  platform: () => ipcRenderer.invoke("electron.platform").then(resp => resp),
   quit: () => ipcRenderer.invoke("electron.quit")
 };
 contextBridge.exposeInMainWorld('electron', electron)

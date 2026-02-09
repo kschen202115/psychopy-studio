@@ -522,6 +522,7 @@ const handlers = {
     },
     authenticatePavlovia: ipcMain.handle("electron.authenticatePavlovia", (evt, url) => authenticatePavlovia(url)),
     version: ipcMain.handle("electron.version", (evt) => appVersion),
+    platform: ipcMain.handle("electron.platform", (evt) => process.platform),
     quit: ipcMain.handle("electron.quit", (evt) => app.quit())
   },
   python: pythonHandlers,

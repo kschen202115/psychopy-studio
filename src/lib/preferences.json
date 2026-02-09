@@ -700,7 +700,7 @@
         },
         "new": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "N"
             ],
             "valType": "keypress",
@@ -720,7 +720,7 @@
         },
         "open": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "O"
             ],
             "valType": "keypress",
@@ -761,7 +761,7 @@
         },
         "save": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "S"
             ],
             "valType": "keypress",
@@ -781,7 +781,7 @@
         },
         "saveAs": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "ALT",
                 "S"
             ],
@@ -802,7 +802,7 @@
         },
         "undo": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "Z"
             ],
             "valType": "keypress",
@@ -822,7 +822,7 @@
         },
         "redo": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "SHIFT",
                 "Z"
             ],
@@ -843,7 +843,7 @@
         },
         "close": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "W"
             ],
             "valType": "keypress",
@@ -863,8 +863,8 @@
         },
         "quit": {
             "val": [
-                "ALT",
-                "F4"
+                "{CMD}",
+                "Q"
             ],
             "valType": "keypress",
             "inputType": "keypress",
@@ -883,7 +883,7 @@
         },
         "find": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "F"
             ],
             "valType": "keypress",
@@ -923,7 +923,7 @@
         },
         "sendToRunner": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "ALT",
                 "F5"
             ],
@@ -944,7 +944,7 @@
         },
         "compilePython": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "E"
             ],
             "valType": "keypress",
@@ -983,7 +983,7 @@
         },
         "stopPython": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "."
             ],
             "valType": "keypress",
@@ -1003,7 +1003,7 @@
         },
         "compileJS": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "ALT",
                 "E"
             ],
@@ -1044,7 +1044,7 @@
         },
         "syncPavlovia": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "ALT",
                 "Y"
             ],
@@ -1065,7 +1065,7 @@
         },
         "showDevTools": {
             "val": [
-                "CONTROL",
+                "{CMD}",
                 "SHIFT",
                 "I"
             ],
