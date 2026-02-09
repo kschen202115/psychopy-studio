@@ -9,27 +9,24 @@
 
     onMount(() => component.restore.set())
 
-    let valid = $state({})
-
-    let applyDisabled = $derived(
-        Object.values(valid).some(
-            (val) => !val.state
+    let valid = $derived(
+        Object.values(component.params).every(
+            param => param.valid.value
         )
     )
 </script>
 
 <div class=standalone-routine-canvas>
     <ParamsNotebook 
-        bind:valid={valid}
-        element={component}
-    ></ParamsNotebook>
+        bind:element={component}
+    />
     <div class=standalone-routine-ctrls>
         <div class=ctrl-gap></div>
         <Button
             label=Apply
             primary
             horizontal
-            disabled={applyDisabled}
+            disabled={!valid}
             onclick={(evt) => component.restore.set()} 
         ></Button>
         <Button
