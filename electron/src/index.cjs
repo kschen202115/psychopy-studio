@@ -56,11 +56,7 @@ clipboard = undefined
 
 // send usage stats
 let usageReport = new UsageReport()
-if (isDev) {
-  console.log(usageReport.url.toString())
-} else {
-  usageReport.send()
-}
+usageReport.send()
 
 // setup listener for file open
 function onFileOpen(evt, file) {

@@ -18,9 +18,22 @@ export class UsageReport {
           this.url.toString()
         ).catch(
           // if it fails, take note, but don't error
-          err => logging.log(`Failed to send usage statistics: ${err}`)
+          err => logging.log("Failed to send usage statistics", this.asJSON(), err)
+        ).then(
+            resp => resp.text()
+        ).then(
+            resp => console.log("Sent usage statistics", this.asJSON(), resp)
         )
     }
+
+    asJSON() {
+        return {
+            target: this.url.origin + this.url.pathname,
+            params: Object.fromEntries(this.url.searchParams.entries()),
+            full: this.url.toString()
+        }
+    }
+
     get time() {
         // get current time
         let now = new Date(Date.now())
