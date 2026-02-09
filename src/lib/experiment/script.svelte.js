@@ -24,8 +24,7 @@ export class Script {
     /**
      * Run this script in Python.
      * 
-     * @param {string || undefined} executable Path to the Python executable to run in (leave 
-     * undefined to use default executable)
+     * @param {string } version PsychoPy version of the venv to run this in
      */
     async runPython(version="app") {
         // fail if there's no Python to run in
@@ -33,14 +32,49 @@ export class Script {
             console.error("Script running is not available in browser.")
             return
         }
-        // run script
-        let id = await python.scripts.run(
-            version,
-            this.file.file, 
-            ...(this.pilotMode ? ["--pilot"] : []),
-            "--prefs-json", `"${await electron.paths.prefs()}"`
+        // mark started
+        await python.output.stdout.send(
+            `--- Started ${this.file.name} ---`
         )
-        await python.scripts.finished(version, id)
+        // run script
+        this.running = await python.scripts.run(
+            version,
+            this.file.file,  
+            ...(this.pilotMode ? ["--pilot"] : []),
+            "--prefs-json",
+            await electron.paths.prefs()
+        )
+        // await finished
+        await python.scripts.finished(version, this.running)
+        // mark finished
+        this.running = undefined
+        await python.output.stdout.send(
+            `--- Finished ${this.file.name} ---`
+        )
+    }
+
+    /**
+     * Stop running this script
+     * 
+     * @param {string } version PsychoPy version of the venv to cancel run in
+     */
+    async stopPython(version="app") {
+        // do nothing if nothing is running
+        if (this.running === undefined) {
+            return
+        }
+        // fail if there's no Python to run in
+        if (!python) {
+            console.error("Script running is not available in browser.")
+            return
+        }
+        // request stop from electron
+        await python.scripts.stop(version, this.running)
+        // mark finished
+        this.running = undefined
+        await python.output.stdout.send(
+            `--- Stopped experiment ${this.file.name} ---`
+        )
     }
 
     /**

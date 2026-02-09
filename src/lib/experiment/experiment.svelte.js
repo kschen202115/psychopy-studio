@@ -533,7 +533,7 @@ export class Experiment {
 
     async stopPython() {
         // do nothing if nothing is running
-        if (this.runnings === undefined) {
+        if (this.running === undefined) {
             return
         }
         // fail if there's no Python to run in

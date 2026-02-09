@@ -115,17 +115,30 @@ export function sendToRunner() {
     openIn(current.pages[current.tab]?.file?.file, "runner")
 }
 
-export async function runPython(executable) {
+export async function runPython(version) {
     if (!python) {
         return
     }
     if (current.pages[current.tab]) {
         // run script
-        await current.pages[current.tab].runPython(executable)
+        await current.pages[current.tab].runPython(version)
     }    
 
     return true
 }
+
+export async function stopPython(version) {
+    if (!python) {
+        return
+    }
+    if (current.pages[current.tab]) {
+        // run script
+        await current.pages[current.tab].stopPython(version)
+    }    
+
+    return true
+}
+
 
 export async function runJS() {
     if (!python) {
@@ -155,6 +168,7 @@ export var shortcuts = {
     togglePiloting: togglePiloting,
     sendToRunner: sendToRunner,
     runPython: runPython,
+    stopPython: stopPython,
     runJS: runJS,
     showDevTools: showDevTools
 }

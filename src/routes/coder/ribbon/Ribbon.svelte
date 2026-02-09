@@ -13,6 +13,7 @@
         sendToRunner,
         // run
         runPython,
+        stopPython,
         // views
         showWindow
     } from '../callbacks.svelte.js'
@@ -125,10 +126,10 @@
             <IconButton 
                 icon="/icons/btn-{current.pages[current.tab]?.pilotMode ? "pilot" : "run"}py.svg" 
                 label="{current.pages[current.tab]?.pilotMode ? "Pilot" : "Run"} experiment locally" 
-                onclick={evt => runPython("app")}
+                onclick={evt => runPython()}
                 disabled={!current.pages[current.tab]?.file?.file || current.pages[current.tab]?.file?.ext !== ".py"}
                 bind:awaiting={awaiting.runpy}
-                cancel={python.scripts.stop}
+                cancel={evt => stopPython()}
                 borderless
             /> 
         </RibbonSection>
