@@ -488,8 +488,6 @@ export class Experiment {
      * Run this experiment in Python.
      * 
      * @param {boolean} compile If true, compile the experiment to Python before running
-     * @param {string || undefined} executable Path to the Python executable to run in (leave 
-     * undefined to use default executable)
      */
     async runPython(compile=true) {
         // fail if there's no Python to run in

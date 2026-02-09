@@ -121,7 +121,7 @@ export async function runPython(executable) {
     }
     if (current.pages[current.tab]) {
         // run script
-        await current.pages[current.tab].runPython(false, executable)
+        await current.pages[current.tab].runPython(executable)
     }    
 
     return true
