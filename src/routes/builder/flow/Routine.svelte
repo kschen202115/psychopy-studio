@@ -4,6 +4,7 @@
     import Tooltip from '$lib/utils/tooltip/Tooltip.svelte';
     import { getContext } from "svelte";
     import { copyRoutine } from "../callbacks.svelte";
+    import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
     
     let current = getContext("current");
 
@@ -11,13 +12,16 @@
         element
     } = $props()
 
-    let showContextMenu = $state(false)
+    let show = $state({
+        settingsDlg: false,
+        contextMenu: false,
+        tooltip: false
+    })
+
     let contextMenuPos = $state({
         x: undefined,
         y: undefined
     });
-
-    let showTooltip = $state(false);
 
     function removeRoutine(evt) {
         // update history
@@ -38,10 +42,10 @@
 <button 
     class=routine 
     draggable={true}
-    onmouseenter={() => {showTooltip = true}}
-    onmouseleave={() => {showTooltip = false}}
-    onfocusin={() => {showTooltip = true}}
-    onfocusout={() => {showTooltip = false}}
+    onmouseenter={() => {show.tooltip = true}}
+    onmouseleave={() => {show.tooltip = false}}
+    onfocusin={() => {show.tooltip = true}}
+    onfocusout={() => {show.tooltip = false}}
     ondragstart={() => current.moving = element} 
     ondragend={() => current.moving = undefined} 
     onclick={() => current.routine = element}
@@ -50,7 +54,7 @@
     oncontextmenu={(evt) => {
         evt.preventDefault();
         // show menu
-        showContextMenu = true;
+        show.contextMenu = true;
         // set its position to the mouse pos
         contextMenuPos.x = evt.pageX;
         contextMenuPos.y = evt.pageY;
@@ -59,7 +63,7 @@
     <!-- tooltip -->
     {#if element.settings && "desc" in element.settings.params && element.settings.params['desc'].val}
         <Tooltip
-            bind:shown={showTooltip}
+            bind:shown={show.tooltip}
             position="bottom"
         >
             {#if element.settings.params['desc'].val.length > 64}
@@ -74,9 +78,14 @@
 
 <!-- context menu -->
 <Menu 
-    bind:shown={showContextMenu} 
+    bind:shown={show.contextMenu} 
     bind:position={contextMenuPos}
 >
+    <MenuItem
+        icon="/icons/btn-edit.svg"
+        label="Routine settings"
+        onclick={(evt) => show.settingsDlg = true}
+    />
     <MenuItem
         icon="/icons/sym-dot-{element.disabled ? "blue" : "light"}.svg"
         label="{element.disabled ? "Enable" : "Disable"} Routine"
@@ -98,6 +107,11 @@
         onclick={removeRoutine}
     />
 </Menu>
+
+<ParamsDialog
+    bind:element={element.settings}
+    bind:shown={show.settingsDlg}
+/>
 
 <style>
     .routine {
