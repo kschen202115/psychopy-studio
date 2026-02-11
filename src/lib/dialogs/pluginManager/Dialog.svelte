@@ -16,8 +16,7 @@
         current: undefined
     });
 
-    let venv = $state.raw()
-    setContext("venv", () => venv)
+    let venv = $state.raw("app")
 
     let output = $state.raw("");
     python.uv.output.listen(
@@ -45,7 +44,7 @@
                         </option>
                     {:then environments}
                         {#each environments as env}
-                            <option value={env.psychopyVersion} selected={env.executable === appExecutable}>
+                            <option value={env.executable === appExecutable ? "app" : env.psychopyVersion}>
                                 {env.psychopyVersion}
                                 {#if env.executable === appExecutable}
                                     (default)
