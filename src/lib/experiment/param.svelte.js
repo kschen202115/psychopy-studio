@@ -7,9 +7,17 @@ export class Param {
     val = $state();
     updates = $state();
 
+    // is this param of a type which should be displayed as code
+    isCodeType = $derived(![
+        "extendedStr",
+        "str", 
+        "file", 
+        "table",
+        "color",
+    ].includes(this.valType))
     // checks to see if this param looks like code
     isCode = $derived(
-        ["code", "extendedCode"].includes(this.valType) || String(this.val).startsWith("$")
+        this.isCodeType || String(this.val).startsWith("$")
     );
 
     // list of validators to run through (in order), these are added by param ctrls

@@ -5,7 +5,7 @@
         /** @prop @type {boolean} Controls whether this control is disabled */
         disabled=false,
         /** @prop @type {Boolean} Should the code indicator ($) be shown? */
-        codeIndicator = ["code", "extendedCode"].includes(param.valType),
+        codeIndicator = param.isCodeType,
         /** @interface */
         ...attachments
     } = $props()
