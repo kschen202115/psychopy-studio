@@ -42,7 +42,7 @@ class Preferences extends HasParams {
         // choose appropriate command key for OS
         let cmd = "CONTROL"
         if (await electron?.platform?.() === "darwin") {
-            cmd = "COMMAND"
+            cmd = "META"
         }
         // iterate through keypress params
         for (let param of Object.values(this.params)) {

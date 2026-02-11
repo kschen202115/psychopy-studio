@@ -29,6 +29,12 @@
 
     // function to close parent
     let closeMenu = getContext("closeMenu");
+
+    // define some key labels
+    let keyLabels = {
+        CONTROL: "CTRL",
+        META: "CMD"
+    }
 </script>
 
 
@@ -53,7 +59,9 @@
     </span>
     <span class=shortcut>
         {#if shortcut in prefs.shortcuts}
-            {prefs.shortcuts[shortcut].val.join("+")}
+            {prefs.shortcuts[shortcut].val.map(
+                item => keyLabels[item] || item
+            ).join("+")}
         {/if}
     </span>
     {@render submenu?.()}
