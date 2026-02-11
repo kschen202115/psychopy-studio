@@ -139,7 +139,11 @@
     });
 
     // dynamically update value
-    $effect(() => editor?.setValue?.(value))
+    $effect(() => {
+        if (!editor?.hasWidgetFocus?.()) {
+            editor?.setValue?.(value)
+        }
+    })
 
     // dynamically update readonly
     $effect(() => editor?.updateOptions?.({ readOnly: readonly }))
