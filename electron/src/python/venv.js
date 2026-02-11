@@ -108,7 +108,6 @@ export class PythonVenv {
                             item => item.name
                         )
                     );
-                    console.log(this.psychopyVersion, tags, tags.includes(this.psychopyVersion))
                     // if version is in tags, it's a prerelease so install from the tag
                     if (tags.includes(this.psychopyVersion)) {
                         uv.output(`Version ${this.psychopyVersion} is unreleased, installing prelease from GitHub...`)
