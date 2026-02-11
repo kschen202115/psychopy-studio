@@ -19,14 +19,14 @@
                         src="/icons/btn-{item.pilotMode ? "pilot" : "run"}py.svg"
                     />
                     <RadioButton 
-                        value={$state.snapshot(i)}
+                        value={parseInt(i)}
                         label="{item.file.name.length > 40 ? "..." : ""}{item.file.name.slice(-40)}"
                         tooltip={item.file.file}
                         icon="/icons/btn-{item instanceof Experiment ? "builder" : "coder"}.svg"
                     />
                     <CompactButton 
                         icon="/icons/btn-delete.svg"
-                        onclick={evt => delete current.runlist[i]}
+                        onclick={evt => delete current.runlist[parseInt(i)]}
                     />
                 </div>
             {/each}

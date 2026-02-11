@@ -14,10 +14,13 @@ export async function addFile(file, pilotMode=undefined) {
     if (typeof file === "string") {
         file = parsePath(file)
     }
-    // if file is already present, do nothing
+    // if file is already present, just select it
     if (current.runlist.some(
         item => item.file.file === file.file
     )) {
+        current.selection = current.runlist.findIndex(
+            item => item.file.file === file.file
+        )
         return
     }
     // if given a .psyrun, add all files contained

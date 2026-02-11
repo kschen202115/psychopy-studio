@@ -7,17 +7,12 @@
     } = $props();
 
     let buttons = $state({
-        selected: {
-            handle: undefined, 
-            value: undefined
-        },
+        selection: undefined,
         all: []
     })
     setContext("siblings", buttons)
+    $effect(() => buttons.selection = value)
 
-    $effect(() => {
-        value = buttons.selected.value
-    })
 </script>
 
 {@render children?.()}

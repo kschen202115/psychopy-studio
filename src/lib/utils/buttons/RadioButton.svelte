@@ -4,7 +4,7 @@
     import Tooltip from "$lib/utils/tooltip/Tooltip.svelte";
 
     let {
-        value,
+        value=$bindable(),
         label,
         icon="",
         tooltip="",
@@ -12,34 +12,20 @@
     } = $props();
 
     let siblings = getContext("siblings");
-    let handle = $state.raw()
-
-    onMount(() => {
-        // store reference to this button in parent
-        siblings.all.push({
-            value: value,
-            handle: handle
-        })
-    })
+    siblings.all.push(value)
 
     let hovered = $state.raw(false);
-
-    let selected = $derived(siblings.selected.handle === handle)
 </script>
 
 <button
     class=radio-btn
-    bind:this={handle}
-    class:selected={selected}
+    class:selected={siblings.selection === value}
     class:hovered={hovered}
     onmouseenter={() => hovered = true}
     onmouseleave={() => hovered = false}
     onfocusin={() => hovered = true}
     onfocusout={() => hovered = false}
-    onclick={evt => siblings.selected = {
-        handle: handle,
-        value: value
-    }}
+    onclick={evt => siblings.selection = value}
     disabled={disabled}
 >
     {#if tooltip}
