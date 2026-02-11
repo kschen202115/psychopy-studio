@@ -31,6 +31,7 @@
         gap: .5rem;
         height: 100%;
         min-width: 55rem;
+        min-height: 25rem;
     }
     .ctrls {
         display: flex;
