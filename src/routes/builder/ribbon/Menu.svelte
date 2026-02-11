@@ -10,6 +10,7 @@
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js";
     import { PluginManagerDlg } from "$lib/dialogs/pluginManager";
     import { setupPython } from "$lib/python"
+    import { Version } from "$lib/utils/versions"
 
     import {
         // file
@@ -291,12 +292,16 @@
     </SubMenu>
 
     {#if electron}
-        <MenuSeparator />
-        
-        <MenuItem
-            label="Report bug"
-            onclick={evt => show.bugReport = true}
-        />
+        {#await electron.version() then version}
+            {#if version === "dev" || Version.parse(version).extra}
+                <MenuSeparator />
+                
+                <MenuItem
+                    label="Report bug"
+                    onclick={evt => show.bugReport = true}
+                />
+            {/if}
+        {/await}
 
         <MenuSeparator />
 

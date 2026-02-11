@@ -7,6 +7,7 @@
     import { electron, python } from "$lib/globals.svelte";
     import { showDevTools } from "$lib/utils/views.svelte"
     import { setupPython } from "$lib/python";
+    import { Version } from "$lib/utils/versions";
 
     import {
         // file
@@ -198,12 +199,16 @@
     </SubMenu>
 
     {#if electron}
-        <MenuSeparator />
-        
-        <MenuItem
-            label="Report bug"
-            onclick={evt => show.bugReport = true}
-        />
+        {#await electron.version() then version}
+            {#if version === "dev" || Version.parse(version).extra}
+                <MenuSeparator />
+                
+                <MenuItem
+                    label="Report bug"
+                    onclick={evt => show.bugReport = true}
+                />
+            {/if}
+        {/await}
 
         <MenuSeparator />
 
