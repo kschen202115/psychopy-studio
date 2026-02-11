@@ -45,35 +45,38 @@
 </script>
 
 <div class=packages-ctrl>
-    <div class=packages-list>
+    <div class=package-list-ctrl>
         <input type=search bind:value={searchterm} />
-        <!-- installed packages first -->
-        {#each Object.keys(children.installed) as name}
-            {#if matches(searchterm, name)}
-                <PackageItem 
-                    name={name}
-                    bind:venv={venv} 
-                    getProfile={name => python.venv.getPackageDetails(venv, name)} 
-                />
-            {/if}
-        {/each}
-        <!-- if search matches a pypi package, include that too -->
-        {#if searchterm && !Object.keys(children.installed).includes(searchterm)}
-            {#await checkPyPi(searchterm).then(resp => resp)}
-                Searching PyPi...
-            {:then profile}
-                {#if profile}
+        <div class=packages-list>
+            <!-- installed packages first -->
+            {#each Object.keys(children.installed) as name}
+                {#if matches(searchterm, name)}
                     <PackageItem 
-                        name={searchterm} 
+                        name={name}
                         bind:venv={venv} 
-                        getProfile={name => profile} 
+                        getProfile={name => python.venv.getPackageDetails(venv, name)} 
                     />
                 {/if}
-            {:catch err}
-                {""}
-            {/await}
-        {/if}
+            {/each}
+            <!-- if search matches a pypi package, include that too -->
+            {#if searchterm && !Object.keys(children.installed).includes(searchterm)}
+                {#await checkPyPi(searchterm).then(resp => resp)}
+                    Searching PyPi...
+                {:then profile}
+                    {#if profile}
+                        <PackageItem 
+                            name={searchterm} 
+                            bind:venv={venv} 
+                            getProfile={name => profile} 
+                        />
+                    {/if}
+                {:catch err}
+                    {""}
+                {/await}
+            {/if}
+        </div>
     </div>
+    
     <div class=package-details>
         {@render children.selected?.()}
     </div>
@@ -82,17 +85,36 @@
 
 <style>
     .packages-ctrl {
-        display: grid;
-        width: 65rem;
-        grid-template-columns: 20rem 1fr;
-        gap: 2rem;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+        gap: 1rem;
         padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .packages-list, .package-details {
+        padding: .5rem;
+        overflow-y: auto;
+    }
+
+    .package-list-ctrl {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 30rem;
     }
 
     .packages-list {
         display: flex;
         flex-direction: column;
         gap: .5rem;
-        overflow-y: auto;
+        height: 100%;
+    }
+
+    .package-details {
+        width: 45rem;
+        height: 100%;
     }
 </style>

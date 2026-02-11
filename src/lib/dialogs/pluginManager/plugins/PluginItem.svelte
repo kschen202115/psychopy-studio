@@ -162,5 +162,6 @@
         flex-direction: column;
         align-items: start;
         gap: .5rem;
+        width: 45rem;
     }
 </style>

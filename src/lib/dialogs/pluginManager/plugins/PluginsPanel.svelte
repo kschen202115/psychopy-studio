@@ -75,8 +75,8 @@
 
     .plugins-ctrl {
         position: relative;
-        display: grid;
-        grid-template-columns: 25rem 45rem;
+        display: flex;
+        flex-direction: row;
         height: 100%;
         gap: 1rem;
         padding: 1rem;
@@ -84,16 +84,14 @@
     }
 
     .plugin-list-ctrl {
-        display: grid;
-        grid-template-rows: min-content 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 1rem;
-        height: 100%;
-        overflow-y: auto;
+        width: 30rem;
     }
 
     .plugins-list, .selected-plugin {
         padding: .5rem;
-        box-sizing: border-box;
         overflow-y: auto;
     }
 
