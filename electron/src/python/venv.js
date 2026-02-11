@@ -88,8 +88,7 @@ export class PythonVenv {
                 // for dev environment, install from dev branch
                 ? "git+https://github.com/psychopy/psychopy-lib@dev"
                 // otherwise install from pypi
-                // todo: switch to package name once on pypi
-                : `git+https://github.com/psychopy/psychopy-lib@${this.psychopyVersion}`
+                : `psychopy-lib==${this.psychopyVersion}`
             )
         ]) {
             if (!(pkg in installed)) {

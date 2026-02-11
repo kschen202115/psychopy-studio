@@ -57,7 +57,7 @@
                 <option 
                     value={`${minor}.*`} 
                     selected={param.val === `${minor}.*`}
-                >latest</option>
+                >{minor} (final)</option>
                 {#each versions as [version, label]}
                     <option 
                         value={version} 
