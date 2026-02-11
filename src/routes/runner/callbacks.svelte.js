@@ -49,6 +49,8 @@ export async function addFile(file, pilotMode=undefined) {
     }
     // add to run list
     current.runlist.push(item)
+    // select
+    current.selection = current.runlist.length
 }
 
 export async function loadPsyrun(file) {
