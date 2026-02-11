@@ -77,7 +77,17 @@ function onFileOpen(evt, file) {
 }
 app.on("open-file", onFileOpen)
 
+var started = false
+
 const createWindow = () => {
+  // if app is already running...
+  if (started) {
+    // open start windows and do nothing else
+    startingWindows()
+    return
+  }
+  // mark started
+  started = true
   // create splash
   windows.splash = new BrowserWindow({
     icon: favicon,
@@ -274,24 +284,32 @@ const createWindow = () => {
     () => {
       // make sure at least one window is open
       if (!Object.keys(windows).filter(key => key !== "splash").length) {
-        let targets
-        try {
-          targets = JSON.parse(prefs.params?.defaultView?.val)
-        } catch {
-          targets = ["builder"]
-        }
-        for (let target of targets) {
-          newWindow(target, true, false).then(
-            // show tips if requested
-            id => windows[id].webContents.send(
-              "showTips", prefs.params?.showStartupTips?.val === "True"
-            )
-          )
-        }
+        startingWindows()
       }
     }
   )
 };
+
+
+/**
+ * Open the default starting windows indicated by prefs
+ */
+function startingWindows() {
+  let targets
+  try {
+    targets = JSON.parse(prefs.params?.defaultView?.val)
+  } catch {
+    targets = ["builder"]
+  }
+  for (let target of targets) {
+    newWindow(target, true, false).then(
+      // show tips if requested
+      id => windows[id].webContents.send(
+        "showTips", prefs.params?.showStartupTips?.val === "True"
+      )
+    )
+  }
+}
 
 
 async function newWindow(target = null, show = true, fullscreen = false) {
