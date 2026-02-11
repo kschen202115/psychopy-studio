@@ -131,7 +131,6 @@ export class Experiment {
         // iterate index until name is unique
         while (Object.keys(this.namespace).includes(`${name}${index}`)) {
             index += 1
-            console.log(index)
         }
 
         return `${name}${index}`

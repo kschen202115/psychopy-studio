@@ -49,7 +49,6 @@ class Preferences extends HasParams {
             if (param.valType === "keypress") {
                 // substitute placeholder {CMD} for OS-specific command key
                 for (let [i, value] of Object.entries(param.val)) {
-                    console.log(param.val[i], i, value)
                     param.val[i] = value.replaceAll("{CMD}", cmd)
                 }
             }

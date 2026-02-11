@@ -47,7 +47,6 @@ export async function showWindow(target) {
     if (electron) {
         // get windows matching target
         let windows = await electron.windows.get(target);
-        console.log(windows)
         // either get first ID, or make a new window and use its ID
         let id;
         if (windows.length) {

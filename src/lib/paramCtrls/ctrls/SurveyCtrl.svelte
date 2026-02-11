@@ -77,7 +77,6 @@
                     Loading surveys...
                 {:then surveys}
                     {#each surveys as survey}
-                        {console.log(survey)}
                         <RadioButton
                             value={survey}
                             label={survey.surveyName}

@@ -56,8 +56,6 @@
                 nPoints: parseInt(config.params.nPoints.val)
             }
         })
-
-        console.log(resp)
     }
 
     let config = $state.raw()
