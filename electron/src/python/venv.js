@@ -269,8 +269,8 @@ export async function getVenv(version) {
         version = appVersion
     }
     // strip extras from version
-    if (version.match(/\d*\.\d*\.\d*/)) {
-        version = version.match(/\d*\.\d*\.\d*/)[0]
+    if (version.match(/\d+\.\d+\.\d+/)) {
+        version = version.match(/\d+\.\d+\.\d+/)[0]
     }
     
     if (version in venvs) {
