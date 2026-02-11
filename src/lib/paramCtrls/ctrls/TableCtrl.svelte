@@ -2,7 +2,8 @@
     import { getContext } from "svelte";
     import { CompactButton } from "$lib/utils/buttons";
     import FileCtrl from "./FileCtrl.svelte";
-    import { electron, python } from "$lib/globals.svelte"
+    import { electron, python } from "$lib/globals.svelte";
+    import { MessageDialog } from "$lib/utils/dialog"; 
 
     let {
         /** @prop @type {import("$lib/experiment").Param} Param object to which this ctrl pertains */
@@ -15,6 +16,8 @@
 
     let current = getContext("current")
 
+    let showPrompt = $state.raw(false)
+
     function validateTable(param, valid) {}
 
     function openTable() {
@@ -22,6 +25,7 @@
     }
 
     function newTable() {
+        showPrompt = true
         if (param?.ctrlParams?.template) {
             // if a table is given, open it
             electron.files.openPath(param.ctrlParams.template).then(
@@ -57,4 +61,14 @@
         onclick={param.val ? openTable : newTable}
         disabled={disabled || param.isCode}
     />
+
+    <MessageDialog
+        title="Reminder..."
+        buttons={{
+            OK: evt => {},
+        }}
+        bind:shown={showPrompt}
+    >
+        <p>Once you have created and saved your table, please remember to add it.</p>
+    </MessageDialog>
 {/if}
