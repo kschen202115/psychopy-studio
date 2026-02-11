@@ -10,18 +10,6 @@
     
     let showNewRoutineDialog = $state(false)
     let showMenu = $state(false)
-
-    let valid = $state({})
-
-    let btnsDisabled = $derived({
-        OK: Object.values(valid).some(
-            (val) => !val.state
-        ),
-        APPLY: Object.values(valid).some(
-            (val) => !val.state
-        )
-    })
-
 </script>
 
 <div
@@ -67,31 +55,37 @@
 
 <!-- dialog for creating a new Routine -->
 {#if current.inserting instanceof Routine}
-<Dialog 
-    id=new-routine
-    title="New Routine" 
-    bind:shown={showNewRoutineDialog} 
-    onopen={() => current.inserting.settings.restore.set()}
-    buttons={{
-        OK: (evt) => {
-            // add to experiment
-            current.inserting.exp = current.experiment
-            current.experiment.routines[current.inserting.name] = current.inserting
-        }, 
-        CANCEL: (evt) => {
-            current.inserting.settings.restore.apply()
-            // stop inserting
-            current.inserting = undefined;
-        },  
-        HELP: "https://www.psychopy.org/builder/routines.html#routines",
-    }}
-    buttonsDisabled={btnsDisabled}
->
-    <ParamsNotebook 
-        element={current.inserting.settings}
-        bind:valid={valid}
-    ></ParamsNotebook>
-</Dialog>
+    <Dialog 
+        id=new-routine
+        title="New Routine" 
+        bind:shown={showNewRoutineDialog} 
+        onopen={() => current.inserting.settings.restore.set()}
+        buttons={{
+            OK: (evt) => {
+                // add to experiment
+                current.inserting.exp = current.experiment
+                current.experiment.routines[current.inserting.name] = current.inserting
+            }, 
+            CANCEL: (evt) => {
+                current.inserting.settings.restore.apply()
+                // stop inserting
+                current.inserting = undefined;
+            },  
+            HELP: "https://www.psychopy.org/builder/routines.html#routines",
+        }}
+        buttonsDisabled={{
+            OK: !Object.values(current.inserting.settings.params).every(
+                param => param.valid?.value
+            ),
+            APPLY: !Object.values(current.inserting.settings.params).every(
+                param => param.valid?.value
+            ),
+        }}
+    >
+        <ParamsNotebook 
+            element={current.inserting.settings}
+        />
+    </Dialog>
 {/if}
 
 
