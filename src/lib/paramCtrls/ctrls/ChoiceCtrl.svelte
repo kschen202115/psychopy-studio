@@ -9,6 +9,15 @@
         ...attachments
     } = $props()
 
+    $effect(() => {
+        if (param.isCodeType && typeof param.val === "string") {
+            // parse integers if necessary
+            if (param.val.match(/^\d+$/)) {
+                param.val = parseInt(param.val)
+            }
+        }
+    })
+
     function validateChoice(param, valid) {
         if (Array.isArray(param.allowedVals) && !param.allowedVals.includes(param.val)) {
             valid.warning = `${param.val} not in list of allowed values`
