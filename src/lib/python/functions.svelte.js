@@ -26,6 +26,16 @@ export async function installPython(version=undefined, forceReinstall=false) {
     if (!version || version === "app") {
         version = await electron.version()
     }
+    // is this a prerelease version?
+    let prerelease
+    if (version === "dev") {
+        prerelease = true
+    } else if (Version.parse(version).extra) {
+        prerelease = true
+        version = Version.parse(version).format("patch")
+    } else {
+        prerelease = false
+    }
     // remove any dogfood details from version
     try {
         version = Version.parse(version).format("patch")
@@ -51,13 +61,6 @@ export async function installPython(version=undefined, forceReinstall=false) {
         // convert back to string (serializable)
         version = version.format()
     }
-    // is this a prerelease version?
-    let prerelease = false
-    if (version === "dev") {
-        prerelease = true
-    } else if (Version.parse(version).extra) {
-        prerelease = true
-    }  
     // if installed and not forcing a reinstall, do nothing
     if (!forceReinstall) {
         if (
