@@ -50,7 +50,14 @@ export async function installPython(version=undefined, forceReinstall=false) {
         pyVersion = ppy2py(version)
         // convert back to string (serializable)
         version = version.format()
-    }    
+    }
+    // is this a prerelease version?
+    let prerelease = false
+    if (version === "dev") {
+        prerelease = true
+    } else if (Version.parse(version).extra) {
+        prerelease = true
+    }  
     // if installed and not forcing a reinstall, do nothing
     if (!forceReinstall) {
         if (
@@ -74,7 +81,7 @@ export async function installPython(version=undefined, forceReinstall=false) {
         version, pyVersion
     ).catch(handleError)
     // install packages
-    await python.venv.setup(version)
+    await python.venv.setup(version, prerelease)
     // mark as done
     status.dlg.busy = false
 }

@@ -59,7 +59,7 @@ const python = {
     ready: (venv) => ipcRenderer.invoke("python.liaison.ready", venv).then(resp => resp)
   },
   venv: {
-    setup: (venv) => ipcRenderer.invoke("python.venv.setup", venv).then(resp => resp),
+    setup: (venv, prerelease=false) => ipcRenderer.invoke("python.venv.setup", venv, prerelease).then(resp => resp),
     executable: (venv) => ipcRenderer.invoke("python.venv.executable", venv).then(resp => resp),
     installPackage: (venv, name) => ipcRenderer.invoke("python.venv.installPackage", venv, name).then(resp => resp),
     uninstallPackage: (venv, name) => ipcRenderer.invoke("python.venv.uninstallPackage", venv, name).then(resp => resp),

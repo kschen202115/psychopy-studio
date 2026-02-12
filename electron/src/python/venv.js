@@ -64,8 +64,10 @@ export class PythonVenv {
 
     /**
      * Setup this virtual environment; make sure it exists and install necessary packages.
+     * 
+     * @param {boolean} prerelease Whether to allow unreleased versions of psychopy-lib
      */
-    async setup() {
+    async setup(prerelease=false) {
         // make one if there isn't one
         if (!this.executable) {
             this.executable = await uv.makeExecutable(
@@ -76,15 +78,16 @@ export class PythonVenv {
         // get installed packages so we know what needs installing
         let installed = this.getPackages()
         // make sure all necessary packages are installed
-        for (let pkg of [
+        for (let [name, cmd] of Object.entries({
             // liaison is needed to send/receive messages from the app
-            "git+https://github.com/psychopy/liaison[websocket]",
+            liaison: "git+https://github.com/psychopy/liaison[websocket]",
             // esprima and javascripthon are needed for py -> js translation
-            "esprima", 
-            "git+https://gitlab.com/peircej/metapensiero.pj",
-        ]) {
-            if (!(pkg in installed)) {
-                await this.installPackage(pkg)
+            esprima: "esprima",
+            dukpy: "dukpy",
+            javascripthon: ["javascripthon", "--no-deps"]
+        })) {
+            if (!(name in installed)) {
+                await this.installPackage(cmd)
             }
         }
         // install psychopy library
@@ -92,31 +95,12 @@ export class PythonVenv {
             if (this.psychopyVersion === "dev") {
                 // for dev environment, install from dev branch
                 await this.installPackage("git+https://github.com/psychopy/psychopy-lib@dev")
+            } else if (prerelease) {
+                // for prerelease, install from release branch
+                await this.installPackage("git+https://github.com/psychopy/psychopy-lib@release")
             } else {
-                // try to install from pypi
+                // for released version, install from pypi
                 await this.installPackage(`psychopy-lib==${this.psychopyVersion}`)
-                // if this failed, try from tags
-                if (!("psychopy-lib" in this.getPackages())) {
-                    // get tags on psychopy-lib
-                    let tags = await fetch(
-                        `https://api.github.com/repos/psychopy/psychopy-lib/tags`, 
-                        {method: "GET"}
-                    ).then(
-                        resp => resp.json()
-                    ).then(
-                        resp => resp.map(
-                            item => item.name
-                        )
-                    );
-                    // if version is in tags, it's a prerelease so install from the tag
-                    if (tags.includes(this.psychopyVersion)) {
-                        uv.output(`Version ${this.psychopyVersion} is unreleased, installing prelease from GitHub...`)
-                        await this.installPackage(`git+https://github.com/psychopy/psychopy-lib@${this.psychopyVersion}`)
-                    } else {
-                        // fail as normal if version isn't on GitHub
-                        throw new Error(`Version ${this.psychopyVersion} of psychopy-lib does not exist.`)
-                    }
-                }
             }
         }
     }
