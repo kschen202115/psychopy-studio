@@ -140,9 +140,11 @@
 
     // dynamically update value
     $effect(() => {
-        if (!editor?.hasWidgetFocus?.()) {
-            editor?.setValue?.(value)
+        if (!readonly && !disabled && editor?.hasWidgetFocus?.()) {
+            // not if editor is editable and has focus - will have updated already
+            return
         }
+        editor?.setValue?.(value)
     })
 
     // dynamically update readonly
