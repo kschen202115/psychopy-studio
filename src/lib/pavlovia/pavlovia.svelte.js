@@ -143,10 +143,6 @@ export async function login(username, current) {
         }
 
         // request actual auth and refresh tokens
-        console.log(
-            "Login successful, requesting authentication code from Pavlovia...",
-            $state.snapshot(auth)
-        )
         let tokens = await fetch(
             `/api/token/authorize?${new URLSearchParams({
                 root: auth.root,
