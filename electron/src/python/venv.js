@@ -80,7 +80,7 @@ export class PythonVenv {
         // make sure all necessary packages are installed
         for (let [name, cmd] of Object.entries({
             // liaison is needed to send/receive messages from the app
-            liaison: "git+https://github.com/psychopy/liaison[websocket]",
+            'liaison-py': "liaison-py[websocket]",
             // esprima and javascripthon are needed for py -> js translation
             esprima: "esprima",
             dukpy: "dukpy",
