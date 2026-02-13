@@ -115,7 +115,11 @@ export async function login(username, current) {
             // create a hash from verifier (via SHA-256 digestion)
             let hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(auth.verifier));
             // decode hash to make challenge
-            auth.challenge = btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/=/g, "");
+            auth.challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+                .replace(/\+/g, '-')
+				.replace(/\//g, '_')
+				.replace(/=+$/, '')
+            ;
             // construct auth url params
             let params = new URLSearchParams({
                 client_id: auth.client,
