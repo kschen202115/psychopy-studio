@@ -5,7 +5,7 @@
     import { Button } from '$lib/utils/buttons';
     import { getContext } from "svelte";
     import Dialog from "$lib/utils/dialog/Dialog.svelte";
-    import { profiles } from "$lib/experiment";
+    import { profiles, pending } from "$lib/experiment/profiles.svelte";
     
     let current = getContext("current");
 
@@ -54,18 +54,24 @@
     <Menu 
         bind:shown={showMenu}
     >
-        {#each Object.keys(profiles.loops) as loopType}
+        {#await pending.loops}
             <MenuItem 
-                label="New {titleCase(loopType)} loop..."
-                onclick={() => {
-                    // create blank Loop
-                    current.inserting = new LoopInitiator(loopType)
-                    current.inserting.exp = current.experiment;
-                    // show dialog
-                    showDialog = true
-                }}
+                label="Loading loops..."
             />
-        {/each}
+        {:then loops}
+            {#each Object.keys(loops) as loopType}
+                <MenuItem 
+                    label="New {titleCase(loopType)} loop..."
+                    onclick={() => {
+                        // create blank Loop
+                        current.inserting = new LoopInitiator(loopType)
+                        current.inserting.exp = current.experiment;
+                        // show dialog
+                        showDialog = true
+                    }}
+                />
+            {/each}
+        {/await}
     </Menu>
 
     <!-- dialog for creating a new Loop -->
