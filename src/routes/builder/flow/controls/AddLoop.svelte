@@ -12,14 +12,6 @@
     let showDialog = $state(false)
     let showMenu = $state(false);
 
-    function titleCase(label) {
-        return label.replace(
-            "Handler", ""
-        ).replace(
-            /([a-z])([A-Z])/g, "$1 $2"
-        ).toLowerCase();
-    }
-
     let valid = $derived.by(() => {
         if (current.inserting) {
             return Object.values(current.inserting.params).every(
@@ -59,17 +51,19 @@
                 label="Loading loops..."
             />
         {:then loops}
-            {#each Object.keys(loops) as loopType}
-                <MenuItem 
-                    label="New {titleCase(loopType)} loop..."
-                    onclick={() => {
-                        // create blank Loop
-                        current.inserting = new LoopInitiator(loopType)
-                        current.inserting.exp = current.experiment;
-                        // show dialog
-                        showDialog = true
-                    }}
-                />
+            {#each Object.entries(loops) as [loopType, loopProfile]}
+                {#if !loopProfile.hidden}
+                    <MenuItem 
+                        label="New {loopProfile.label?.toLowerCase?.() || loopType}..."
+                        onclick={() => {
+                            // create blank Loop
+                            current.inserting = new LoopInitiator(loopType)
+                            current.inserting.exp = current.experiment;
+                            // show dialog
+                            showDialog = true
+                        }}
+                    />
+                {/if}
             {/each}
         {/await}
     </Menu>
