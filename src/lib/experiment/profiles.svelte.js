@@ -13,10 +13,10 @@ export var profiles = $state({
 })
 
 export var pending = $state({
-    components: undefined,
-    loops: undefined,
-    devices: undefined,
-    preferences: undefined
+    components: Promise.withResolvers().promise,
+    loops: Promise.withResolvers().promise,
+    devices: Promise.withResolvers().promise,
+    preferences: Promise.withResolvers().promise
 })
 
 // populate on Liaison starting (if it ever does)
