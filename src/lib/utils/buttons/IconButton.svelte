@@ -23,8 +23,10 @@
         children=undefined,
     } = $props()
 
-    let showTooltip = $state(false);
-    let showError = $state.raw(false)
+    let show = $state({
+        tooltip: false,
+        error: false
+    })
 </script>
 
 {#snippet button(status)}
@@ -36,12 +38,12 @@
             // if awaiting, execute cancel method
             awaiting: evt => cancel?.(evt),
             // if errored, show error
-            error: evt => showError = true
+            error: evt => show.error = true
         }[status]}
-        onmouseenter={() => {showTooltip = true}}
-        onmouseleave={() => {showTooltip = false}}
-        onfocusin={() => {showTooltip = true}}
-        onfocusout={() => {showTooltip = false}}
+        onmouseenter={() => {show.tooltip = true}}
+        onmouseleave={() => {show.tooltip = false}}
+        onfocusin={() => {show.tooltip = true}}
+        onfocusout={() => {show.tooltip = false}}
         class:borderless={borderless}
     >
         <Icon 
@@ -49,14 +51,14 @@
                 // if completed/not started, regular icon
                 ready: icon,
                 // if awaiting, ... icon and cancel icon if hovered
-                awaiting: showTooltip ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
+                awaiting: show.tooltip ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
                 // if error, error icon
                 error: "/icons/sym-error.svg"
             }[status]}
             size=2.25rem
         />
         <Tooltip
-            bind:shown={showTooltip}
+            bind:shown={show.tooltip}
             position="bottom"
         >
             {{
@@ -84,12 +86,12 @@
         <Message
             message="Error, click to show"
             icon="/icons/sym-error.svg"
-            onclick={evt => showError = true}
+            onclick={evt => show.error = true}
         />
     </MessageArray>
     <!-- error dialog -->
     <MessageDialog
-        bind:shown={showError}
+        bind:shown={show.error}
         title="Error in '{label}'"
         buttons={{
             OK: evt => awaiting = Promise.resolve(false)

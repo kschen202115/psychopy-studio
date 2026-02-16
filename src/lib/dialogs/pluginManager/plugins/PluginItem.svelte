@@ -20,8 +20,8 @@
         Object.keys(siblings.installed).includes(plugin.pipname)
     )
 
-    function install(evt) {
-        python.venv.installPackage(
+    async function install(evt) {
+        return await python.venv.installPackage(
             venv, plugin.pipname
         ).then(
             resp => python.venv.getPackages(
@@ -32,8 +32,8 @@
         );
     }
 
-    function uninstall(evt) {
-        python.venv.uninstallPackage(
+    async function uninstall(evt) {
+        return await python.venv.uninstallPackage(
             venv, plugin.pipname
         ).then(
             resp => python.venv.getPackages(
@@ -58,7 +58,6 @@
                         label="Install"
                         icon="/icons/btn-download.svg"
                         onclick={install}
-                        bind:awaiting={siblings.installed}
                         horizontal
                         disabled={venv === undefined}
                     />
@@ -67,7 +66,6 @@
                         label="Uninstall"
                         icon="/icons/btn-delete.svg"
                         onclick={uninstall}
-                        bind:awaiting={siblings.installed}
                         horizontal
                         disabled={venv === undefined}
                     />

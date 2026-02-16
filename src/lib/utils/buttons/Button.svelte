@@ -23,46 +23,101 @@
         vertical = false,
         /** @prop @type {boolean} Are we awaiting execution of this button? */
         awaiting=$bindable(),
+        /** If action is cancellable, supply a function to cancel it */
+        cancel=undefined,
         /** @prop @type {boolean} Disable this button */
         disabled = false
     } = $props()
 
-    let showTooltip = $state(false)
+    let show = $state({
+        tooltip: false,
+        error: false
+    })
+
 </script>
 
-<button
-    onclick={onclick}
-    class:vertical
-    class:horizontal
-    class:primary
-    class:affirmative
-    class:negative
-    disabled={disabled}
-    onmouseenter={() => {showTooltip = true}}
-    onmouseleave={() => {showTooltip = false}}
-    onfocusin={() => {showTooltip = true}}
-    onfocusout={() => {showTooltip = false}}
->
-    {#if tooltip}
+{#snippet button(status)}
+    <button
+        disabled={disabled} 
+        onclick={{
+            // if completed/not started, execute method
+            ready: evt => awaiting = onclick(evt),
+            // if awaiting, execute cancel method
+            awaiting: evt => cancel?.(evt),
+            // if errored, show error
+            error: evt => show.error = true
+        }[status]}
+        class:vertical
+        class:horizontal
+        class:primary
+        class:affirmative
+        class:negative
+        onmouseenter={() => {show.tooltip = true}}
+        onmouseleave={() => {show.tooltip = false}}
+        onfocusin={() => {show.tooltip = true}}
+        onfocusout={() => {show.tooltip = false}}
+    >
         <Tooltip
-            bind:shown={showTooltip}
+            bind:shown={show.tooltip}
             position="right"
         >
-            {tooltip}
+            {{
+                // if completed/not started, regular label
+                ready: tooltip,
+                // if awaiting, regular label + cancel (if possible)
+                awaiting: label + (cancel ? " (cancel)" : ""),
+                // if error, error icon
+                error: "Failed, click to show error"
+            }[status]}            
         </Tooltip>
-    {/if}
-    {#if icon}
-        <div class=icon-container>
-            <Icon 
-                src={icon} 
-                bind:awaiting={awaiting}
-            />
-        </div>
-    {/if}
-    <span
-        class=label
-    >{label}</span>
-</button>
+
+        {#if icon}
+            <div class=icon-container>
+                <Icon 
+                    src={{
+                        // if completed/not started, regular icon
+                        ready: icon,
+                        // if awaiting, ... icon and cancel icon if hovered
+                        awaiting: show.tooltip ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
+                        // if error, error icon
+                        error: "/icons/sym-error.svg"
+                    }[status]}
+                    size=2.25rem
+                />
+            </div>
+        {/if}
+        <span
+            class=label
+        >{label}</span>
+    </button>
+{/snippet}
+
+{#await awaiting}
+    {@render button("awaiting")}
+{:then}
+    {@render button("ready")}
+{:catch err}
+    {@render button("error")}
+    <!-- error message -->
+    <MessageArray>
+        <Message
+            message="Error, click to show"
+            icon="/icons/sym-error.svg"
+            onclick={evt => show.error = true}
+        />
+    </MessageArray>
+    <!-- error dialog -->
+    <MessageDialog
+        bind:shown={show.error}
+        title="Error in '{label}'"
+        buttons={{
+            OK: evt => awaiting = Promise.resolve(false)
+        }}
+    >
+        {err.message}
+    </MessageDialog>
+
+{/await}
 
 <style>
     button {
