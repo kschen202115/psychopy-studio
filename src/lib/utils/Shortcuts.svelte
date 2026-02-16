@@ -32,9 +32,9 @@
     }}
     onkeyup={evt => {
         // mark key as no longer held
-        if (held.includes(evt.key)) {
+        if (held.includes(evt.key.toUpperCase())) {
             held.splice(
-                held.indexOf(evt.key)
+                held.indexOf(evt.key.toUpperCase())
             )
         }
     }}
