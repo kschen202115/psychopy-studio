@@ -20,6 +20,44 @@ class Preferences extends HasParams {
         this.ready = this.load()
     }
 
+    /**
+     * Choose appropriate command key for the current OS
+     */
+    async localizeCmdKey() {
+        // default to CTRL
+        let cmd = "CONTROL"
+        // if possible, detect OS and switch to appropriate key
+        if (electron) {
+            // use META key for Mac OS
+            if (await electron.platform() === "darwin") {
+                cmd = "META"
+            }
+            // iterate through keypress params
+            for (let param of Object.values(this.params)) {
+                if (param.valType === "keypress") {
+                    // substitute placeholder {CMD} for OS-specific command key
+                    for (let [i, value] of Object.entries(param.val)) {
+                        param.val[i] = value.replaceAll("{CMD}", cmd)
+                    }
+                }
+            }
+        }
+    }
+
+    reset() {
+        // usual reset behaviour
+        HasParams.prototype.reset.call(this)
+        // localize cmd key
+        this.localizeCmdKey()
+    }
+
+    loadJSON(data) {
+        // usual JSON load behaviour
+        HasParams.prototype.loadJSON.call(this, data)
+        // localize cmd key
+        this.localizeCmdKey()
+    }
+
     async load() {
         let data
         if (electron) {
@@ -38,22 +76,7 @@ class Preferences extends HasParams {
             data = FallbackPreferences
         }
         // setup params from file content
-        this.fromJSON(data)
-        // choose appropriate command key for OS
-        let cmd = "CONTROL"
-        if (await electron?.platform?.() === "darwin") {
-            cmd = "META"
-        }
-        // iterate through keypress params
-        for (let param of Object.values(this.params)) {
-            if (param.valType === "keypress") {
-                // substitute placeholder {CMD} for OS-specific command key
-                for (let [i, value] of Object.entries(param.val)) {
-                    param.val[i] = value.replaceAll("{CMD}", cmd)
-                }
-            }
-        }
-        
+        this.fromJSON(data)        
     }
 
     save() {
