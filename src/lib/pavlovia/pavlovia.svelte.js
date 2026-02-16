@@ -24,6 +24,44 @@ export async function loadProjects() {
     return users
 }
 
+/**
+ * Find the project associated with a given experiment
+ * 
+ * @param {Experiment} experiment Experiment to find project for
+ * @param {object} user User whose credentials to use (determines visibility of projects)
+ */
+export async function findProject(experiment, user) {
+    console.log("FIND PROJECT", experiment?.file?.parent, $state.snapshot(user))
+    // return undefined if there is no user or no experiment file
+    if (!experiment?.file?.parent || !user) {
+        return
+    }
+    // get git remote
+    let remote = await git.getRemote(
+        $state.snapshot(experiment.file.parent), $state.snapshot(user)
+    ).then(
+        remote => remote ? new URL(remote) : remote
+    )
+    // only continue if there is a remote...
+    if (remote) {
+        // get name from remote URL
+        let [_, group, name] = remote.pathname.match(/\/(.+?)\/(.+?)\.git/)
+        // search GitLab
+        let found = await fetch(
+            `https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}&access_token=${user.token.access}`
+        ).then(
+            resp => resp.json()
+        )
+        console.log(found)
+        // if we found a project...
+        if (found.length) {
+            // log and return
+            console.log(`Loaded project ${group}/${name}`, found[0])
+            return found[0]
+        }
+    }
+}
+
 export var auth = $state({
     root: "https://gitlab.pavlovia.org",
     client: "944b87ee0e6b4f510881d6f6bc082f64c7bba17d305efdb829e6e0e7ed466b34",

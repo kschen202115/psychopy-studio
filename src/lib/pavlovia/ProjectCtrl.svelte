@@ -1,7 +1,7 @@
 <script>
     import { DropdownButton } from "$lib/utils/buttons";
     import { getContext, onMount } from "svelte";
-    import { projects, users } from "./pavlovia.svelte";
+    import { projects, users, findProject } from "./pavlovia.svelte";
     import { MenuItem, MenuSeparator, SubMenu } from "$lib/utils/menu";
     import { electron, git } from "$lib/globals.svelte";
     import ManageProjectsDlg from "$lib/dialogs/projects/manage/ManageProjectsDlg.svelte";
@@ -38,38 +38,9 @@
         browseProjectsDlg: false
     })
 
-    $effect(async () => {
-        // if we have both an experiment file and a user...
-        if (current.experiment?.file?.parent && current.user) {
-            // get git remote
-            let remote = await git.getRemote(
-                $state.snapshot(current.experiment.file.parent), $state.snapshot(current.user)
-            ).then(
-                remote => remote ? new URL(remote) : remote
-            )
-            // only continue if there is a remote...
-            if (remote) {
-                // get name from remote URL
-                let [_, group, name] = remote.pathname.match(/\/(.+?)\/(.+?)\.git/)
-                // search GitLab
-                let found = await fetch(
-                    `https://gitlab.pavlovia.org/api/v4/users/${group}/projects?search=${name}&access_token=${current.user.token.access}`
-                ).then(
-                    resp => resp.json()
-                )
-                // if we found a project...
-                if (found.length) {
-                    // ...use its details
-                    current.project = found[0]
-                    // log and return
-                    console.log(`Loaded project ${group}/${name}`, found[0])
-                    return
-                }
-            }
-            // if we haven't returned yet, there is no project
-            current.project = undefined
-        }
-    })
+    // refresh project when experiment or user changes
+    $effect(async () => current.project = await findProject(current.experiment, current.user))
+    $inspect(current.project)
 
     let label = $derived.by(() => {
         if (current.project) {

@@ -2,6 +2,7 @@
     import { git } from "$lib/globals.svelte";
     import { showWindow } from "$lib/utils/views.svelte";
     import { getContext } from "svelte";
+    import { findProject } from "./pavlovia.svelte";
     import CommitDlg from "./CommitDlg.svelte";
     import NewProjectDlg from "./NewProjectDlg.svelte";
 
@@ -14,8 +15,6 @@
 
 
     export async function sync(folder, user, force=false) {
-        // open runner to capture output
-        showWindow("runner")
         // get remote
         let remote = await git.getRemote(folder, user);
         // if there is no remote, create one
@@ -25,6 +24,8 @@
             if (await awaiting.newProject.promise) {
                 // if completed, get details
                 remote = await git.getRemote(folder, user);
+                // update current project
+                current.project = await findProject(current.experiment, current.user)
             } else {
                 // if cancelled, return
                 git.output("Cancelled by user.")
@@ -39,6 +40,8 @@
             // propt to commit
             show.commit = true;
             sha = await awaiting.commit.promise;
+            // open runner to capture output
+            showWindow("runner")
             // if cancelled, return
             if (!sha) {
                 git.output("Cancelled by user.")
@@ -47,6 +50,9 @@
             // push changes
             await git.push(folder, user, force)
         } else {
+            // open runner to capture output
+            showWindow("runner")
+            // explain failure
             git.output("Nothing to push.")
         }
         
