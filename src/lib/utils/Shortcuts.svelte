@@ -6,7 +6,6 @@
     } = $props();
 
     let held = $state([]);
-    $inspect(held)
 </script>
 
 
