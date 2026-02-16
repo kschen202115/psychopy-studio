@@ -1,5 +1,6 @@
 <script>
     import { prefs } from "$lib/preferences.svelte";
+    import { CompactButton } from "$lib/utils/buttons"
 
     let {
         param=$bindable(),
@@ -45,7 +46,6 @@
 <div 
     class=container
     class:selected={selected}
-    onclick={evt => selected = !disabled}
     class:hovered={hovered}
     style:color={param.valid.value ? "inherit" : "var(--red)"}
     onmouseenter={evt => hovered = true}
@@ -58,37 +58,32 @@
         <input 
             type=text
             bind:this={handle}
-            onfocusout={evt => selected = false}
             onkeydown={evt => {
                 // prevent usual effect
                 evt.preventDefault()
-                // if ENTER, accept value
-                if (evt.key === "Enter") {
-                    selected = false;
-                    hovered = false;
-                    return
-                }
                 // if not in value, add it
                 if (!param.val.includes(evt.key.toUpperCase())) {
                     param.val.push(evt.key.toUpperCase())
                 }
             }}
-            onkeyup={evt => {
-                // prevent usual effect
-                evt.preventDefault()
-                // if in value, remove it
-                if (param.val.includes(evt.key.toUpperCase())) {
-                    param.val.splice(
-                        param.val.indexOf(evt.key.toUpperCase())
-                    )
-                }
-            }}
             style:color={param.val.length ? "inherit" : "var(--outline)" }
-            value={param.val.length ? param.val.join?.(" + ") : "Press keys, then press ENTER to accept"}
+            value={param.val.length ? param.val.join?.(" + ") : "Press keys, then click the save to accept"}
+        />
+        <CompactButton 
+            onclick={evt => param.val.length = 0;}
+            icon="/icons/btn-clear.svg"
+            tooltip="Clear keypresses"
+        />
+        <CompactButton 
+            onclick={evt => selected = false}
+            icon="/icons/btn-save.svg"
+            tooltip="Done"
+            disabled={!param.valid.value}
         />
     {:else}
         <input 
             type=text
+            onclick={evt => selected = !disabled}
             style:color={hovered ? "var(--outline)" : "inherit"}
             value={hovered ? "Click to set" : param.val.join?.(" + ")}
         />
@@ -101,6 +96,7 @@
         display: flex;
         position: relative;
         flex-grow: 1;
+        gap: .5rem;
     }
     input {
         width: 100%;
