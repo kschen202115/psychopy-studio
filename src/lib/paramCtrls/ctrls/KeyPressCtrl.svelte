@@ -67,16 +67,16 @@
                 }
             }}
             style:color={param.val.length ? "inherit" : "var(--outline)" }
-            value={param.val.length ? param.val.join?.(" + ") : "Press keys, then click the save to accept"}
+            value={param.val.length ? param.val.join?.(" + ") : "Press keys, then click the tick to accept"}
         />
         <CompactButton 
-            onclick={evt => param.val.length = 0;}
+            onclick={evt => param.val.length = 0}
             icon="/icons/btn-clear.svg"
             tooltip="Clear keypresses"
         />
         <CompactButton 
             onclick={evt => selected = false}
-            icon="/icons/btn-save.svg"
+            icon="/icons/btn-tick.svg"
             tooltip="Done"
             disabled={!param.valid.value}
         />

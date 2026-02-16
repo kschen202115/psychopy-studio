@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-714,0)">
+        <g id="btn-tick" transform="matrix(0.451519,0,0,0.451519,714,0)">
+            <rect x="0" y="0" width="70.872" height="70.866" style="fill:none;"/>
+            <g transform="matrix(1.68784,-1.68784,1.68709,1.68709,-1231.58,1218.95)">
+                <path d="M740.372,28.181C740.372,29.186 739.557,30 738.553,30C733.88,30 721.493,30 716.82,30C716.337,30 715.875,29.808 715.534,29.467C715.193,29.126 715.001,28.663 715.001,28.181C715.001,25.496 715.001,20.502 715.001,17.818C715.001,17.335 715.193,16.873 715.534,16.532C715.875,16.19 716.337,15.999 716.82,15.999C717.855,15.999 719.147,15.999 720.182,15.999C721.186,15.999 722,16.813 722,17.818C722,19.892 722,22.998 722,22.998L738.553,22.998C739.035,22.998 739.498,23.19 739.839,23.531C740.18,23.872 740.372,24.335 740.372,24.817C740.372,25.853 740.372,27.145 740.372,28.181Z" style="fill:var(--green);"/>
+            </g>
+        </g>
+    </g>
+</svg>
