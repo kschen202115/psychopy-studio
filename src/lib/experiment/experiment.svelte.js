@@ -412,6 +412,10 @@ export class Experiment {
             file.writable.write(content);
             file.writable.close();
         }
+        // if indicated in exp settings, export JS
+        if (this.settings.params['exportHTML'].val === "on Save") {
+            this.writeScript("PsychoJS")
+        }
     }
 
     async writeScript(target="PsychoPy", executable=undefined) {

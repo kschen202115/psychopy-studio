@@ -15,6 +15,10 @@
 
 
     export async function sync(folder, user, force=false) {
+        // if indicated in exp settings, compile JS
+        if (current.experiment?.settings?.params?.['exportHTML'].val === "on Sync") {
+            await current.experiment.writeScript("PsychoJS")
+        }
         // get remote
         let remote = await git.getRemote(folder, user);
         // if there is no remote, create one
