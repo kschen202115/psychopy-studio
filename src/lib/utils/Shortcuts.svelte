@@ -6,6 +6,7 @@
     } = $props();
 
     let held = $state([]);
+    $inspect(held)
 </script>
 
 
@@ -19,7 +20,6 @@
         if (!held.includes(evt.key.toUpperCase())) {
             held.push(evt.key.toUpperCase())
         }
-        console.log(held)
         // does it match any shortcut?
         for (let [name, param] of Object.entries(prefs.shortcuts)) {
             if (param.val.every(val => held.includes(val.toUpperCase())) && held.every(val => param.val.includes(val.toUpperCase()))) {
