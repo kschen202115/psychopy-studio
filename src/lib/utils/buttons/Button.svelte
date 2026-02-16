@@ -57,19 +57,21 @@
         onfocusin={() => {show.tooltip = true}}
         onfocusout={() => {show.tooltip = false}}
     >
-        <Tooltip
-            bind:shown={show.tooltip}
-            position="right"
-        >
-            {{
-                // if completed/not started, regular label
-                ready: tooltip,
-                // if awaiting, regular label + cancel (if possible)
-                awaiting: label + (cancel ? " (cancel)" : ""),
-                // if error, error icon
-                error: "Failed, click to show error"
-            }[status]}            
-        </Tooltip>
+        {#if tooltip}
+            <Tooltip
+                bind:shown={show.tooltip}
+                position="right"
+            >
+                {{
+                    // if completed/not started, regular label
+                    ready: tooltip,
+                    // if awaiting, regular label + cancel (if possible)
+                    awaiting: label + (cancel ? " (cancel)" : ""),
+                    // if error, error icon
+                    error: "Failed, click to show error"
+                }[status]}            
+            </Tooltip>
+        {/if}
 
         {#if icon}
             <div class=icon-container>
