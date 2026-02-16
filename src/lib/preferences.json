@@ -924,8 +924,8 @@
         "sendToRunner": {
             "val": [
                 "{CMD}",
-                "ALT",
-                "F5"
+                "SHIFT",
+                "R"
             ],
             "valType": "keypress",
             "inputType": "keypress",
@@ -964,7 +964,8 @@
         },
         "runPython": {
             "val": [
-                "F5"
+                "{CMD}",
+                "R"
             ],
             "valType": "keypress",
             "inputType": "keypress",
@@ -1024,8 +1025,9 @@
         },
         "runJS": {
             "val": [
+                "{CMD}",
                 "ALT",
-                "F5"
+                "R"
             ],
             "valType": "keypress",
             "inputType": "keypress",
