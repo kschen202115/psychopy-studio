@@ -31,7 +31,6 @@ export async function loadProjects() {
  * @param {object} user User whose credentials to use (determines visibility of projects)
  */
 export async function findProject(experiment, user) {
-    console.log("FIND PROJECT", experiment?.file?.parent, $state.snapshot(user))
     // return undefined if there is no user or no experiment file
     if (!experiment?.file?.parent || !user) {
         return
@@ -52,7 +51,6 @@ export async function findProject(experiment, user) {
         ).then(
             resp => resp.json()
         )
-        console.log(found)
         // if we found a project...
         if (found.length) {
             // log and return
