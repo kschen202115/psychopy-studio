@@ -51,7 +51,7 @@
                 // if completed/not started, regular icon
                 ready: icon,
                 // if awaiting, ... icon and cancel icon if hovered
-                awaiting: show.tooltip ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
+                awaiting: show.tooltip && cancel ? "/icons/sym-cancel.svg" : "/icons/sym-pending.svg",
                 // if error, error icon
                 error: "/icons/sym-error.svg"
             }[status]}
