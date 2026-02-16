@@ -112,8 +112,8 @@ export class PythonVenv {
      */
     async installPackage(name) {
         // log start
-        uv.output(
-            `Installing ${name}...`
+        output(
+            `uv:${name}`, `Installing ${name}...\n`
         )
         // convert package to an array, if needed
         if (typeof name === "string") {
@@ -122,10 +122,10 @@ export class PythonVenv {
         // run uv command to install
         await uv.execTracked([
             "pip", "install", ...name, "--python", this.executable
-        ])
+        ], undefined, `uv:${name}`)
         // log done
-        uv.output(
-            `Finished installing ${name}.`
+        output(
+            `uv:${name}`, `Finished installing ${name}.\n`
         )
     }
 
@@ -136,8 +136,8 @@ export class PythonVenv {
      */
     async uninstallPackage(name) {
         // log start
-        uv.output(
-            `Uninstalling ${name}...`
+        output(
+            `uv:${name}`, `Uninstalling ${name}...`
         )
         // convert package to an array, if needed
         if (typeof name === "string") {
@@ -146,10 +146,10 @@ export class PythonVenv {
         // uninstall
         await uv.execTracked([
             "pip", "uninstall", ...name, "--python", this.executable
-        ])
+        ], undefined, `uv:${name}`)
         // log done
-        uv.output(
-            `Finished uninstalling ${name}.`
+        output(
+            `uv:${name}`, `Finished uninstalling ${name}.`
         )
     }
 
@@ -222,9 +222,10 @@ export class PythonVenv {
      * 
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
+     * @param {string} tag Tag to send output to (use undefined to not emit an event)
      */
-    execSync(args, timeout=undefined) {
-        return execSync("stdout", `"${this.executable}"`, args, timeout)
+    execSync(args, timeout=undefined, tag="stdout") {
+        return execSync(tag, `"${this.executable}"`, args, timeout)
     }
 
     /**

@@ -1,14 +1,19 @@
 <script>
-    import { CompactButton, Button } from "$lib/utils/buttons";
+    import { Button } from "$lib/utils/buttons";
     import { getContext } from "svelte";
     import { python } from "$lib/globals.svelte";
+    import ProgressDlg from "../ProgressDlg.svelte";
 
     let {
         plugin,
         venv=$bindable()
     } = $props()
 
-    let siblings = getContext("siblings")
+    let siblings = getContext("siblings");
+
+    // install progress information
+    let showProgress = $state.raw(false)
+
 
     $effect(() => {
         if (siblings.selected === undefined) {
@@ -21,6 +26,9 @@
     )
 
     async function install(evt) {
+        // show progress dlg
+        showProgress = true
+        // install
         return await python.venv.installPackage(
             venv, plugin.pipname
         ).then(
@@ -33,6 +41,9 @@
     }
 
     async function uninstall(evt) {
+        // show progress dlg
+        showProgress = true
+        // uninstall
         return await python.venv.uninstallPackage(
             venv, plugin.pipname
         ).then(
@@ -75,6 +86,11 @@
         {#each (plugin.description || "").split("\n") as line}
             <p>{line}</p>
         {/each}
+
+        <ProgressDlg
+            tag="uv:{plugin.pipname}"
+            bind:shown={showProgress}
+        />
     </div>
 {/snippet}
 

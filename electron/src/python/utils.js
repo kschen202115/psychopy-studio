@@ -27,10 +27,21 @@ export async function getSafeAddress() {
 /**
  * Send some output to the front end
  * 
- * @param {string} tag Channel to send over (use undefined to not emit an event)
+ * @param {string} tag Channel to send over (use undefined to not emit an event), you can specify subchannels using ":" (e.g. `uv:psychopy-cedrus` will go to both `uv` and `uv:psychopy-cedrus`)
  * @param {string|Buffer} message Message to send, can be either bytes or a string
  */
 export function output(tag, message) {
+    // get all channels to send output to (using : syntax)
+    let channels = []
+    if (tag) {
+        // add initial tag
+        channels.push(tag)
+        // add each parent in tree
+        while (tag?.includes?.(":")) {
+            tag = tag.substring(0, tag.lastIndexOf(":"))
+            channels.push(tag)
+        }
+    }
     // if given a buffer, decode it
     if (message instanceof Buffer) {
         message = decoder.decode(message)
@@ -38,9 +49,9 @@ export function output(tag, message) {
     // log message
     logging.log(message, tag?.toUpperCase?.())
     // emit event
-    if (tag) {
+    for (let channel of channels) {
         BrowserWindow.getAllWindows().forEach(
-            win => win.webContents.send(tag, message)
+            win => win.webContents.send(channel, message)
         )
     }
 }

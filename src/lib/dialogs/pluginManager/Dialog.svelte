@@ -1,8 +1,6 @@
 <script>
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import { Dialog } from "$lib/utils/dialog";
-    import { CompactButton } from "$lib/utils/buttons";
-    import { CodeOutput } from "$lib/utils/code";
     import PluginsPanel from "./plugins/PluginsPanel.svelte";
     import PackagesPanel from "./packages/PackagesPanel.svelte";
     import { python } from "$lib/globals.svelte"
@@ -17,11 +15,6 @@
     });
 
     let venv = $state.raw("app")
-
-    let output = $state.raw("");
-    python.uv.output.listen(
-        (evt, message) => output += `${message}\n`
-    )
 </script>
 
 
@@ -77,23 +70,6 @@
                 }
             >
                 <PackagesPanel bind:venv={venv} />
-            </NotebookPage>
-            <NotebookPage
-                label="Output"
-                bind:selected={
-                    () => pages.current === "output",
-                    value => pages.current = "output"
-                }
-            >
-                <CodeOutput bind:value={output}>
-                    {#snippet ctrls()}
-                        <CompactButton
-                            icon="/icons/btn-clear.svg"
-                            onclick={evt => output = ""}
-                            tooltip="Clear"
-                        />
-                    {/snippet}
-                </CodeOutput>
             </NotebookPage>
         </Notebook>
     </div>

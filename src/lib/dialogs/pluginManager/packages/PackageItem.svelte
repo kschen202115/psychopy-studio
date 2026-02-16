@@ -2,6 +2,7 @@
     import { marked } from "marked";
     import { getContext } from "svelte";
     import { Button } from "$lib/utils/buttons";
+    import ProgressDlg from "../ProgressDlg.svelte";
     var decoder = new TextDecoder();
 
     let {
@@ -19,12 +20,18 @@
         }
     })
 
+     // install progress information
+    let showProgress = $state.raw(false)
+
     let installed = $derived(
         Object.keys(siblings.installed).includes(name)
     )
 
-    function install(evt) {
-        python.venv.installPackage(
+    async function install(evt) {
+        // show progress dlg
+        showProgress = true
+        // install
+        return await python.venv.installPackage(
             venv, name
         ).then(
             resp => python.venv.getPackages(
@@ -35,8 +42,11 @@
         );
     }
 
-    function uninstall(evt) {
-        python.venv.uninstallPackage(
+    async function uninstall(evt) {
+        // show progress dlg
+        showProgress = true
+        // install
+        return await python.venv.uninstallPackage(
             venv, name
         ).then(
             resp => python.venv.getPackages(
@@ -56,16 +66,12 @@
             </h2>
         {:then profile}
             <div class=package-name><code>{profile.info.name}</code></div>
-            <div class=package-desc>
-                {@html marked(profile.info.description || "")}
-            </div>
             <div class=ctrls>
                 {#if !installed}
                     <Button
                         label="Install"
                         icon="/icons/btn-download.svg"
                         onclick={install}
-                        bind:awaiting={siblings.installed}
                         horizontal
                     />
                 {:else}
@@ -73,10 +79,12 @@
                         label="Uninstall"
                         icon="/icons/btn-delete.svg"
                         onclick={uninstall}
-                        bind:awaiting={siblings.installed}
                         horizontal
                     />
                 {/if}
+            </div>
+            <div class=package-desc>
+                {@html marked(profile.info.description || "")}
             </div>
         {:catch err}
             <h2>Failed to load details for <code>{name}</code></h2>
@@ -84,6 +92,11 @@
                 {err}
             </div>
         {/await}
+
+        <ProgressDlg
+            tag="uv:{name}"
+            bind:shown={showProgress}
+        />
     </div>
 {/snippet}
 
