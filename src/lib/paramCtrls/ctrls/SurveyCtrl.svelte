@@ -1,6 +1,6 @@
 <script>
     import SingleLineCtrl from "./SingleLineCtrl.svelte"
-    import { CompactButton, IconButton, RadioGroup, RadioButton } from "$lib/utils/buttons"
+    import { CompactButton, RadioButton } from "$lib/utils/buttons"
     import { getContext } from "svelte";
     import Dialog from "$lib/utils/dialog/Dialog.svelte";
     import { users } from "$lib/pavlovia/pavlovia.svelte";
@@ -69,27 +69,24 @@
         <p>
             Below are all of the surveys linked to your Pavlovia account - select the one you want and press OK to add its ID. You can view and manage your Pavlovia surveys <a href="https://pavlovia.org/dashboard?tab=4" target="_blank">here</a>
         </p>
-        <RadioGroup
-            bind:value={selected.survey}
-        >
-            <div class=choice-group>
-                {#await getSurveys()}
-                    Loading surveys...
-                {:then surveys}
-                    {#each surveys as survey}
-                        <RadioButton
-                            value={survey}
-                            label={survey.surveyName}
-                            tooltip={survey.description}
-                        />
-                    {/each}
-                {:catch err}
-                <p class=error>
-                    {err}
-                </p>
-                {/await}
-            </div>
-        </RadioGroup>
+        <div class=choice-group>
+            {#await getSurveys()}
+                Loading surveys...
+            {:then surveys}
+                {#each surveys as survey}
+                    <RadioButton
+                        bind:selection={selected.survey}
+                        value={survey}
+                        label={survey.surveyName}
+                        tooltip={survey.description}
+                    />
+                {/each}
+            {:catch err}
+            <p class=error>
+                {err}
+            </p>
+            {/await}
+        </div>
     </div>
 </Dialog>
 

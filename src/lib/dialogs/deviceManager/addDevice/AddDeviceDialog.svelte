@@ -1,7 +1,7 @@
 <script>
     import { Dialog } from "$lib/utils/dialog";
     
-    import { CompactButton, PanelButton, RadioGroup } from "$lib/utils/buttons";
+    import { CompactButton, PanelButton } from "$lib/utils/buttons";
     import { sanitizeImportString } from "$lib/utils/tools/imports.js";
     import DeviceListItem from "./DeviceListItem.svelte";
     import { ParamCtrl } from "$lib/paramCtrls";
@@ -14,10 +14,8 @@
         shown=$bindable()
     } = $props()
 
-    let selected = $state({
-        device: undefined
-    })
-    setContext("selected", selected)
+    let selection = $state.raw();
+    $inspect(selection)
 
     let param = new Param("Device label")
     param.valType = "code"
@@ -39,7 +37,7 @@
     }
 
     let disableBtns = $derived({
-        OK: !param.valid.value || !selected.device
+        OK: !param.valid.value || !selection
     })
 
 </script>
@@ -52,7 +50,7 @@
         // no name
         param.val = ""
         // nothing selected
-        selected.device = undefined;
+        selection = undefined;
         // close all panels
         for (let key in panelsOpen) {
             panelsOpen[key] = false;
@@ -61,7 +59,7 @@
     buttons={{
         OK: (evt) => {
             // populate
-            devices[param.val] = new Device(selected.device.backend.__name__, selected.device.device);
+            devices[param.val] = new Device(selection.backend.__name__, selection.device);
             devices[param.val].params['name'].val = param.val;
         },
         CANCEL: (evt) => {}
@@ -85,68 +83,65 @@
             />
         </div>
         <div class=devices-list>
-            <RadioGroup
-                bind:value={selected.device}
-            >
-                {#await profilesPending.devices}
-                    <div class=loading-msg>
-                        Getting device backends...
-                    </div>
-                {:then}
-                    {#if profiles.devices}
-                        {#each Object.values(profiles.devices).filter(profile => profile.device) as backend}
-                            {#await python.liaison.send("app", {
-                                command: "run",
-                                args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
-                            }, timeout)}
+            {#await profilesPending.devices}
+                <div class=loading-msg>
+                    Getting device backends...
+                </div>
+            {:then}
+                {#if profiles.devices}
+                    {#each Object.values(profiles.devices).filter(profile => profile.device) as backend}
+                        {#await python.liaison.send("app", {
+                            command: "run",
+                            args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
+                        }, timeout)}
+                            <PanelButton
+                                label="Getting {backend.label} devices..."
+                                open={false}
+                            />
+                        {:then deviceProfiles}
+                            {#if deviceProfiles.length}
                                 <PanelButton
-                                    label="Getting {backend.label} devices..."
-                                    open={false}
-                                />
-                            {:then deviceProfiles}
-                                {#if deviceProfiles.length}
-                                    <PanelButton
-                                        label={backend.label}
-                                        bind:open={panelsOpen[backend.__name__]}
-                                    >
-                                        <div class=device-category>
-                                            {#each Object.values(deviceProfiles) as device}
-                                                <DeviceListItem
-                                                    device={device}
-                                                    backend={backend}
-                                                />
-                                            {/each}
-                                        </div>
-                                    </PanelButton>
-                                {/if}
-                            {:catch err}
-                                <div class=timeout-msg>
-                                    <p>Getting available devices took longer than expected.</p>
-                                    <pre>
-{err.error.join("\n")}
-                                    </pre>
-                                    
-                                    <p>Try again with a longer wait time (in milliseconds)?</p>
-                                    <div class=retry>
-                                        <input 
-                                            type=number 
-                                            style:flex-grow={1}
-                                            bind:value={timeout} 
-                                        />
-                                        <CompactButton
-                                            icon="/icons/btn-refresh.svg"
-                                            tooltip=Retry
-                                            onclick={refresh}
-                                        />
+                                    label={backend.label}
+                                    bind:open={panelsOpen[backend.__name__]}
+                                >
+                                    <div class=device-category>
+                                        {#each Object.values(deviceProfiles) as device}
+                                            <DeviceListItem
+                                                bind:selection={selection}
+                                                device={device}
+                                                backend={backend}
+                                            />
+                                        {/each}
                                     </div>
+                                </PanelButton>
+                            {/if}
+                        {:catch err}
+                            <div class=timeout-msg>
+                                <p>Getting available devices took longer than expected.</p>
+                                <pre>
+{err.error.join("\n")}
+                                </pre>
+                                
+                                <p>Try again with a longer wait time (in milliseconds)?</p>
+                                <div class=retry>
+                                    <input 
+                                        type=number 
+                                        style:flex-grow={1}
+                                        bind:value={timeout} 
+                                    />
+                                    <CompactButton
+                                        icon="/icons/btn-refresh.svg"
+                                        tooltip=Retry
+                                        onclick={refresh}
+                                    />
                                 </div>
-                            {/await}
-                        {/each}
-                    {/if}
-                {:catch err}
-                    {console.log(err)}
-                {/await}
-            </RadioGroup>
+                            </div>
+                        {/await}
+                    {/each}
+                {/if}
+            {:catch err}
+                {console.log(err)}
+            {/await}
         </div>
     </div>
 </Dialog>

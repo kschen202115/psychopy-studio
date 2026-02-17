@@ -1,5 +1,5 @@
 <script>
-    import { RadioButton, RadioGroup, CompactButton, Button } from "$lib/utils/buttons"
+    import { RadioButton, CompactButton, Button } from "$lib/utils/buttons"
     import { Experiment } from "$lib/experiment";
     import { Icon } from "$lib/utils/icons";
     import { getContext } from "svelte";
@@ -10,27 +10,24 @@
 
 <div class=panel>
     <div class=items>
-        <RadioGroup
-            bind:value={current.selection}
-        >
-            {#each Object.entries(current.runlist) as [i, item]}
-                <div class=item>
-                    <Icon 
-                        src="/icons/btn-{item.pilotMode ? "pilot" : "run"}py.svg"
-                    />
-                    <RadioButton 
-                        value={parseInt(i)}
-                        label="{item.file.name.length > 40 ? "..." : ""}{item.file.name.slice(-40)}"
-                        tooltip={item.file.file}
-                        icon="/icons/btn-{item instanceof Experiment ? "builder" : "coder"}.svg"
-                    />
-                    <CompactButton 
-                        icon="/icons/btn-delete.svg"
-                        onclick={evt => delete current.runlist[parseInt(i)]}
-                    />
-                </div>
-            {/each}
-        </RadioGroup>
+        {#each Object.entries(current.runlist) as [i, item]}
+            <div class=item>
+                <Icon 
+                    src="/icons/btn-{item.pilotMode ? "pilot" : "run"}py.svg"
+                />
+                <RadioButton 
+                    bind:selection={current.selection}
+                    value={parseInt(i)}
+                    label="{item.file.name.length > 40 ? "..." : ""}{item.file.name.slice(-40)}"
+                    tooltip={item.file.file}
+                    icon="/icons/btn-{item instanceof Experiment ? "builder" : "coder"}.svg"
+                />
+                <CompactButton 
+                    icon="/icons/btn-delete.svg"
+                    onclick={evt => delete current.runlist[parseInt(i)]}
+                />
+            </div>
+        {/each}
     </div>
     <div class=ctrls>
         <Button 

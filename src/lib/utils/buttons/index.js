@@ -5,5 +5,4 @@ export { default as CompactButton } from "./CompactButton.svelte";
 export { default as DropdownButton } from "./DropdownButton.svelte";
 export { default as IconButton } from "./IconButton.svelte";
 export { default as SwitchButton } from "./SwitchButton.svelte";
-export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as RadioButton } from "./RadioButton.svelte";

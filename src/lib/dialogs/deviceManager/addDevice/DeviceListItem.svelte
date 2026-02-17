@@ -6,16 +6,16 @@
     import { Info } from "$lib/utils/tooltip";
 
     let {
+        selection=$bindable(),
         device,
         backend
     } = $props()
 
-    let selected = getContext("selected");
 
     onDestroy(() => {
         // clear selected device if selected and destroyed
-        if (selected.device?.device === device) {
-            selected.device = undefined;
+        if (selection === device) {
+            selection = undefined;
         }
     })
 </script>
@@ -24,6 +24,7 @@
     class=device-list-item
 >
     <RadioButton
+        bind:selection={selection}
         label={device.deviceName}
         value={{
             device: device,

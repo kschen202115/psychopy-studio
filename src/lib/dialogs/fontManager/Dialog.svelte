@@ -1,7 +1,7 @@
 <script>
     import { Dialog } from "$lib/utils/dialog";
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
-    import { Button, RadioButton, RadioGroup } from "$lib/utils/buttons";
+    import { Button, RadioButton } from "$lib/utils/buttons";
     import { FontManager } from "./manager.svelte.js";
     import { getContext } from "svelte";
 
@@ -55,20 +55,17 @@
                         <div class=info>
                             {FontManager[source].description}
                         </div>
-                        <RadioGroup
-                            bind:value={value}
-                        >
-                            {#each FontManager[source].fonts.filter(
-                                name => name.toLowerCase().replaceAll(" ", "").includes(
-                                    searchTerm.toLowerCase().replaceAll(" ", "")
-                                )
-                            ) as name}
-                                <RadioButton 
-                                    value={name}
-                                    label={name}
-                                />
-                            {/each}
-                        </RadioGroup>
+                        {#each FontManager[source].fonts.filter(
+                            name => name.toLowerCase().replaceAll(" ", "").includes(
+                                searchTerm.toLowerCase().replaceAll(" ", "")
+                            )
+                        ) as name}
+                            <RadioButton 
+                                bind:selection={value}
+                                value={name}
+                                label={name}
+                            />
+                        {/each}
                         {#if FontManager[source].refresh}
                             <Button 
                                 label=Refresh

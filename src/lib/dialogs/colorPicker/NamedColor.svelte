@@ -1,5 +1,5 @@
 <script>
-    import { RadioButton, RadioGroup } from "$lib/utils/buttons";
+    import { RadioButton } from "$lib/utils/buttons";
 
     let {
         value=$bindable(),
@@ -160,22 +160,19 @@
 
 <div class=page>
     <div class=ctrl>
-        <RadioGroup
-            bind:value={value}
-        >
-            {#each colorNames as color}
-                <div
-                    class=button-wrapper
-                    style:--responsive-color={color}
-                >
-                    <RadioButton 
-                        value={target === "param" ? color : `"${color}"`}
-                        label={color}
-                        icon="/icons/sym-dot-responsive.svg"
-                    />
-                </div>
-            {/each}
-        </RadioGroup>
+        {#each colorNames as color}
+            <div
+                class=button-wrapper
+                style:--responsive-color={color}
+            >
+                <RadioButton 
+                    bind:selection={value}
+                    value={target === "param" ? color : `"${color}"`}
+                    label={color}
+                    icon="/icons/sym-dot-responsive.svg"
+                />
+            </div>
+        {/each}
     </div>
     <div 
         class=preview
