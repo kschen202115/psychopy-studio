@@ -324,6 +324,12 @@ async function newWindow(target = null, show = true, fullscreen = false) {
     }
   });
   win.removeMenu();
+  // prevent default key behaviour for CMD+R
+  win.webContents.on("before-input-event", (evt, input) => {
+    if (input.modifiers.includes("meta") && input.key.toLowerCase() === "r") {
+      evt.preventDefault()
+    }
+  })
   // open new windows in browser unless opened by electron
   win.webContents.setWindowOpenHandler(
     ({ url }) => {
