@@ -8,6 +8,7 @@
     import { CoderNotebook } from "./notebook";
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
+    import { PaneGroup, Pane, PaneResizer } from "paneforge";
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
     import { electron, python } from "$lib/globals.svelte";
@@ -36,38 +37,54 @@
 </script>
 
 <title>PsychoPy Coder</title>
-<Frame
-    rows={3} 
-    cols={4}
->
+<Frame>
     {#snippet ribbon()}
         <CoderRibbon />
     {/snippet}
-    {#if electron}
-        <Panel
-            title=Files
-            hspan={1}
-            vspan={2}
-        >
-            <FileExplorer />
-        </Panel>
-    {/if}
-    <Panel
-        title=Editor 
-        hspan={electron ? 3 : 4} 
-        vspan={python ? 2 : 3}
-    >
-        <CoderNotebook />
-    </Panel>
-    {#if python?.ready}
-        <Panel
-            title=Console
-            hspan={5}
-            vspan={1}
-        >
-            <ShellNotebook />
-        </Panel>
-    {/if}
+    <PaneGroup direction="vertical">
+        <Pane defaultSize={2/3}>
+            <PaneGroup direction="horizontal">
+                {#if electron}
+                    <Pane defaultSize={1/4}>
+                        <Panel
+                            title=Files
+                            hspan={1}
+                            vspan={2}
+                        >
+                            <FileExplorer />
+                        </Panel>
+                    </Pane>
+                {/if}
+                
+                <PaneResizer style="width: .3rem;"/>
+                
+                <Pane defaultSize={3/4}>
+                    <Panel
+                        title=Editor 
+                        hspan={electron ? 3 : 4} 
+                        vspan={python ? 2 : 3}
+                    >
+                        <CoderNotebook />
+                    </Panel>
+                </Pane>
+            </PaneGroup>
+        </Pane>
+
+        <PaneResizer style="height: .3rem;" />
+        {#if python?.ready}
+            <Pane defaultSize={1/3}>
+                <Panel
+                    title=Console
+                    hspan={5}
+                    vspan={1}
+                >
+                    <ShellNotebook />
+                </Panel>
+            </Pane>
+        {/if}
+    </PaneGroup>
+    
+    
 
     <TipsDialog 
         categories={["general", "coder", "silly"]}

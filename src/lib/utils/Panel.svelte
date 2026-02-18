@@ -2,35 +2,20 @@
     let {
         /** @prop @type {string} Text to display in this panel's sash */
         title,
-        /** @prop @type {integer} Number of columns to span within the frame */
-        hspan=1,
-        /** @prop @type {integer} Number of rows to span within the frame */
-        vspan=1,
         /** @interface */
         children=undefined
     } = $props()
-    
-    function ondrag(evt) {
-        let panel = this.parentElement
-        let frame = panel.parentElement
-
-        frame.dragging_panel = panel
-    }
-    function ondrop(evt) {
-        let frame = this.parentElement
-
-        this.parentElement.insertBefore(frame.dragging_panel, this);
-    }
 </script>
 
-<div class="panel" style="grid-column-end: span {hspan}; grid-row-end: span {vspan}">
-    <div class="pnl-title" draggable=true>
+<div class="panel">
+    <div class="pnl-title">
         {title}
     </div>
     <div class="pnl-content">
         {@render children?.()}
     </div>
 </div>
+
 
 <style>
     :root {
@@ -43,6 +28,11 @@
         border-radius: .25rem;
         overflow: hidden;
         grid-template: min-content 1fr / 1fr;
+        /* margin: .15rem;
+        width: calc(100% - .3rem);
+        height: calc(100% - .3rem); */
+        width: 100%;
+        height: 100%;
     }
     .panel .pnl-content {
         position: relative;

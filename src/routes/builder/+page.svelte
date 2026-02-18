@@ -1,6 +1,7 @@
 <script>
     import Panel from '$lib/utils/Panel.svelte';
     import Frame from '$lib/utils/Frame.svelte';
+    import { PaneGroup, Pane, PaneResizer } from "paneforge";
     import Theme from "$lib/utils/Theme.svelte";
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
@@ -44,33 +45,44 @@
     <title>PsychoPy Builder</title>
 {/if}
 
-<Frame 
-    rows={3} 
-    cols={4}
->
+<Frame>
     {#snippet ribbon()}
-    <Ribbon></Ribbon>
+        <Ribbon />
     {/snippet}
+    <PaneGroup direction="vertical">
+        <Pane defaultSize={2/3}>
+            <PaneGroup direction="horizontal">
+                <Pane defaultSize={3/4}>
+                    <Panel 
+                        title=Routines 
+                    >
+                        <RoutinesNotebook />
+                    </Panel>
+                </Pane>
+                
+                <PaneResizer style="width: .3rem;"/>
 
-    <Panel 
-        title=Routines 
-        hspan={3} 
-        vspan={2}
-    >
-        <RoutinesNotebook></RoutinesNotebook>
-    </Panel>
-    <Panel 
-        title=Components 
-        vspan={2}
-    >
-        <ComponentsPanel></ComponentsPanel>
-    </Panel>
-    <Panel 
-        title=Flow 
-        hspan={4}
-    >
-        <FlowPanel></FlowPanel>
-    </Panel>
+                <Pane defaultSize={1/4}>
+                    <Panel 
+                        title=Components 
+                    >
+                        <ComponentsPanel />
+                    </Panel>
+                </Pane>
+            </PaneGroup>
+        </Pane>
+
+        <PaneResizer style="height: .3rem;" />
+
+        <Pane defaultSize={1/3}>
+            <Panel 
+                title=Flow 
+                hspan={4}
+            >
+                <FlowPanel />
+            </Panel>
+        </Pane>
+    </PaneGroup>
 
     <ReadMe 
         script={current.readme.script}

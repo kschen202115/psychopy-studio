@@ -2,6 +2,7 @@
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
+    import { PaneGroup, Pane, PaneResizer } from "paneforge";
     import Theme from "$lib/utils/Theme.svelte";
     import AlertsOutput from "./outputs/AlertsOutput.svelte";
     import FilesPanel from "./files/Panel.svelte";
@@ -70,68 +71,74 @@
 {:else}
     <title>PsychoPy Runner</title>
 {/if}
-<Frame
-    rows={1} 
-    cols={3}
->
+<Frame>
     {#snippet ribbon()}
         <Ribbon />
     {/snippet}
-    <Panel
-        title=Files
-        hspan={1}
-        vspan={1}
-    >
-        <FilesPanel />
-    </Panel>
 
-    <Panel
-        title=Output 
-        hspan={2}
-        vspan={1}
-    >
-        <Notebook>
-            <NotebookPage
-                label=Alerts
-                bind:selected={
-                    () => current.tab === "alerts",
-                    (val) => {
-                        if (val) {
-                            current.tab = "alerts"
-                        }
-                    }
-                }
+    <PaneGroup direction="horizontal">
+        <Pane defaultSize={1/3}>
+            <Panel
+                title=Files
+                hspan={1}
+                vspan={1}
             >
-                <AlertsOutput />
-            </NotebookPage>
-            <NotebookPage
-                label=Stdout
-                bind:selected={
-                    () => current.tab === "stdout",
-                    (val) => {
-                        if (val) {
-                            current.tab = "stdout"
-                        }
-                    }
-                }
+                <FilesPanel />
+            </Panel>
+        </Pane>
+
+        <PaneResizer style="width: .3rem;"/>
+
+        <Pane defaultSize={2/3}>
+            <Panel
+                title=Output 
+                hspan={2}
+                vspan={1}
             >
-                <StdoutOutput />
-            </NotebookPage>
-            <NotebookPage
-                label=Pavlovia
-                bind:selected={
-                    () => current.tab === "pavlovia",
-                    (val) => {
-                        if (val) {
-                            current.tab = "pavlovia"
+                <Notebook>
+                    <NotebookPage
+                        label=Alerts
+                        bind:selected={
+                            () => current.tab === "alerts",
+                            (val) => {
+                                if (val) {
+                                    current.tab = "alerts"
+                                }
+                            }
                         }
-                    }
-                }
-            >
-                <PavloviaOutput />
-            </NotebookPage>
-        </Notebook>
-    </Panel>
+                    >
+                        <AlertsOutput />
+                    </NotebookPage>
+                    <NotebookPage
+                        label=Stdout
+                        bind:selected={
+                            () => current.tab === "stdout",
+                            (val) => {
+                                if (val) {
+                                    current.tab = "stdout"
+                                }
+                            }
+                        }
+                    >
+                        <StdoutOutput />
+                    </NotebookPage>
+                    <NotebookPage
+                        label=Pavlovia
+                        bind:selected={
+                            () => current.tab === "pavlovia",
+                            (val) => {
+                                if (val) {
+                                    current.tab = "pavlovia"
+                                }
+                            }
+                        }
+                    >
+                        <PavloviaOutput />
+                    </NotebookPage>
+                </Notebook>
+            </Panel>
+        </Pane>
+    </PaneGroup>
 
     <TipsDialog 
         categories={["general", "runner", "silly"]}
