@@ -52,15 +52,15 @@
         class:primary
         class:affirmative
         class:negative
-        onmouseenter={() => {show.tooltip = true}}
-        onmouseleave={() => {show.tooltip = false}}
-        onfocusin={() => {show.tooltip = true}}
-        onfocusout={() => {show.tooltip = false}}
+        onmouseenter={() => {if (tooltip) {show.tooltip = true}}}
+        onmouseleave={() => {if (tooltip) {show.tooltip = false}}}
+        onfocusin={() => {if (tooltip) {show.tooltip = true}}}
+        onfocusout={() => {if (tooltip) {show.tooltip = false}}}
     >
         {#if tooltip}
             <Tooltip
                 bind:shown={show.tooltip}
-                position="right"
+                position={vertical ? "bottom" : "right"}
             >
                 {{
                     // if completed/not started, regular label

@@ -52,7 +52,7 @@
     vertical
     disabled={!(current.routine instanceof Routine)}
     onclick={newComponent}
-></Button>
+/>
 
 <Dialog 
     id=new-component

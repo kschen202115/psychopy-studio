@@ -40,5 +40,5 @@
     icon="/icons/components/{component['__name__']}.svg"
     vertical
     onclick={newRoutine}
-></Button>
+/>
 {/if}
