@@ -84,7 +84,7 @@
                         // if error, error icon
                         error: "/icons/sym-error.svg"
                     }[status]}
-                    size=2.25rem
+                    size={vertical ? "2.75rem" : "2.25rem"}
                 />
             </div>
         {/if}
