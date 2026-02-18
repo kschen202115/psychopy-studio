@@ -1,4 +1,4 @@
-const { ipcRenderer, contextBridge } = require('electron');
+const { ipcRenderer, contextBridge, webUtils } = require('electron');
 
 
 // details about Electron process
@@ -14,6 +14,7 @@ const electron = {
     close: (id) => ipcRenderer.invoke("electron.windows.close", id).then(resp => resp),
   },
   paths: {
+    getPathForFile: (file) => webUtils.getPathForFile(file), 
     documents: () => ipcRenderer.invoke("electron.paths.documents").then(resp => resp),
     user: () => ipcRenderer.invoke("electron.paths.user").then(resp => resp),
     devices: () => ipcRenderer.invoke("electron.paths.devices").then(resp => resp),

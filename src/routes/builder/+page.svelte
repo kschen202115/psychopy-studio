@@ -45,7 +45,9 @@
     <title>PsychoPy Builder</title>
 {/if}
 
-<Frame>
+<Frame
+    onFileDrop={(evt, file) => openFile(file)}
+>
     {#snippet ribbon()}
         <Ribbon />
     {/snippet}

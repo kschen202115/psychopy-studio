@@ -37,7 +37,9 @@
 </script>
 
 <title>PsychoPy Coder</title>
-<Frame>
+<Frame
+    onFileDrop={(evt, file) => current.openFile(file)}
+>
     {#snippet ribbon()}
         <CoderRibbon />
     {/snippet}

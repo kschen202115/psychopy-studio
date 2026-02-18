@@ -71,7 +71,9 @@
 {:else}
     <title>PsychoPy Runner</title>
 {/if}
-<Frame>
+<Frame
+    onFileDrop={(evt, file) => addFile(file)}
+>
     {#snippet ribbon()}
         <Ribbon />
     {/snippet}
