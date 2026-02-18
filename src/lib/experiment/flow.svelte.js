@@ -296,7 +296,6 @@ export class LoopInitiator extends HasParams {
 
     addTerminator() {
         this.terminator = new LoopTerminator();
-        this.terminator.name = this.name;
         this.terminator.exp = this.exp;
         this.terminator.initiator = this;
     }
@@ -327,9 +326,13 @@ export class LoopInitiator extends HasParams {
 }
 
 export class LoopTerminator {
+
+    name = $derived(
+        this.initiator?.name
+    )
+
     constructor() {
         this.exp = undefined;
-        this.name = undefined;
         this.initiator = undefined;
     }
 
