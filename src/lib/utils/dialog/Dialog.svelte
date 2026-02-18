@@ -1,7 +1,7 @@
 <script>
     import { Button } from "$lib/utils/buttons";
     import { Icon } from "$lib/utils/icons";
-    import { untrack } from "svelte";
+    import { onMount, untrack } from "svelte";
 
     let {
         id,
@@ -42,6 +42,11 @@
             handle.close()
         }
     })
+
+    // update shown state on dialog close
+    onMount(
+        evt => handle.addEventListener("close", evt => shown = false)
+    )
 
 </script>
 
