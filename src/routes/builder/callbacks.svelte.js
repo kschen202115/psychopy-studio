@@ -32,7 +32,7 @@ export async function file_open() {
 
 export async function openFile(file) {
     // construct an Experiment object from the file
-    current.experiment.fromFile(file);
+    await current.experiment.fromFile(file);
     // choose current routine
     if (current.experiment.routines) {
         current.routine = Object.values(current.experiment.routines)[0];
