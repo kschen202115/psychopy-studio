@@ -18,7 +18,7 @@
 
 <div 
     id=frame
-    ondragenter={evt => hover.show = true}
+    ondragenter={evt => hover.show = evt.dataTransfer.types?.includes?.("Files")}
     ondragover={evt => evt.preventDefault()}
     ondragleave={evt => hover.show = evt.fromElement === hover.indicator}
     ondrop={async evt => {
