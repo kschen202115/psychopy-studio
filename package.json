@@ -7,7 +7,7 @@
 	"type": "module",
 	"license": "./LICENSE",
 	"build": {
-		"appId": "OpenScienceTools.PsychoPyStudio",
+		"appId": "OpenScienceTools.PsychoPy.Studio",
 		"productName": "PsychoPy Studio",
 		"executableName": "PsychoPy Studio",
 		"artifactName": "PsychoPy_Studio_${version}.${ext}",
