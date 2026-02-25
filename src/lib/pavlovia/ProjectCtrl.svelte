@@ -34,13 +34,15 @@
     })
 
     let show = $state({
+        newProjectDlg: false,
         manageProjectsDlg: false,
-        browseProjectsDlg: false
+    })
+    let awaiting = $state({
+        newProjectDlg: Promise.withResolvers()
     })
 
     // refresh project when experiment or user changes
     $effect(async () => current.project = await findProject(current.experiment, current.user))
-    $inspect(current.project)
 
     let label = $derived.by(() => {
         if (current.project) {
@@ -71,7 +73,7 @@
         label="New project"
         icon="/icons/btn-add.svg"
         onclick={evt => show.newProjectDlg = true}
-        disabled={!current.user}
+        disabled={!current.user || !current.experiment?.file?.file}
     ></MenuItem>
     <MenuItem
         label="Edit project"
@@ -88,7 +90,7 @@
     <MenuItem
         label="Search projects..."
         icon="/icons/btn-find.svg"
-        onclick={(evt) => show.browseProjectsDlg = true}
+        onclick={(evt) => window.open("https://pavlovia.org/explore", "_blank")}
     ></MenuItem>
 </DropdownButton>
 
@@ -97,4 +99,5 @@
 />
 <NewProjectDlg 
     bind:shown={show.newProjectDlg}
+    bind:awaiting={awaiting.newProjectDlg}
 />
