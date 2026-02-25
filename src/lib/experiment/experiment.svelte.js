@@ -328,7 +328,7 @@ export class Experiment {
             if (routineNode.nodeName === "Routine") {
                 routine = new Routine(); 
             } else {
-                routine = new StandaloneRoutine();
+                routine = new StandaloneRoutine(routineNode.nodeName);
             }
             routine.exp = this;
             routine.fromXML(routineNode);
