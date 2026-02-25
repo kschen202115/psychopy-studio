@@ -15,7 +15,6 @@
     } = $props()
 
     let selection = $state.raw();
-    $inspect(selection)
 
     let param = new Param("Device label")
     param.valType = "code"

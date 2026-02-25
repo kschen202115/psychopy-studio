@@ -328,7 +328,7 @@ export class Experiment {
             if (routineNode.nodeName === "Routine") {
                 routine = new Routine(); 
             } else {
-                routine = new StandaloneRoutine();
+                routine = new StandaloneRoutine(routineNode.nodeName);
             }
             routine.exp = this;
             routine.fromXML(routineNode);
@@ -441,6 +441,15 @@ export class Experiment {
             await setupPython(version)
         }
         version = version || "app"
+        // reload devices.json if necessary
+        await python.liaison.send(version, {
+            command: "try",
+            args: ["prefs.setDevicesFile", path.join(
+                await electron.paths.user(), "devices.json"
+            )]
+        }, 10000).catch(
+            err => logging.error([`Failed to set devices file`, err])
+        )
 
         // create experiment object via Liaison
         await python.liaison.send(version, {
