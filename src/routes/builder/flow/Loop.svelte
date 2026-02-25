@@ -12,7 +12,7 @@
     let current = getContext("current");
 
     let {
-        element=undefined
+        element=$bindable()
     } = $props()
 
     let showDialog = $state(false);
@@ -93,11 +93,11 @@
         />
     </div>
     {#if element}
-        {#each element.routines as rt}
+        {#each Object.keys(element.routines) as i}
             {#if rt instanceof FlowLoop}
-                <Loop element={rt}></Loop>
+                <Loop bind:element={element.routines[i]}></Loop>
             {:else}
-                <RoutineNode element={rt}></RoutineNode>
+                <RoutineNode bind:element={element.routines[i]}></RoutineNode>
             {/if}
         {/each}
     {/if}

@@ -95,6 +95,7 @@
         padding: 1rem;
         display: flex;
         flex-direction: column;
+        width: 45rem;
         height: 100%;
         box-sizing: border-box;
     }

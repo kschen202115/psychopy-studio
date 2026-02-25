@@ -9,7 +9,7 @@
     let current = getContext("current");
 
     let {
-        element
+        element=$bindable()
     } = $props()
 
     let show = $state({
@@ -81,11 +81,13 @@
     bind:shown={show.contextMenu} 
     bind:position={contextMenuPos}
 >
-    <MenuItem
-        icon="/icons/btn-edit.svg"
-        label="Routine settings"
-        onclick={(evt) => show.settingsDlg = true}
-    />
+    {#if element.settings}
+        <MenuItem
+            icon="/icons/btn-edit.svg"
+            label="Routine settings"
+            onclick={(evt) => show.settingsDlg = true}
+        />
+    {/if}
     <MenuItem
         icon="/icons/sym-dot-{element.disabled ? "blue" : "light"}.svg"
         label="{element.disabled ? "Enable" : "Disable"} Routine"
@@ -93,7 +95,11 @@
             // update history
             current.experiment.history.update(`${element.disabled ? "enable" : "disable"} ${element.name}`);
             // disable Routine
-            element.settings.params.disabled.val = !element.disabled;
+            if (element.settings) {
+                element.settings.params.disabled.val = !element.disabled;
+            } else {
+                element.params.disabled.val = !element.disabled;
+            }
         }}
     />
     <MenuItem 
@@ -108,10 +114,12 @@
     />
 </Menu>
 
-<ParamsDialog
-    bind:element={element.settings}
-    bind:shown={show.settingsDlg}
-/>
+{#if element.settings}
+    <ParamsDialog
+        bind:element={element.settings}
+        bind:shown={show.settingsDlg}
+    />
+{/if}
 
 <style>
     .routine {

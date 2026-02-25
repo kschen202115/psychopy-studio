@@ -23,13 +23,13 @@
         </div>
         {#if current.experiment}
             {#each current.experiment.flow.dynamic as emt}
-            <div class=flow-animation>
-                {#if emt instanceof FlowLoop}
-                    <LoopNode element={emt}></LoopNode>
-                {:else}
-                    <RoutineNode element={emt}></RoutineNode>
-                {/if}
-            </div>
+                <div class=flow-animation>
+                    {#if emt instanceof FlowLoop}
+                        <LoopNode bind:element={emt} />
+                    {:else}
+                        <RoutineNode bind:element={emt} />
+                    {/if}
+                </div>
             {/each}
         {/if}
         <EntryPoint index=-1></EntryPoint>
