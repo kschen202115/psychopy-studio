@@ -61,11 +61,7 @@ export class UsageReport {
         }
     }
     get version() {
-        if (appVersion === "dev") {
-            return `Studio ${appVersion}`
-        } else {
-            return `Studio ${appVersion}.${appVersion}`
-        }
+        return `Studio ${appVersion}`
     }
     
     get misc() {
