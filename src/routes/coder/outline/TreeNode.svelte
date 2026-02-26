@@ -79,11 +79,20 @@
 
 <style>
     .tree-node {
-        margin-left: .5rem;
-        padding-left: .5rem;
-        border-left: 1px solid var(--overlay)
+        margin-left: .75rem;
+        border-left: 1px solid transparent;
+    }
+    .tree-node:hover {
+        border-color: var(--overlay);
+    }
+    .tree-node button:hover {
+        background-color: var(--mantle);
     }
     .tree-node button {
-        margin-bottom: .5rem;
+        padding: .5rem;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
+        background-color: transparent;
     }
 </style>

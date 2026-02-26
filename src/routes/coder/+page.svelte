@@ -66,7 +66,7 @@
                 <PaneResizer style="width: .3rem;"/>
                 
                 <Pane defaultSize={1/4}>
-                    <Panel title=Editor>
+                    <Panel title=Outline>
                         <OutlinePanel />
                     </Panel>
                 </Pane>

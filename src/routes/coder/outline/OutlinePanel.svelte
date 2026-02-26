@@ -20,6 +20,8 @@
 
 <style>
     .panel {
-        padding: 1rem;
+        background-color: var(--base);
+        min-height: 100%;
+        box-sizing: border-box;
     }
 </style>
