@@ -21,16 +21,15 @@
 <Dialog 
     title="New project"
     buttons={{
-        OK: evt => git.newProject(
-            $state.snapshot(details), 
-            current.experiment.file.parent, 
-            $state.snapshot(current.user)
-        ).then(
-            resp => {
-                current.project = resp
-                awaiting.resolve(true)
-            }
-        ),
+        OK: async evt => {
+            await git.newProject(
+                $state.snapshot(details), 
+                current.experiment.file.parent, 
+                $state.snapshot(current.user)
+            )
+            current.project = await findProject(current.experiment, current.user)
+            awaiting.resolve(true)
+        },
         CANCEL: evt => awaiting.resolve(false)
     }}
     onopen={evt => {
