@@ -6,11 +6,22 @@
         /** @interface */
         ctrls=undefined
     } = $props()
+
+    let editor = $state.raw();
+
+    // dynamically update value
+    $effect(() => {
+        // dynamically update value
+        editor?.setValue?.(value)
+        // scroll to end
+        editor?.revealLineInCenterIfOutsideViewport?.(value.split("\n").length)
+    })
 </script>
 
 <div class=code-output>
     <CodeEditor 
         value={value}
+        bind:editor={editor}
         language=shell
         lineNumbers={false}
         readonly
