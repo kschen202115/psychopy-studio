@@ -11,6 +11,7 @@
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
+    import OutlinePanel from "./outline/OutlinePanel.svelte";
     import { electron, python } from "$lib/globals.svelte";
     import SetupPython from "$lib/python/SetupPython.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
@@ -48,11 +49,7 @@
             <PaneGroup direction="horizontal">
                 {#if electron}
                     <Pane defaultSize={1/4}>
-                        <Panel
-                            title=Files
-                            hspan={1}
-                            vspan={2}
-                        >
+                        <Panel title=Files>
                             <FileExplorer />
                         </Panel>
                     </Pane>
@@ -60,13 +57,17 @@
                 
                 <PaneResizer style="width: .3rem;"/>
                 
-                <Pane defaultSize={3/4}>
-                    <Panel
-                        title=Editor 
-                        hspan={electron ? 3 : 4} 
-                        vspan={python ? 2 : 3}
-                    >
+                <Pane defaultSize={2/4}>
+                    <Panel title=Editor>
                         <CoderNotebook />
+                    </Panel>
+                </Pane>
+
+                <PaneResizer style="width: .3rem;"/>
+                
+                <Pane defaultSize={1/4}>
+                    <Panel title=Editor>
+                        <OutlinePanel />
                     </Panel>
                 </Pane>
             </PaneGroup>
