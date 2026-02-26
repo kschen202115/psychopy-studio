@@ -66,7 +66,7 @@
 </script>
 
 
-{#if current.selection !== undefined}
+{#if current.runlist[current.selection]?.file?.name}
     <title>PsychoPy Runner: {current.runlist[current.selection].file.name}</title>
 {:else}
     <title>PsychoPy Runner</title>
