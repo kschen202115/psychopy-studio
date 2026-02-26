@@ -35,7 +35,7 @@
                         // append details
                         subnodes.push({
                             content: content.slice(bodynode.from, bodynode.to),
-                            index: subnode.from,
+                            index: index + subnode.from,
                             type: subnode.type.name,
                             name: content.slice(namenode.from, namenode.to),
                         })

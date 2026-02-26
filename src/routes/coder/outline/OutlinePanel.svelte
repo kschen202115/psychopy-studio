@@ -9,7 +9,7 @@
     {#if current.pages?.[current.tab]}
         <TreeNode 
             content={current.pages[current.tab].content}
-            index={0}
+            index={1}
             type=Script
             name={current.pages[current.tab].file.stem}
         />
