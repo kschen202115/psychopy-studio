@@ -59,7 +59,7 @@
 </script>
 
 {#if element.complete}
-    <EntryPoint index={element.initiator.index}></EntryPoint>
+    <EntryPoint index={element.initiator.index} />
 {/if}
 <div class=loop class:incomplete={!element.complete}>
     {#if element}
@@ -94,10 +94,10 @@
     </div>
     {#if element}
         {#each Object.keys(element.routines) as i}
-            {#if rt instanceof FlowLoop}
-                <Loop bind:element={element.routines[i]}></Loop>
+            {#if element.routines[i] instanceof FlowLoop}
+                <Loop bind:element={element.routines[i]} />
             {:else}
-                <RoutineNode bind:element={element.routines[i]}></RoutineNode>
+                <RoutineNode bind:element={element.routines[i]} />
             {/if}
         {/each}
     {/if}
@@ -115,7 +115,7 @@
                 src="/icons/sym-arrow-down{edgeHovered.right ? "-hl" : ""}.svg"
             />
         </div>
-        <EntryPoint index={element.terminator.index}></EntryPoint>
+        <EntryPoint index={element.terminator.index} />
     {/if}
 </div>
 
