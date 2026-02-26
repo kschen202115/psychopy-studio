@@ -28,8 +28,6 @@
             if (await awaiting.newProject.promise) {
                 // if completed, get details
                 remote = await git.getRemote(folder, user);
-                // update current project
-                current.project = await findProject(current.experiment, current.user)
             } else {
                 // if cancelled, return
                 git.output("Cancelled by user.")
@@ -37,10 +35,10 @@
             }
         }
         // pull from remote
-        await git.pull(folder, user, force)
+        await git.pull(folder, user, false)
         // stage all changes
         let sha
-        if (await git.stage(folder)) {
+        if ((await git.stage(folder)).length) {
             // propt to commit
             show.commit = true;
             sha = await awaiting.commit.promise;
