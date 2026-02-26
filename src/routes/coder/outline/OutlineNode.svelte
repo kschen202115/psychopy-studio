@@ -2,7 +2,7 @@
     import { TreeNode, TreeBranch } from "$lib/utils/tree"
     import OutlineNode from "./OutlineNode.svelte";
     import { parser as pythonParser } from "@lezer/python";
-    import { parser as jsParser } from "@lezer/python"
+    import { parser as jsParser } from "@lezer/javascript"
     import { current } from "../globals.svelte";
 
     let {
@@ -12,6 +12,13 @@
         name,
         top=false
     } = $props()
+
+    let icons = {
+        "Script.py": "/icons/nodetypes/Script.py.svg",
+        "Script.js": "/icons/nodetypes/Script.js.svg",
+        ClassDefinition: "/icons/nodetypes/ClassDefinition.svg",
+        FunctionDefinition: "/icons/nodetypes/FunctionDefinition.svg",
+    }
 
     let node = $derived.by(() => {
         // python parser for python files
@@ -34,6 +41,21 @@
                         // get name and content
                         let namenode = subnode.node.getChild("VariableName")
                         let bodynode = subnode.node.getChild("Body")
+                        // append details
+                        subnodes.push({
+                            content: content.slice(bodynode.from, bodynode.to),
+                            index: index + subnode.from,
+                            type: subnode.type.name,
+                            name: content.slice(namenode.from, namenode.to),
+                        })
+                        // stop iteration
+                        return false
+                    }
+                    // for variable defs...
+                    if (subnode.type.name === "VariableDeclaration") {
+                        // get name
+                        let namenode = subnode.node.getChild("VariableDefinition")
+                        let bodynode = subnode.node.getChild("Equals").nextSibling
                         // append details
                         subnodes.push({
                             content: content.slice(bodynode.from, bodynode.to),
@@ -67,7 +89,7 @@
 {#if subnodes.length}
     <TreeBranch
         label={name}
-        icon="/icons/nodetypes/{type}.svg"
+        icon={icons?.[type]}
         onselect={navigateTo}
         open={top}
     >
@@ -83,7 +105,7 @@
 {:else if !top}
     <TreeNode 
         label={name}
-        icon="/icons/nodetypes/{type}.svg"
+        icon={icons?.[type]}
         onselect={navigateTo}
     />
 {/if}
