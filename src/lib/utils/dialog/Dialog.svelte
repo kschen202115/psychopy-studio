@@ -121,7 +121,7 @@
                 {/if}
                 {#if buttons.OK}
                 <Button 
-                    label="Okay"
+                    label="OK"
                     onclick={(evt) => {
                         buttons['OK'](evt);
                         shown = false;
