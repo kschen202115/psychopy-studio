@@ -12,7 +12,7 @@
             <OutlineNode 
                 content={current.pages[current.tab].content}
                 index={1}
-                type=Script
+                type="Script{current.pages[current.tab].file.ext}"
                 name={current.pages[current.tab].file.name}
                 top
             />

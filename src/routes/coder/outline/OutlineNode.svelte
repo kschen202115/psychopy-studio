@@ -4,7 +4,6 @@
     import { parser as pythonParser } from "@lezer/python";
     import { parser as jsParser } from "@lezer/python"
     import { current } from "../globals.svelte";
-    import TreeRoot from "../../../lib/utils/tree/TreeRoot.svelte";
 
     let {
         content,
@@ -68,6 +67,7 @@
 {#if subnodes.length}
     <TreeBranch
         label={name}
+        icon="/icons/nodetypes/{type}.svg"
         onselect={navigateTo}
         open={top}
     >
@@ -83,6 +83,7 @@
 {:else if !top}
     <TreeNode 
         label={name}
+        icon="/icons/nodetypes/{type}.svg"
         onselect={navigateTo}
     />
 {/if}

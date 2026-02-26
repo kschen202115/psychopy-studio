@@ -59,7 +59,7 @@
         flex-direction: row;
         flex-wrap: nowrap;
         align-items: center;
-        gap: .25rem;
+        gap: .5rem;
         background-color: transparent;
         border: none;
         overflow: hidden;
