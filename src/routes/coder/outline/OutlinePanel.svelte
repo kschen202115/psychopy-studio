@@ -11,10 +11,13 @@
             content={current.pages[current.tab].content}
             index={1}
             type=Script
-            name={current.pages[current.tab].file.stem}
+            name={current.pages[current.tab].file.name}
+            top
         />
     {:else}
-        No open file
+        <div class=message>
+            No open file
+        </div>
     {/if}
 </div>
 
@@ -22,6 +25,10 @@
     .panel {
         background-color: var(--base);
         min-height: 100%;
+        box-sizing: border-box;
+    }
+    .message {
+        padding: 1rem;
         box-sizing: border-box;
     }
 </style>

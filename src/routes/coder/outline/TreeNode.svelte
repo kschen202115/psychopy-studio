@@ -8,7 +8,8 @@
         content,
         index,
         type,
-        name
+        name,
+        top=false
     } = $props()
 
     let node = $derived.by(() => {
@@ -54,8 +55,9 @@
     
 </script>
 
-<div class=tree-node>
+{#if !top}
     <button
+        class=tree-node-btn
         onclick={evt => {
             let editor = current.pages[current.tab].editor;
             let pos = editor.getModel().getPositionAt(index);
@@ -65,31 +67,35 @@
     >
         {name} ({type})
     </button>
-    
+{/if}
 
-    {#each subnodes as subnode}
-        <TreeNode 
-            content={subnode.content}
-            index={subnode.index}
-            type={subnode.type}
-            name={subnode.name}
-        />
-    {/each}
-</div>
+{#if subnodes.length}
+    <div class=tree-node>
+        {#each subnodes as subnode}
+            <TreeNode 
+                content={subnode.content}
+                index={subnode.index}
+                type={subnode.type}
+                name={subnode.name}
+            />
+        {/each}
+    </div>
+{/if}
 
 <style>
     .tree-node {
         margin-left: .75rem;
+        margin-bottom: .5rem;
         border-left: 1px solid transparent;
     }
     .tree-node:hover {
         border-color: var(--overlay);
     }
-    .tree-node button:hover {
+    .tree-node-btn:hover {
         background-color: var(--mantle);
     }
-    .tree-node button {
-        padding: .5rem;
+    .tree-node-btn {
+        padding: .25rem .5rem;
         width: 100%;
         box-sizing: border-box;
         text-align: left;
