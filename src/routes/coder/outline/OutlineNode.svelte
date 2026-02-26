@@ -1,8 +1,10 @@
 <script>
-    import TreeNode from "./TreeNode.svelte";
+    import { TreeNode, TreeBranch } from "$lib/utils/tree"
+    import OutlineNode from "./OutlineNode.svelte";
     import { parser as pythonParser } from "@lezer/python";
     import { parser as jsParser } from "@lezer/python"
     import { current } from "../globals.svelte";
+    import TreeRoot from "../../../lib/utils/tree/TreeRoot.svelte";
 
     let {
         content,
@@ -51,54 +53,36 @@
         return subnodes
     })
 
-    
+    function navigateTo() {
+        // get current page
+        let editor = current.pages[current.tab].editor;
+        // work out line from character index
+        let pos = editor.getModel().getPositionAt(index);
+        // jump to line
+        editor.revealPosition(pos)
+        editor.setPosition(pos)
+    }
     
 </script>
 
-{#if !top}
-    <button
-        class=tree-node-btn
-        onclick={evt => {
-            let editor = current.pages[current.tab].editor;
-            let pos = editor.getModel().getPositionAt(index);
-            editor.revealPosition(pos)
-            editor.setPosition(pos)
-        }}
-    >
-        {name} ({type})
-    </button>
-{/if}
-
 {#if subnodes.length}
-    <div class=tree-node>
+    <TreeBranch
+        label={name}
+        onselect={navigateTo}
+        open={top}
+    >
         {#each subnodes as subnode}
-            <TreeNode 
+            <OutlineNode 
                 content={subnode.content}
                 index={subnode.index}
                 type={subnode.type}
                 name={subnode.name}
             />
         {/each}
-    </div>
+    </TreeBranch>
+{:else if !top}
+    <TreeNode 
+        label={name}
+        onselect={navigateTo}
+    />
 {/if}
-
-<style>
-    .tree-node {
-        margin-left: .75rem;
-        margin-bottom: .5rem;
-        border-left: 1px solid transparent;
-    }
-    .tree-node:hover {
-        border-color: var(--overlay);
-    }
-    .tree-node-btn:hover {
-        background-color: var(--mantle);
-    }
-    .tree-node-btn {
-        padding: .25rem .5rem;
-        width: 100%;
-        box-sizing: border-box;
-        text-align: left;
-        background-color: transparent;
-    }
-</style>
