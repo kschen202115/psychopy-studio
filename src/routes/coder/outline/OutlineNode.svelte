@@ -59,7 +59,7 @@
                         // append details
                         subnodes.push({
                             content: content.slice(bodynode.from, bodynode.to),
-                            index: index + subnode.from,
+                            index: 1 + index + subnode.from,
                             type: subnode.type.name,
                             name: content.slice(namenode.from, namenode.to),
                         })
