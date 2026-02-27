@@ -5,6 +5,7 @@
     import { Device } from "$lib/experiment";
     import { devices, electron } from "$lib/globals.svelte";
     import AddDeviceDialog from "./addDevice/AddDeviceDialog.svelte";
+    import { pending } from "$lib/experiment/profiles.svelte";
     import { onMount } from "svelte";
 
     let {
@@ -48,6 +49,8 @@
             // do nothing if not in an electron context
             return
         }
+        // wait for Python to have started so we have necessary class defs
+        await pending.devices
         // get devices file path
         let file = await electron.paths.devices();
         // make sure devices.json exists
