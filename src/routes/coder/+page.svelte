@@ -59,7 +59,7 @@
         <Pane defaultSize={3/5}>
 
             <PaneGroup direction="vertical">
-                <Pane defaultSize={2/3}>
+                <Pane defaultSize={3/4}>
                     <Panel title=Editor>
                         <CoderNotebook />
                     </Panel>
@@ -68,7 +68,7 @@
                 <PaneResizer style="height: .3rem;"/>
 
                 {#if python?.ready}
-                    <Pane defaultSize={1/3}>
+                    <Pane defaultSize={1/4}>
                         <Panel title=Console>
                             <ShellNotebook />
                         </Panel>
