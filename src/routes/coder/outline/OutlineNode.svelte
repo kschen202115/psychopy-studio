@@ -1,8 +1,7 @@
 <script>
     import { TreeNode, TreeBranch } from "$lib/utils/tree"
     import OutlineNode from "./OutlineNode.svelte";
-    import { parser as pythonParser } from "@lezer/python";
-    import { parser as jsParser } from "@lezer/javascript"
+    import { parsePython, parseJavaScript } from "./parsers.js"
     import { current } from "../globals.svelte";
 
     let {
@@ -17,61 +16,24 @@
         "Script.py": "/icons/nodetypes/Script.py.svg",
         "Script.js": "/icons/nodetypes/Script.js.svg",
         ClassDefinition: "/icons/nodetypes/ClassDefinition.svg",
+        ClassDeclaration: "/icons/nodetypes/ClassDefinition.svg",
         FunctionDefinition: "/icons/nodetypes/FunctionDefinition.svg",
+        FunctionDeclaration: "/icons/nodetypes/FunctionDefinition.svg",
     }
 
-    let node = $derived.by(() => {
-        // python parser for python files
-        if (current.pages[current.tab].file.file.endsWith(".py")) {
-            return pythonParser.parse(content)
-        }
-        // js parser for js files
-        if (current.pages[current.tab].file.file.endsWith(".js")) {
-            return jsParser.parse(content)
-        }
-    })
-
     let subnodes = $derived.by(() => {
-        let subnodes = [];
         try {
-            node?.iterate?.({
-                enter: subnode => {
-                    // for function and class defs...
-                    if (["FunctionDefinition", "ClassDefinition"].includes(subnode.type.name)) {
-                        // get name and content
-                        let namenode = subnode.node.getChild("VariableName")
-                        let bodynode = subnode.node.getChild("Body")
-                        // append details
-                        subnodes.push({
-                            content: content.slice(bodynode.from, bodynode.to),
-                            index: index + subnode.from,
-                            type: subnode.type.name,
-                            name: content.slice(namenode.from, namenode.to),
-                        })
-                        // stop iteration
-                        return false
-                    }
-                    // for variable defs...
-                    if (subnode.type.name === "VariableDeclaration") {
-                        // get name
-                        let namenode = subnode.node.getChild("VariableDefinition")
-                        let bodynode = subnode.node.getChild("Equals").nextSibling
-                        // append details
-                        subnodes.push({
-                            content: content.slice(bodynode.from, bodynode.to),
-                            index: 1 + index + subnode.from,
-                            type: subnode.type.name,
-                            name: content.slice(namenode.from, namenode.to),
-                        })
-                        // stop iteration
-                        return false
-                    }
-                }
-            })
+            // parse Python file
+            if ([".py"].includes(current.pages[current.tab].file.ext)) {
+                return parsePython(content, index + 1)
+            }
+            // parse JS file
+            if ([".js", ".cjs", ".ts"].includes(current.pages[current.tab].file.ext)) {
+                return parseJavaScript(content, index + 1)
+            }
         } catch (err) {
             console.error(err)
         }
-        return subnodes
     })
 
     function navigateTo() {
