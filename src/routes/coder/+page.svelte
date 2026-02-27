@@ -44,47 +44,47 @@
     {#snippet ribbon()}
         <CoderRibbon />
     {/snippet}
-    <PaneGroup direction="vertical">
-        <Pane defaultSize={2/3}>
-            <PaneGroup direction="horizontal">
-                {#if electron}
-                    <Pane defaultSize={1/4}>
-                        <Panel title=Files>
-                            <FileExplorer />
-                        </Panel>
-                    </Pane>
-                {/if}
-                
-                <PaneResizer style="width: .3rem;"/>
-                
-                <Pane defaultSize={2/4}>
+    
+    <PaneGroup direction="horizontal">
+        {#if electron}
+            <Pane defaultSize={1/5}>
+                <Panel title=Files>
+                    <FileExplorer />
+                </Panel>
+            </Pane>
+        {/if}
+
+        <PaneResizer style="width: .3rem;"/>
+
+        <Pane defaultSize={3/5}>
+
+            <PaneGroup direction="vertical">
+                <Pane defaultSize={2/3}>
                     <Panel title=Editor>
                         <CoderNotebook />
                     </Panel>
                 </Pane>
 
-                <PaneResizer style="width: .3rem;"/>
-                
-                <Pane defaultSize={1/4}>
-                    <Panel title=Outline>
-                        <OutlinePanel />
-                    </Panel>
-                </Pane>
-            </PaneGroup>
-        </Pane>
+                <PaneResizer style="height: .3rem;"/>
 
-        <PaneResizer style="height: .3rem;" />
-        {#if python?.ready}
-            <Pane defaultSize={1/3}>
-                <Panel
-                    title=Console
-                    hspan={5}
-                    vspan={1}
-                >
-                    <ShellNotebook />
-                </Panel>
-            </Pane>
-        {/if}
+                {#if python?.ready}
+                    <Pane defaultSize={1/3}>
+                        <Panel title=Console>
+                            <ShellNotebook />
+                        </Panel>
+                    </Pane>
+                {/if}
+            </PaneGroup>
+
+        </Pane>
+            
+        <PaneResizer style="width: .3rem;"/>
+            
+        <Pane defaultSize={1/5}>
+            <Panel title=Outline>
+                <OutlinePanel />
+            </Panel>
+        </Pane>
     </PaneGroup>
     
     
