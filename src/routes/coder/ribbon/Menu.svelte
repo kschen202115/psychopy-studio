@@ -195,7 +195,7 @@
         {#if python}
             <MenuItem 
                 label="Reinstall Python"
-                onclick={evt => setupPython(true)}
+                onclick={evt => setupPython("app", true)}
             />
         {/if}
     </SubMenu>
