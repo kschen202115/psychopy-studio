@@ -16,6 +16,7 @@
 <div class=dir-ctrl>
     <input 
         class=directory
+        style:flex-grow=1
         bind:value={value} 
         disabled 
     />
@@ -37,6 +38,15 @@
         }}
     />
     <CompactButton 
+        icon="/icons/btn-dirup.svg"
+        tooltip="Up to parent directory"
+        onclick={evt => {
+            // set
+            value = path.dirname(value)
+            onchange($state.snapshot(value))
+        }}
+    />
+    <CompactButton 
         icon="/icons/btn-target.svg"
         tooltip="Navigate to current file"
         onclick={evt => {
@@ -50,8 +60,8 @@
 
 <style>
     .dir-ctrl {
-        display: grid;
-        grid-template-columns: [start] 1fr min-content min-content [end];
+        display: flex;
+        flex-direction: row;
         gap: .5rem;
         width: 100%;
         padding: .5rem;
