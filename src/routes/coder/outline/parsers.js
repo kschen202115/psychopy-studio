@@ -56,17 +56,19 @@ export function parseJavaScript(content, index=1) {
             // for variable defs...
             if (subnode.type.name === "VariableDeclaration") {
                 // get name
-                let namenode = subnode.node.getChild("VariableDefinition")
-                let bodynode = subnode.node.getChild("Equals").nextSibling
+                let namenode = subnode.node.getChild("VariableDefinition") || subnode.node.getChild("ObjectPattern")
+                let bodynode = subnode.node.getChild("Equals")
+
                 // append details
                 subnodes.push({
-                    content: content.slice(bodynode.from, bodynode.to),
+                    content: bodynode ? content.slice(bodynode.from, bodynode.to) : "undefined",
                     index: 1 + index + subnode.from,
                     type: subnode.type.name,
                     name: content.slice(namenode.from, namenode.to),
                 })
                 // stop iteration
                 return false
+                
             }
         }
     })

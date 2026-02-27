@@ -34,6 +34,8 @@
         } catch (err) {
             console.error(err)
         }
+
+        return []
     })
 
     function navigateTo() {
