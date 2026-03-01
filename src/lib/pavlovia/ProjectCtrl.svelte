@@ -81,11 +81,6 @@
         onclick={evt => window.open(`${current.project.web_url}/edit`, "_blank")}
         disabled={!current.project}
     ></MenuItem>
-    <MenuItem
-        label="Manage local projects..."
-        icon="/icons/btn-edit.svg"
-        onclick={(evt) => show.manageProjectsDlg = true}
-    ></MenuItem>
     <MenuSeparator/>
     <MenuItem
         label="Search projects..."
