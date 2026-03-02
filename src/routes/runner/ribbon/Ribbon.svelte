@@ -33,17 +33,10 @@
 </script>
 
 <Ribbon>
-    <RibbonSection>
-        <IconButton 
-            icon="/icons/btn-hamburger.svg"
-            label="Menu"
-            onclick={() => show.menu = true} 
-            borderless
-        />
-        <Menu 
-            bind:shown={show.menu} 
-        />
-    </RibbonSection>
+    <Menu 
+        bind:shown={show.menu} 
+    />
+    
     <RibbonSection label=File icon="/icons/rbn-file.svg">
         <IconButton 
             icon="/icons/btn-new.svg" 

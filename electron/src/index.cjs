@@ -1,7 +1,7 @@
 const path = require('node:path');
 const fs = require("fs");
 const proc = require("child_process");
-const { app, dialog, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, dialog, BrowserWindow, ipcMain, shell, Menu, MenuItem } = require('electron');
 
 // make sure psychopy4 folder exists before importing subpackages
 if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
@@ -15,6 +15,7 @@ const { handlers: gitHandlers } = require("./git.js")
 const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js")
 const { appVersion, isDev } = require('./version.js');
+const { default: test } = require('node:test');
 
 // figure out best file to use for a favicon
 var favicon = path.join(__dirname, 'favicon')
@@ -323,7 +324,6 @@ async function newWindow(target = null, show = true, fullscreen = false) {
       preload: path.join(__dirname, 'preload.js')
     }
   });
-  win.removeMenu();
   // prevent default key behaviour for CMD+R
   win.webContents.on("before-input-event", (evt, input) => {
     if (input.modifiers.includes("meta") && input.key.toLowerCase() === "r") {
@@ -380,6 +380,43 @@ async function newWindow(target = null, show = true, fullscreen = false) {
   }
   // wait until ready
   return await ready.promise
+}
+
+
+/**
+ * Create a menu from template received from the frontend
+ * 
+ * @param {array} template Same as for Menu.buildFromTemplate, but with a frontend callback ID 
+ * rather than a function for `click` attributes
+ */
+function setMenu(win, template) {
+  function setupCallback(entry) {
+    if (entry.click) {
+      // click callbacks are supplied from the frontend as an ID
+      let id = entry.click;
+      // create a function which sends this ID back to the frontend to call a function
+      entry.click = evt => {
+        win.webContents.send(
+          `menu:${id}`, true
+        )
+      }
+    }
+    // iterate through submenu items
+    if (entry.submenu) {
+      for (let subentry of entry.submenu) {
+        // recur
+        setupCallback(subentry)
+      } 
+    }
+  }
+
+  // setup callbacks for items
+  for (let entry of template) {
+    setupCallback(entry)
+  }
+  // create menu from template
+  let menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
 }
 
 
@@ -507,6 +544,8 @@ const handlers = {
       focus: ipcMain.handle("electron.windows.focus", (evt, id) => windows[id || evt.sender.id].focus()),
       devtools: ipcMain.handle("electron.windows.devtools", (evt, id) => windows[id || evt.sender.id].openDevTools()),
       close: ipcMain.handle("electron.windows.close", (evt, id) => windows[id || evt.sender.id].close()),
+      hideMenu: ipcMain.handle("electron.windows.hideMenu", (evt) => windows[evt.sender.id].removeMenu()),
+      setMenu: ipcMain.handle("electron.windows.setMenu", (evt, template) => setMenu(windows[evt.sender.id], template))
     },
     paths: {
       documents: ipcMain.handle("electron.paths.documents", (evt) => app.getPath("documents")),

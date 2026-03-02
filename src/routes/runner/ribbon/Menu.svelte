@@ -1,6 +1,6 @@
 <script>
     import { getContext } from "svelte";
-    import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu';
+    import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu/frameMenu';
     import PrefsDialog from '$lib/dialogs/preferences/PrefsDialog.svelte';
     import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { prefs } from "$lib/preferences.svelte"; 
@@ -84,13 +84,24 @@
         />
 
         {#if electron}
-            <MenuSeparator />
+            {#await electron.version() then version}
+                {#if version === "dev" || Version.parse(version).extra}
+                    <MenuSeparator />
+                    
+                    <MenuItem
+                        label="Report bug"
+                        onclick={evt => show.bugReport = true}
+                    />
+                {/if}
 
-            <MenuItem
-                label="Quit"
-                onclick={quit}
-                shortcut="quit"
-            />
+                <MenuSeparator />
+
+                <MenuItem
+                    label="Quit"
+                    onclick={quit}
+                    shortcut="quit"
+                />
+            {/await}
         {/if}
     </SubMenu>
 
@@ -197,27 +208,6 @@
             {/await}
         {/if}
     </SubMenu>
-
-    {#if electron}
-        {#await electron.version() then version}
-            {#if version === "dev" || Version.parse(version).extra}
-                <MenuSeparator />
-                
-                <MenuItem
-                    label="Report bug"
-                    onclick={evt => show.bugReport = true}
-                />
-            {/if}
-        {/await}
-
-        <MenuSeparator />
-
-        <MenuItem
-            label="Quit"
-            onclick={quit}
-            shortcut="quit"
-        />
-    {/if}
 </Menu>
 
 

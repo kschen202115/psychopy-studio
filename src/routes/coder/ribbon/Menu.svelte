@@ -1,6 +1,6 @@
 <script>
     import { getContext } from "svelte";
-    import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu';
+    import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu/frameMenu';
     import PrefsDialog from '$lib/dialogs/preferences/PrefsDialog.svelte';
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
@@ -100,6 +100,27 @@
             label="Reset preferences"
             onclick={evt => prefs.reset()}
         />
+
+        {#if electron}
+            {#await electron.version() then version}
+                {#if version === "dev" || Version.parse(version).extra}
+                    <MenuSeparator />
+                    
+                    <MenuItem
+                        label="Report bug"
+                        onclick={evt => show.bugReport = true}
+                    />
+                {/if}
+                
+                <MenuSeparator />
+
+                <MenuItem
+                    label="Quit"
+                    onclick={quit}
+                    shortcut="quit"
+                />
+            {/await}
+        {/if}
     </SubMenu>
 
     <SubMenu label="Edit" icon="/icons/rbn-edit.svg">
@@ -223,27 +244,6 @@
             {/await}
         {/if}
     </SubMenu>
-
-    {#if electron}
-        {#await electron.version() then version}
-            {#if version === "dev" || Version.parse(version).extra}
-                <MenuSeparator />
-                
-                <MenuItem
-                    label="Report bug"
-                    onclick={evt => show.bugReport = true}
-                />
-            {/if}
-        {/await}
-
-        <MenuSeparator />
-
-        <MenuItem
-            label="Quit"
-            onclick={quit}
-            shortcut="quit"
-        />
-    {/if}
 </Menu>
 
 
