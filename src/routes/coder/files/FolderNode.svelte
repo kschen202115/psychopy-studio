@@ -6,7 +6,8 @@
     import { getContext } from "svelte";
 
     let {
-        value=$bindable()
+        value=$bindable(),
+        top=false
     } = $props();
 
     let fileIcons = {
@@ -99,6 +100,7 @@
 
 <TreeBranch
     label={parsePath(value || "").name}
+    open={top}
 >
     {#await electron.files.scandir(value)}
         Scanning...

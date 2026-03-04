@@ -11,6 +11,7 @@
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
     import ShellNotebook from "./shell/ShellNotebook.svelte";
     import FileExplorer from "./files/FileExplorer.svelte";
+    import OutlinePanel from "./outline/OutlinePanel.svelte";
     import { electron, python } from "$lib/globals.svelte";
     import SetupPython from "$lib/python/SetupPython.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
@@ -43,47 +44,47 @@
     {#snippet ribbon()}
         <CoderRibbon />
     {/snippet}
-    <PaneGroup direction="vertical">
-        <Pane defaultSize={2/3}>
-            <PaneGroup direction="horizontal">
-                {#if electron}
-                    <Pane defaultSize={1/4}>
-                        <Panel
-                            title=Files
-                            hspan={1}
-                            vspan={2}
-                        >
-                            <FileExplorer />
-                        </Panel>
-                    </Pane>
-                {/if}
-                
-                <PaneResizer style="width: .3rem;"/>
-                
-                <Pane defaultSize={3/4}>
-                    <Panel
-                        title=Editor 
-                        hspan={electron ? 3 : 4} 
-                        vspan={python ? 2 : 3}
-                    >
-                        <CoderNotebook />
-                    </Panel>
-                </Pane>
-            </PaneGroup>
-        </Pane>
-
-        <PaneResizer style="height: .3rem;" />
-        {#if python?.ready}
-            <Pane defaultSize={1/3}>
-                <Panel
-                    title=Console
-                    hspan={5}
-                    vspan={1}
-                >
-                    <ShellNotebook />
+    
+    <PaneGroup direction="horizontal">
+        {#if electron}
+            <Pane defaultSize={1/5}>
+                <Panel title=Files>
+                    <FileExplorer />
                 </Panel>
             </Pane>
         {/if}
+
+        <PaneResizer style="width: .3rem;"/>
+
+        <Pane defaultSize={3/5}>
+
+            <PaneGroup direction="vertical">
+                <Pane defaultSize={3/4}>
+                    <Panel title=Editor>
+                        <CoderNotebook />
+                    </Panel>
+                </Pane>
+
+                <PaneResizer style="height: .3rem;"/>
+
+                {#if python?.ready}
+                    <Pane defaultSize={1/4}>
+                        <Panel title=Console>
+                            <ShellNotebook />
+                        </Panel>
+                    </Pane>
+                {/if}
+            </PaneGroup>
+
+        </Pane>
+            
+        <PaneResizer style="width: .3rem;"/>
+            
+        <Pane defaultSize={1/5}>
+            <Panel title=Outline>
+                <OutlinePanel />
+            </Panel>
+        </Pane>
     </PaneGroup>
     
     
