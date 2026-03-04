@@ -19,16 +19,23 @@
     let template = $state([])
     setContext("template", template);
 
-    $effect(async () => {
-        if (await isHamburger) {
-            // hide electron menu if we have a hamburger
-            await electron.windows.hideMenu()
-        } else {
-            // otherwise, set it up from the template defined by this menu object
-            await electron.windows.setMenu(
-                $state.snapshot(template)
-            )
+    $effect(() => {
+        // take snapshot of template state
+        let templateSnapshot = $state.snapshot(template);
+        // create function to update/hide menu
+        let updateMenu = async () => {
+            if (await isHamburger) {
+                // hide electron menu if we have a hamburger
+                await electron.windows.hideMenu()
+            } else {
+                // otherwise, set it up from the template defined by this menu object
+                await electron.windows.setMenu(
+                    templateSnapshot
+                )
+            }
         }
+        // call it (but don't await, as this would break $effect)
+        updateMenu()
     })
 
 </script>
