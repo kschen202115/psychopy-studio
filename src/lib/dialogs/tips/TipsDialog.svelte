@@ -40,7 +40,7 @@
         OK: evt => {
             if (hide) {
                 prefs.params.showStartupTips.val = false;
-                prefs.save
+                prefs.save()
             }
             
         },
