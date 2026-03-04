@@ -33,6 +33,8 @@
         Testing: 4
     }
 
+    // params whose content can be translated 
+    // (in the format format { param name: JS param name })
     let translatableParams = {
         "Before Experiment": "Before JS Experiment", 
         "Begin Experiment": "Begin JS Experiment", 
@@ -41,6 +43,30 @@
         "End Routine": "End JS Routine", 
         "End Experiment": "End JS Experiment"
     }
+    // categs which should be highlighted if any param has content
+    // (in the format { param name: param value => is highlighted })
+    let highlightableCategs = {
+        "Before Exp.": val => !(["", "// Translating..."].includes(val)),
+        "Begin Exp.": val => !(["", "// Translating..."].includes(val)), 
+        "Begin Routine": val => !(["", "// Translating..."].includes(val)), 
+        "Each Frame": val => !(["", "// Translating..."].includes(val)), 
+        "End Routine": val => !(["", "// Translating..."].includes(val)), 
+        "End Exp.": val => !(["", "// Translating..."].includes(val))
+    }
+    // whether highlightable categs are highlighted
+    let highlightCategs = $derived.by(() => {
+        // assume not
+        let highlights = {}
+        // iterate through categs
+        for (let [categ, params] of Object.entries(element.sortedParams)) {
+            // highlight if we have a content check method and it returns true on any param
+            highlights[categ] = Object.values(params).some(
+                param => highlightableCategs[categ]?.(param.val)
+            )
+        }
+
+        return highlights
+    })
 
     // store translated param values
     $effect(() => {
@@ -101,6 +127,7 @@
                 ) && categ !== "uncategorised"}
                     <NotebookPage
                         label={categ}
+                        highlight={highlightCategs[categ]}
                         data={element}
                         bind:selected={
                             () => {return pageIndex === categ},

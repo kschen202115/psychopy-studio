@@ -11,6 +11,8 @@
         icon=undefined,
         /** @binding Control whether this page is selected */
         selected=$bindable(),
+        /** @prop @type {boolean} Whetehr this tab should be highlighted */
+        highlight=false,
         /** @prop @type {function|undefined} Function to close the tab (setting this will show the 
          * close button) */
         close=undefined,
@@ -113,7 +115,7 @@
             onfocusout={(evt) => renaming = false}
         />
     {:else}
-        <span class=label>
+        <span class=label class:highlight={highlight}>
             {label}
         </span>
     {/if}
@@ -163,6 +165,9 @@
     .notebook-tab .label {
         grid-column-start: label;
         text-wrap: nowrap;
+    }
+    .notebook-tab .label.highlight {
+        font-weight: bold;
     }
     .notebook-tab .close-btn {
         position: relative;
