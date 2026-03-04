@@ -3,6 +3,7 @@
     import { ButtonTab, Notebook, NotebookPage } from "$lib/utils/notebook";
     import { CodeEditor } from "$lib/utils/code";
     import { prefs } from "$lib/preferences.svelte";
+    import { Script } from "$lib/experiment";
 
     var media = $state({
         prefersColorScheme: "light"
@@ -42,7 +43,13 @@
         </NotebookPage>
     {/each}
     <ButtonTab
-        callback={current.newFile}
+        callback={evt => current.pages.push(new Script({
+            file: undefined,
+            parent: undefined,
+            name: "untitled.py",
+            stem: "untitled",
+            ext: ".py"
+        }))}
         tooltip="New file..."
-    ></ButtonTab>
+    />
 </Notebook>
