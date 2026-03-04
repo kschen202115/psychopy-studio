@@ -12,6 +12,8 @@ const electron = {
     focus: (id) => ipcRenderer.invoke("electron.windows.focus", id).then(resp => resp),
     devtools: (id) => ipcRenderer.invoke("electron.windows.devtools", id).then(resp => resp),
     close: (id) => ipcRenderer.invoke("electron.windows.close", id).then(resp => resp),
+    hideMenu: () => ipcRenderer.invoke("electron.windows.hideMenu").then(resp => resp),
+    setMenu: (template) => ipcRenderer.invoke("electron.windows.setMenu", template).then(resp => resp),
   },
   paths: {
     getPathForFile: (file) => webUtils.getPathForFile(file), 

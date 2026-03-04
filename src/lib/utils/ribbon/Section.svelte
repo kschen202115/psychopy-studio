@@ -53,7 +53,7 @@
         position: absolute;
         bottom: 0;
     }
-    .ribbon-section:not(:first-child) {
+    .ribbon-section:not(:first-of-type) {
         border-left: 1px solid var(--overlay)
     }
 </style>
