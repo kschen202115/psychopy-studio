@@ -98,9 +98,12 @@ export class PythonShell {
       }, timeout)
     })
     // store message for return
-    thusfar.message.push(
-      `>> ${msg}`
-    )
+    for (let line of msg.split("\n").filter(line => line.length > 0)) {
+      thusfar.message.push(
+        `>> ${line}`
+      )
+    }
+    
     // send message
     this.process.stdin.write(
       `${msg}\nprint("${this.tokens.stdout.stop}", file=sys.stdout)\nprint("${this.tokens.stderr.stop}", file=sys.stderr)\n`
