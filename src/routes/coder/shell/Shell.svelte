@@ -1,8 +1,7 @@
 <script>
     import { python } from "$lib/globals.svelte.js";
     import { CompactButton } from "$lib/utils/buttons";
-    import { CodeOutput } from "$lib/utils/code";
-    import { onMount } from "svelte";
+    import { CodeOutput, CodeInput } from "$lib/utils/code";
 
     let {
         id
@@ -33,56 +32,49 @@
             {/snippet}
         </CodeOutput>
     </div>
-    <input 
-        type=text
+    <CodeInput 
         bind:value={input.present}
-        onkeyup={evt => {
-            if (evt.key === "Enter") {
-                // get command
-                let cmd = $state.snapshot(input.present)
-                // send message
-                let resp = python.shell.send("app", id, cmd)
-                // add to history
-                input.past.push(cmd)
-                // clear future and present
-                input.future = []
-                input.present = ""
-                // show resp
-                resp.then(
-                    resp => output.content += resp.join("\n") + "\n"
-                ).catch(
-                    err => console.log(err)
-                )
+        onsubmit={evt => {
+            // get command
+            let cmd = $state.snapshot(input.present)
+            // send message
+            let resp = python.shell.send("app", id, cmd)
+            // add to history
+            input.past.push(cmd)
+            // clear future and present
+            input.future = []
+            input.present = ""
+            // show resp
+            resp.then(
+                resp => output.content += resp.join("\n") + "\n"
+            ).catch(
+                err => console.log(err)
+            )
+        }}
+        onprevious={evt => {
+            // if there's no history, do nothing
+            if (!input.past.length) {
+                return
             }
-            if (evt.key === "ArrowUp") {
-                // if there's no history, do nothing
-                if (!input.past.length) {
-                    return
-                }
-                // the present becomes the future
-                input.future.unshift(input.present)
-                // the past becomes the present
-                input.present = input.past.pop()
+            // the present becomes the future
+            input.future.unshift(input.present)
+            // the past becomes the present
+            input.present = input.past.pop()
+        }}
+        onnext={evt => {
+            // if there's no future, do nothing
+            if (!input.future.length) {
+                return
             }
-            if (evt.key === "ArrowDown") {
-                // if there's no future, do nothing
-                if (!input.future.length) {
-                    return
-                }
-                // the present becomes the past
-                input.past.push(input.present)
-                // the future becomes the present
-                input.present = input.future.shift()
-            }
+            // the present becomes the past
+            input.past.push(input.present)
+            // the future becomes the present
+            input.present = input.future.shift()
         }}
     />
 </div>
 
 <style>
-    input {
-        font-family: var(--mono);
-    }
-
     .shell-ctrl {
         height: 100%;
         display: flex;
