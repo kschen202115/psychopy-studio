@@ -162,7 +162,7 @@ export class PythonVenv {
         // get package list from pip
         let resp = uv.execSync([
             "pip", "list", "--python", `"${this.executable}"`, "--format", "json"
-        ])
+        ], undefined, "uv", true)
         // parse it
         let parsed = JSON.parse(resp)
         // simplify structure
@@ -185,7 +185,7 @@ export class PythonVenv {
         // use pip show to get details
         let resp = uv.execSync([
             "pip", "show", name, "--python", `"${this.executable}"`
-        ])
+        ], undefined, "uv", true)
         // parse as an object
         let local = Object.fromEntries(
             resp.matchAll(/^(.*?): (.*?)$/gm).map(val => [val[1], val[2]])
@@ -223,9 +223,10 @@ export class PythonVenv {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      * @param {string} tag Tag to send output to (use undefined to not emit an event)
+     * @param {boolean} silent Set true to prevent output from going to stdout
      */
-    execSync(args, timeout=undefined, tag="stdout") {
-        return execSync(tag, `"${this.executable}"`, args, timeout)
+    execSync(args, timeout=undefined, tag="stdout", silent=false) {
+        return execSync(tag, `"${this.executable}"`, args, timeout, silent)
     }
 
     /**

@@ -239,9 +239,10 @@ export class UV {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      * @param {string} tag Tag to send output to (use undefined to not emit an event)
+     * @param {boolean} silent Set true to prevent UV output from going to stdout
      */
-    execSync(args, timeout=undefined, tag="uv") {
-        return execSync(tag, `"${this.executable}"`, args, timeout)
+    execSync(args, timeout=undefined, tag="uv", silent=false) {
+        return execSync(tag, `"${this.executable}"`, args, timeout, silent)
     }
 
     /**
