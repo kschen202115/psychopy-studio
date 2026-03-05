@@ -141,6 +141,10 @@ export class UV {
         let folder = path.join(
             app.getPath("appData"), "psychopy4", ".python"
         )
+        // if there's no folder, there's no subfolders
+        if (!fs.existsSync(folder)) {
+            return output
+        }
         // iterate through subfolders in the python folder
         for (let subfolder of fs.readdirSync(folder)) {
             // reinstate .* syntax
