@@ -90,7 +90,7 @@ export async function file_save_as() {
         current.experiment.file?.file || "untitled.psyexp"
     )
     // abort if no file
-    if (file === undefined) {
+    if (!file || !file.file) {
         return
     }
     // set file
