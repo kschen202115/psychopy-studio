@@ -69,13 +69,17 @@
             label="Save file"
             shortcut="save"
             onclick={fileSave} 
-            disabled={!current.pages[current.tab]?.canUndo} 
+            disabled={
+                Object.values(current.pages).length === 0 ||
+                (!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file)
+            }
         />
         <MenuItem 
             icon="/icons/btn-saveas.svg" 
             label="Save file as"
             shortcut="saveAs"
             onclick={fileSaveAs} 
+            disabled={Object.values(current.pages).length === 0}
         />
         <MenuItem
             label="Reveal in file explorer"
