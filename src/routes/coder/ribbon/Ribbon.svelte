@@ -66,13 +66,17 @@
             label="Save file" 
             onclick={fileSave}
             borderless
-            disabled={!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file}
+            disabled={
+                Object.values(current.pages).length === 0 ||
+                (!current.pages[current.tab]?.canUndo && current.pages[current.tab]?.file?.file)
+            }
         />
         <IconButton 
             icon="/icons/btn-saveas.svg" 
             label="Save file as"
             onclick={fileSaveAs} 
             borderless
+            disabled={Object.values(current.pages).length === 0}
         />
     </RibbonSection>
 
