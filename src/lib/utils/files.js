@@ -104,6 +104,7 @@ export async function browseFileSave(
     if (electron) {
         // get file path from electron dialog
         let file = await electron.files.saveDialog({
+            defaultPath: defaultFile,
             filters: electronFilters(filters)
         })
         // abort if no file
