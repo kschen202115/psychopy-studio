@@ -64,7 +64,7 @@
     label={label}
     onclick={(evt) => {
         if (current.project) {
-            window.open(current.project.web_url)
+            window.open(current.project.web_url.replace("gitlab.pavlovia", "pavlovia"))
         }
     }}
     disabled={!current.project}
