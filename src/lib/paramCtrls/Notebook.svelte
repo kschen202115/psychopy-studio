@@ -142,16 +142,18 @@
                             <!-- start ctrl, if needed -->
                             {#if "startVal" in params}
                                 <StartStopCtrl
-                                    name=Start
-                                    params={element.startParams}
-                                ></StartStopCtrl>
+                                    bind:valueParam={element.params.startVal}
+                                    bind:typeParam={element.params.startType}
+                                    bind:expectedParam={element.params.startEstim}
+                                />
                             {/if}
                             <!-- stop ctrl, if needed -->
                             {#if "stopVal" in params}
                                 <StartStopCtrl
-                                    name=Stop
-                                    params={element.stopParams}
-                                ></StartStopCtrl>
+                                    bind:valueParam={element.params.stopVal}
+                                    bind:typeParam={element.params.stopType}
+                                    bind:expectedParam={element.params.durationEstim}
+                                />
                             {/if}
                             <!-- other params -->
                             {#each Object.entries(params) as [name, param]}
