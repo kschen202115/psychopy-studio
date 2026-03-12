@@ -5,7 +5,8 @@
     import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
-    import { showDevTools } from "$lib/utils/views.svelte"
+    import { showDevTools } from "$lib/utils/views.svelte";
+    import { PsychoPyBranchDlg } from "$lib/dialogs/pluginManager";
     import { setupPython } from "$lib/python";
     import { Version } from "$lib/utils/versions";
     import { translate } from "$lib/translation";
@@ -34,6 +35,7 @@
         findDlg: false,
         settingsDlg: false,
         bugReport: false,
+        psychopyBranchDlg: false,
     })
 </script>
 
@@ -166,6 +168,10 @@
                 onclick={evt => show.pluginMgr = true}
                 disabled={!python?.ready}
             />
+            <MenuItem
+                label="Install PsychoPy from Git"
+                onclick={evt => show.psychopyBranchDlg = true}
+            />
         {/if}
 
         {#if electron}
@@ -216,6 +222,11 @@
 <PrefsDialog
     bind:shown={show.prefsDlg}
 />
+{#if python}
+    <PsychoPyBranchDlg 
+        bind:shown={show.psychopyBranchDlg}
+    />
+{/if}
 {#if electron}
     <BugReportDlg 
         user={current.user}
