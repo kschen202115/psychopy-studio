@@ -8,7 +8,7 @@
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js";
-    import { PluginManagerDlg } from "$lib/dialogs/pluginManager";
+    import { PluginManagerDlg, PsychoPyBranchDlg } from "$lib/dialogs/pluginManager";
     import { setupPython } from "$lib/python"
     import { Version } from "$lib/utils/versions"
 
@@ -53,6 +53,7 @@
         settingsDlg: false,
         deviceMgrDlg: false,
         pluginMgr: false,
+        psychopyBranchDlg: false,
         bugReport: false
     })
 </script>
@@ -284,6 +285,10 @@
                 label="Reinstall Python"
                 onclick={evt => setupPython("app", true)}
             />
+            <MenuItem
+                label="Install PsychoPy from Git"
+                onclick={evt => show.psychopyBranchDlg = true}
+            />
         {/if}
     </SubMenu>
 
@@ -329,6 +334,9 @@
 {#if python}
     <PluginManagerDlg 
         bind:shown={show.pluginMgr}
+    />
+    <PsychoPyBranchDlg 
+        bind:shown={show.psychopyBranchDlg}
     />
 {/if}
 {#if electron}
