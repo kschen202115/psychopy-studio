@@ -602,12 +602,7 @@ export class Experiment {
                 100000
             )
             // start a server
-            let address = await python.psychojs.run(this.file.parent)
-            // open experiment in browser
-            let params = new URLSearchParams(
-                this.pilotMode ? {__pilotToken: "local"} : {}
-            )
-            window.open(`http://${address}?${params.toString()}`)
+            return await python.psychojs.run(this.file.parent, {__pilotToken: "local"})
         } else {
             // todo: Run in JS on Pavlovia (not pilot)
         }
