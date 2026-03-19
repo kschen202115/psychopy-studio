@@ -15,6 +15,7 @@
     import { electron, python } from "$lib/globals.svelte";
     import SetupPython from "$lib/python/SetupPython.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
+    import { updateLocale } from "$lib/translation";
     
 
     // reference current in context for ease of access
@@ -34,6 +35,8 @@
         // mark ready
         electron.windows.emit("ready", true)
     }
+
+    $effect(updateLocale)
 
 </script>
 

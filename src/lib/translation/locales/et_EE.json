@@ -1,0 +1,15 @@
+{
+    "Your stimulus size exceeds the {dimension} dimension of your window.": "Teie stiimuli suurus ületab ekraani {dimension} mõõtmed.",
+    "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "Teie stiimuli suurus on väiksem kui 1 piksel ({dimension} mõõde).",
+    "Your stimulus position exceeds the {dimension} dimension of your window.": "Teie stiimuli suurus ületab ekraani {dimension} dimensiooni mõõtmed.",
+    "Your stimulus {type} time of {time} is less than a screen refresh for a {Hz}Hz monitor.": "Teie stiimuli {type} aeg {time} on lühem kui ühe ekraanivärskenduse aeg {Hz}Hz monitoril.",
+    "Your stimulus {type} time of {time} seconds cannot be accurately presented for {time} on a {Hz}Hz monitor.": "Teie stiimuli {type} aeg {time} sekundit ei saa täpselt kuvada {time} sekundiks {Hz}Hz ekraanil.",
+    "Experiment was built in a future version of PsychoPy ({version}), we recommend either updating PsychoPy or changing the \"Use Version\" setting in Experiment Settings to this version.": "Katse loodi PsychoPy tulevases versioonis ({version}). Soovitame PsychoPy uuendada või muuta \"Kasuta versiooni\" sätted Katse Seadetes sellele versioonile vastavaks.",
+    "Your stimulus {type} type {frameType} must be expressed as a whole number.": "Teie stiimuli {type} tüüp {frameType} peaks olema väljendatud täisarvuna.",
+    "Component {component} has stop time set as a duration, but doesn't have a start time": "Komponendi {component} ajastus on defineeritud kestusena, kuid algusaega on määramata jäänud.",
+    "Python Syntax Error in '{codeTab}' tab. See '{code}' on line number {lineNumber} of the '{codeTab}' tab.": "Pythoni süntaksi viga vahekaardil '{codeTab}'. Vaata '{code}' rida number {lineNumber} vahekaardil '{codeTab}'.",
+    "JavaScript Syntax Error in '{codeTab}' tab. See '{lineNumber}' in the '{codeTab}' tab.": "JavaScripti süntaksi viga vahekaardil '{codeTab}'. Vaata rida number '{lineNumber}' vahekaardil '{codeTab}'.",
+    "The component {name} is currently disabled and will not be written to your experiment script.": "Komponent {name} on praegu keelatud ja seda ei kirjutata teie katsekoodi.",
+    "Cannot calculate parameter.": "Parameetri arvutamine ebaõnnestus.",
+    "Favorites": "Lemmikud"
+}

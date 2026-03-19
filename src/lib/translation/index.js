@@ -1,0 +1,1 @@
+export { _translate, locales, setLocale, getLocale, updateLocale } from "./translation.svelte";

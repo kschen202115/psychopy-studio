@@ -19,6 +19,7 @@
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
     import TipsDialog from '../../lib/dialogs/tips/TipsDialog.svelte';
+    import { updateLocale } from "$lib/translation"
 
     // parse url params
     let params = new URLSearchParams(location.search)
@@ -36,6 +37,8 @@
         // mark ready
         electron.windows.emit("ready", true)
     }
+
+    $effect(updateLocale)
     
 </script>
 

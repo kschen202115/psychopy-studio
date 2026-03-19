@@ -18,6 +18,7 @@
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
+    import { updateLocale } from "$lib/translation"
 
     setContext("current", current)
 
@@ -63,6 +64,8 @@
             current.output.pavlovia += message + "\n"
         }
     )
+
+    $effect(updateLocale)
 </script>
 
 
