@@ -2,6 +2,8 @@
 import { parse } from "svelte/compiler";
 import { walk } from 'estree-walker'
 
+let functions = ["t", "i18next.t", "_translate"]
+
 const SvelteExtractor = {
   name: "svelte-extractor",
   onLoad: (code, path) => {
@@ -26,9 +28,9 @@ const SvelteExtractor = {
           // look for calls to i18next.t
           let matches = code.slice(
             node.expression.start, node.expression.end
-          ).match(
-            /i18next\.t\(.+?\)/g
-          )
+          ).match(new RegExp(
+            functions.map(name => RegExp.escape(name)).join("|") + "\(.+?\)"
+          ))
           // extract thesee
           for (let match of matches || []) {
             extracted.push(match)
@@ -97,6 +99,7 @@ export default {
     primaryLanguage: "en",
     removeUnusedKeys: false,
     defaultValue: undefined,
+    functions: functions
   },
   
   plugins: [
