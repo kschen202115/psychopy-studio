@@ -77,7 +77,7 @@ i18next.init({
 
 
 // export translate function
-export const _translate = i18next.t;
+export const translate = i18next.t;
 // export available localtes
 export const locales = Object.keys(i18next.toJSON().store.data)
 // export functions to get/set locale

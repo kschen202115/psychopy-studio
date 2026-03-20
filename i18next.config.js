@@ -2,7 +2,7 @@
 import { parse } from "svelte/compiler";
 import { walk } from 'estree-walker'
 
-let functions = ["t", "i18next.t", "_translate"]
+let functions = ["t", "i18next.t", "translate"]
 
 const SvelteExtractor = {
   name: "svelte-extractor",
