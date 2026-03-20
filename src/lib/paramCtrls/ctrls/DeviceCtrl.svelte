@@ -51,7 +51,7 @@
     <option
         value=""
         selected={param.val === ""}
-    >Default</option>
+    >{translate("Default")}</option>
     {#each options as option}
         <option 
             value={option} 
