@@ -2,6 +2,7 @@
     import { CodeOutput } from "$lib/utils/code";
     import { MessageDialog } from "$lib/utils/dialog";
     import { python, electron } from "$lib/globals.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         tag,
@@ -13,7 +14,7 @@
 
 <MessageDialog
     bind:shown={shown}
-    title=Progress
+    title={translate("Progress")}
     buttons={{
         OK: evt => output = ""
     }}

@@ -4,6 +4,7 @@
     import { python } from "$lib/globals.svelte";
     import MonitorConfigurationDlg from "./MonitorConfiguration.svelte";
     import { MonitorConfiguration } from "./configuration.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         shown=$bindable()
@@ -95,7 +96,7 @@
 </script>
 
 <Dialog
-    title="Monitor Center"
+    title={translate("Monitor Center")}
     buttons={{
         OK: monitors.save,
         APPLY: monitors.save,
@@ -106,7 +107,7 @@
     <div class=content>
         <Notebook>
             {#await monitors.promise}
-                Loading monitors...
+                {translate("Loading monitors...")}
             {:then}
                 {#each Object.entries(monitors.all) as [name, details]}
                     <NotebookPage

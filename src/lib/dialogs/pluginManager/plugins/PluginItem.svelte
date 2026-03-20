@@ -3,6 +3,7 @@
     import { getContext } from "svelte";
     import { python } from "$lib/globals.svelte";
     import ProgressDlg from "../ProgressDlg.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         plugin,
@@ -66,7 +67,7 @@
             <div class=plugin-install-btn>
                 {#if !installed}
                     <Button
-                        label="Install"
+                        label={translate("Install")}
                         icon="/icons/btn-download.svg"
                         onclick={install}
                         horizontal
@@ -74,7 +75,7 @@
                     />
                 {:else}
                     <Button
-                        label="Uninstall"
+                        label={translate("Uninstall")}
                         icon="/icons/btn-delete.svg"
                         onclick={uninstall}
                         horizontal
