@@ -60,7 +60,7 @@ export class MonitorConfiguration {
             inputType: "single",
             valType: "code",
             label: translate("Screen width (cm)"),
-            hint: translate("The width of the screen in cenimeters (cm)")
+            hint: translate("The width of the screen in centimeters (cm)")
         })
         this.params.usebits = new Param("usebits")
         Object.assign(this.params.usebits, {
