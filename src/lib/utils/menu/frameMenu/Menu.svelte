@@ -5,6 +5,7 @@
     import { isHamburger } from ".";
     import { RibbonSection } from '$lib/utils/ribbon';
     import { IconButton } from '$lib/utils/buttons';
+    import { translate } from "$lib/translation";
 
     let {
         /** @public @type {import("svelte").store<boolean|undefined>} Whether this menu is shown */
@@ -45,7 +46,7 @@
         <RibbonSection>
             <IconButton 
                 icon="/icons/btn-hamburger.svg"
-                label="Menu"
+                label={translate("Menu")}
                 onclick={() => shown = true} 
                 borderless
             />

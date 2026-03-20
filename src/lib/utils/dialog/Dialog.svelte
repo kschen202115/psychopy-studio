@@ -2,6 +2,7 @@
     import { Button } from "$lib/utils/buttons";
     import { Icon } from "$lib/utils/icons";
     import { onMount, untrack } from "svelte";
+    import { translate } from "$lib/translation";
 
     let {
         id,
@@ -83,21 +84,21 @@
         </div>
         <div class="buttons">
             <div class="btn-array extra">
-                    {#if buttons.HELP}
+                {#if buttons.HELP}
                     <Button 
-                        label=Help
+                        label={translate("Help")}
                         onclick={() => {
                             window.open(buttons.HELP, '_blank').focus();
                         }} 
                         horizontal
-                    ></Button>
-                    {/if}
+                    />
+                {/if}
             </div>
             <div class=gap></div>
             <div class="btn-array standard">
                 {#if buttons.YES}
                 <Button 
-                    label="Yes"
+                    label={translate("Yes")}
                     onclick={(evt) => {
                         buttons['YES'](evt);
                         shown = false;
@@ -105,11 +106,11 @@
                     affirmative
                     horizontal
                     disabled={buttonsDisabled && buttonsDisabled['YES']}
-                ></Button>
+                />
                 {/if}
                 {#if buttons.NO}
                 <Button 
-                    label="No"
+                    label={translate("No")}
                     onclick={(evt) => {
                         buttons['NO'](evt);
                         shown = false;
@@ -117,11 +118,11 @@
                     horizontal
                     negative
                     disabled={buttonsDisabled && buttonsDisabled['NO']}
-                ></Button>
+                />
                 {/if}
                 {#if buttons.OK}
                 <Button 
-                    label="OK"
+                    label={translate("OK")}
                     onclick={(evt) => {
                         buttons['OK'](evt);
                         shown = false;
@@ -129,17 +130,17 @@
                     primary
                     horizontal
                     disabled={buttonsDisabled && buttonsDisabled['OK']}
-                ></Button>
+                />
                 {/if}
                 {#if buttons.APPLY}
                 <Button 
-                    label="Apply"
+                    label={translate("Apply")}
                     onclick={(evt) => {
                         buttons['APPLY'](evt); 
                     }} 
                     horizontal
                     disabled={buttonsDisabled && buttonsDisabled['APPLY']}
-                ></Button>
+                />
                 {/if}
                 {#if buttons.EXTRA}
                     {#each Object.entries(buttons['EXTRA']) as [label, onclick]}
@@ -153,14 +154,14 @@
                 {/if}
                 {#if buttons.CANCEL}
                 <Button 
-                    label="Cancel"
+                    label={translate("Cancel")}
                     onclick={(evt) => {
                         buttons['CANCEL'](evt); 
                         shown = false;
                     }} 
                     horizontal
                     disabled={buttonsDisabled && buttonsDisabled['CANCEL']}
-                ></Button>
+                />
                 {/if}
             </div>
         </div>
