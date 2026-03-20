@@ -4,6 +4,7 @@
     import TimelineHeader from './Timeline.svelte';
     import EntryPoint from './EntryPoint.svelte';
     import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         routine=undefined
@@ -18,27 +19,27 @@
 >
     <div class=button-container>
         <Button 
-            label="Routine settings"
+            label={translate("Routine settings")}
             icon="/icons/btn-settings.svg"
-            tooltip="Edit settings for this Routine"
+            tooltip={translate("Edit settings for this Routine")}
             onclick={() => showDialog = true}
             horizontal 
-        ></Button>
+        />
     </div>
 
     <ParamsDialog
         element={routine.settings}
         bind:shown={showDialog}
-    ></ParamsDialog>
+    />
 
     {#if routine.components}
-    <TimelineHeader routine={routine}></TimelineHeader>
+        <TimelineHeader routine={routine} />
     {/if}
 
     {#each routine.components as component}
-        <Component component={component}></Component>
+        <Component component={component} />
     {/each}
-    <EntryPoint routine={routine} index=-1></EntryPoint>
+    <EntryPoint routine={routine} index=-1 />
 </div>
 
 <style>

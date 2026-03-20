@@ -6,6 +6,7 @@ import { newWindow, openIn, showDevTools } from "$lib/utils/views.svelte"
 import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
 import { Routine, HasParams } from "$lib/experiment"
 import { prefs } from "$lib/preferences.svelte";
+import { translate } from "$lib/translation";
 
 
 /* File */
@@ -18,7 +19,7 @@ export async function file_open() {
     // open file browser
     let file = await browseFileOpen(
         [
-            { description: "PsychoPy Experiments", accept: {"application/xml": [".psyexp"]} }
+            { description: translate("PsychoPy Experiments"), accept: {"application/xml": [".psyexp"]} }
         ],
         current.experiment.file?.parent || ""
     )
@@ -85,7 +86,7 @@ export async function file_save_as() {
     // open file browser
     let file = await browseFileSave(
         [
-            { description: "PsychoPy Experiments", accept: {"application/xml": [".psyexp"]} }
+            { description: translate("PsychoPy Experiments"), accept: {"application/xml": [".psyexp"]} }
         ],
         current.experiment.file?.file || "untitled.psyexp"
     )
