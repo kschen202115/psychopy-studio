@@ -17,27 +17,6 @@ const SvelteExtractor = {
     });
     // array in which to store output
     let extracted = [];
-    // extract from html
-    if (ast.html) {
-      walk(ast.html, {
-        enter(node, parent, prop, index) {
-          // we're only interested in mustage tags
-          if (node?.type !== "MustacheTag") {
-            return
-          }
-          // look for calls to i18next.t
-          let matches = code.slice(
-            node.expression.start, node.expression.end
-          ).match(new RegExp(
-            functions.map(name => RegExp.escape(name)).join("|") + "\(.+?\)"
-          ))
-          // extract thesee
-          for (let match of matches || []) {
-            extracted.push(match)
-          }
-        }
-      })
-    }
     // extract from instance
     if (ast.instance) {
       extracted.push(
@@ -54,7 +33,22 @@ const SvelteExtractor = {
         )
       )
     }
-
+    // extract from html
+    if (ast.html) {
+      walk(ast.html, {
+        enter(node, parent, prop, index) {
+          // we're only interested in mustage tags
+          if (node?.type !== "MustacheTag") {
+            return
+          }
+          // add content to extracted array
+          extracted.push("(" + code.slice(
+            node.expression.start, node.expression.end
+          ) + ")")
+        }
+      })
+    }
+    
     return extracted.join("\n")
   }
 }
