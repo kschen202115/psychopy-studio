@@ -1,7 +1,9 @@
 {
+  "translation": {
     "&View": "& مشاهده",
     "Open a new Builder view": "باز کردن نماى ساز جدید",
     "&Quit\t%s": "& ترک %s",
     " OK ": "باشه",
     " Cancel ": "لغو"
+  }
 }

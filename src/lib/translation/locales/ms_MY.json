@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "Saiz stimulus anda melebihi {dimension} dimensi tetingkap anda.",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "Saiz stimulus anda lebih kecil daripada 1 pixel ({dimension} dimensi).",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "Posisi stimulus anda melebihi {dimension} dimensi tetingkap anda.",
@@ -9,4 +10,5 @@
     "Welcome to PsychoPy3!": "Selamat datang ke PsychoPy3!",
     "[Warning] Could not activate plugin. PsychoPy may need to restart for plugin to take effect.": "[Amaran] Tidak boleh mengaktifkan plugin. PsychoPy mungkin memerlukan restart untuk plugin berkuat kasa.",
     "Click Cancel to stay in PsychoPy.": "Klik Cancel untuk tinggal di PsychoPy."
+  }
 }

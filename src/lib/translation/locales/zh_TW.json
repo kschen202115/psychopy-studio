@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "你的刺激大小超過了 {dimension} 你視窗的尺寸。",
     "&View": "视图(&V)",
     "Open a new Builder view": "打开新的 Builder 视图",
@@ -655,4 +656,5 @@
     "(missing)": "(缺失)",
     " Configuration Wizard": " 配置向导",
     " Benchmark Wizard": " 基准向导"
+  }
 }

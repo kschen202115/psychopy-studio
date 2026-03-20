@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "حجم المثير الذي قمت باستخدامه تجاوز حجم أبعاد {dimension} نافذتك.",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "حجم المثير الخاص بك أصغر من 1 بكسل (البعد {dimension}).",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "يتجاوز موضع المثير الخاص بك بُعد {dimension} نافذتك.",
@@ -890,4 +891,5 @@
     "Benchmark complete! (See the Coder output window.)": "اكتمل المعيار! (انظر نافذة إخراج المبرمج)",
     "Click OK to view full configuration and benchmark data.": "انقر فوق موافق لعرض التكوين الكامل وبيانات القياس.",
     "Click Cancel to stay in PsychoPy.": "انقر فوق إلغاء للبقاء في PsychoPy."
+  }
 }

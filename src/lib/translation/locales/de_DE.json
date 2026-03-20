@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "Die Größe Ihres Stimulus übersteigt die Dimension {dimension} Ihres Fensters.",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "Die Stimulusgröße ist kleiner als 1 Pixel ({dimension}-Dimension).",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "Die Position Ihres Stimulus überschreitet die Dimension {dimension} Ihres Fensters.",
@@ -270,4 +271,5 @@
     "Looks like your variable '{code}' in '{displayName}' should be set to update.": "Es sieht so aus, als ob Ihre Variable '{code}' in '{displayName}' auf Update gesetzt werden sollte.",
     "Python var `{}` in `{}` is same as Name": "Python var `{}` in `{}` ist identisch mit Name",
     "Variable name ${newName} is in use (by {used}). Try another name.": "Der Variablenname ${newName} wird bereits verwendet (von {used}). Versuchen Sie einen anderen Namen."
+  }
 }

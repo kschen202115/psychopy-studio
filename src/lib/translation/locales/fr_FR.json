@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "La taille de votre stimulus dépasse les {dimension} dimensions de votre fenêtre.",
     "Cannot calculate parameter.": "Le paramètre ne peut pas être calculé.",
     "About PsychoPy": "A propos de PsychoPy",
@@ -222,4 +223,5 @@
     "Version or value": "Version ou valeur",
     "Notes": "Notes",
     "Click Cancel to stay in PsychoPy.": "Cliquer sur Annuler pour rester sur PsychoPy."
+  }
 }

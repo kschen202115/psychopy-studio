@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "El tamaño de su estímulo excede la dimensión {dimension} de su ventana.",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "El tamaño de su estímulo es menor que 1 píxel ( de dimensión {dimension}).",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "La posición de su estímulo excede la  {dimension} dimensión de su ventana.",
@@ -1755,4 +1756,5 @@
     "Benchmark complete! (See the Coder output window.)": "¡Evaluación Benchmark completa! (Consulte la ventana de resultados del Coder)\"",
     "Click OK to view full configuration and benchmark data.": "Haga clic en Aceptar para ver la configuración completa y los datos del benchmark.",
     "Click Cancel to stay in PsychoPy.": "Haga clic en Cancelar para permanecer en PsychoPy."
+  }
 }

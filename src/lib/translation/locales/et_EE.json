@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "Teie stiimuli suurus ületab ekraani {dimension} mõõtmed.",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "Teie stiimuli suurus on väiksem kui 1 piksel ({dimension} mõõde).",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "Teie stiimuli suurus ületab ekraani {dimension} dimensiooni mõõtmed.",
@@ -12,4 +13,5 @@
     "The component {name} is currently disabled and will not be written to your experiment script.": "Komponent {name} on praegu keelatud ja seda ei kirjutata teie katsekoodi.",
     "Cannot calculate parameter.": "Parameetri arvutamine ebaõnnestus.",
     "Favorites": "Lemmikud"
+  }
 }

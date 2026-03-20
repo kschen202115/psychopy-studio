@@ -1,4 +1,5 @@
 {
+  "translation": {
     "Your stimulus size exceeds the {dimension} dimension of your window.": "刺激大小超过了窗口尺寸{dimension}。",
     "Your stimulus size is smaller than 1 pixel ({dimension} dimension).": "刺激尺寸小于一像素（{dimension} 尺寸）。",
     "Your stimulus position exceeds the {dimension} dimension of your window.": "刺激位置超出了窗口尺寸{dimension}。",
@@ -1234,4 +1235,5 @@
     "Benchmark complete! (See the Coder output window.)": "基准测试完成！(请参阅Coder 输出窗口）。",
     "Click OK to view full configuration and benchmark data.": "单击“确认”查看完整配置和基准数据。",
     "Click Cancel to stay in PsychoPy.": "单击“取消”停留在 PsychoPy 中。"
+  }
 }
