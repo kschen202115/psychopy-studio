@@ -1,6 +1,7 @@
 import { status } from "./globals.svelte.js"
 import { electron, python } from "$lib/globals.svelte";
 import { Version, ppy2py } from "$lib/utils/versions.js";
+import { translate } from "$lib/translation";
 
 
 /**
@@ -72,8 +73,8 @@ export async function installPython(version=undefined, forceReinstall=false) {
         }
     }
     // open dialog to show progress
-    status.message = "Installing Python and PsychoPy library..."
-    status.dlg.message = (
+    status.message = translate("Installing Python and PsychoPy library...")
+    status.dlg.message = translate(
         `### Installing Python (${pyVersion}) and PsychoPy library (${version ? version : "latest version"})...\n` +
         `This may take some time and, unfortunately, cannot be done in the background. Once it's finished installing, you won't have to see this message again.`
     )
@@ -108,13 +109,13 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         version = await electron.version()
     }
     // do we already have UV?
-    status.message = "Checking Python..."
+    status.message = translate("Checking Python...")
     let hasUV = await python.uv.exists().catch(handleError)
     // install UV
     if (!hasUV || forceReinstall) {
         // open dialog to show progress
-        status.message = "Downloading UV (a Python installer)..."
-        status.dlg.message = (
+        status.message = translate("Downloading UV (a Python installer)...")
+        status.dlg.message = translate(
             "### Downloading UV (a Python installer)...\n" + 
             "This is a program we use to install Python. Once it's finished installing, you won't have to see this message again."
         )
@@ -133,17 +134,17 @@ export async function setupPython(version=undefined, forceReinstall=false) {
         await installPython(version, forceReinstall)
     }
     // is Python already running?
-    status.message = "Connecting Python"
+    status.message = translate("Connecting Python")
     if (await python.liaison.started(version)) {
         // mark as connected
-        status.message = "Connected Python"
+        status.message = translate("Connected Python")
         status.ready.resolve(true)
     } else {
         // start python
-        status.message = "Starting Python..."
+        status.message = translate("Starting Python...")
         await python.liaison.start(version).catch(handleError)
         // mark success
-        status.message = "Successfully started Python"
+        status.message = translate("Successfully started Python")
         status.ready.resolve(true)
     }
     // mark python global as ready once Liaison has started

@@ -3,6 +3,7 @@
     import { MessageDialog } from "$lib/utils/dialog";
     import { CodeOutput } from "$lib/utils/code";
     import { python } from "$lib/globals.svelte.js";
+    import { translate } from "$lib/translation";
 
     let errors = $state([])
     let showDlg = $state.raw(false)
@@ -32,7 +33,7 @@
     {#each errors as error}
         {#await error.dismiss}
             <Message
-                message="Python error, click to show"
+                message={translate("Python error, click to show")}
                 icon="/icons/sym-error.svg"
                 onclick={evt => showDlg = true}
             />
