@@ -99,6 +99,7 @@ export default {
     primaryLanguage: "en-US",
     removeUnusedKeys: false,
     defaultValue: undefined,
+    defaultNS: false,
     functions: functions
   },
   
