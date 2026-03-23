@@ -53,7 +53,7 @@
                     src="/icons/btn-runner.svg"
                     size="10rem";
                 />
-                <p>Coordinate running experiments and scripts and view any warnings generated.</p>
+                <p>Coordinate running experiments and scripts and view any output.</p>
             </button>
         {/if}
     </nav>

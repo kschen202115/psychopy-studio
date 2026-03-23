@@ -6,7 +6,6 @@
     import Theme from "$lib/utils/Theme.svelte";
     import AlertsOutput from "./outputs/AlertsOutput.svelte";
     import FilesPanel from "./files/Panel.svelte";
-
     import { current } from "./globals.svelte";
     import { setContext } from "svelte";
     import StdoutOutput from "./outputs/StdoutOutput.svelte";
@@ -18,7 +17,7 @@
     import Shortcuts from '$lib/utils/Shortcuts.svelte';
     import { shortcuts } from "./callbacks.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
-    import { updateLocale } from "$lib/translation"
+    import { updateLocale, translate } from "$lib/translation"
 
     setContext("current", current)
 
@@ -70,9 +69,9 @@
 
 
 {#if current.runlist[current.selection]?.file?.name}
-    <title>PsychoPy Runner: {current.runlist[current.selection].file.name}</title>
+    <title>{translate("PsychoPy Runner")}: {current.runlist[current.selection].file.name}</title>
 {:else}
-    <title>PsychoPy Runner</title>
+    <title>{translate("PsychoPy Runner")}</title>
 {/if}
 <Frame
     onFileDrop={(evt, file) => addFile(file)}
