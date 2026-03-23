@@ -169,7 +169,7 @@
         {/if}
         <SwitchButton 
             labels={[translate("Pilot"), translate("Run")]} 
-            tooltip={current.pages[current.tab]?.pilotMode ? "Experiment will run in pilot mode" : "Experiment will run in run mode"}
+            tooltip={current.experiment?.pilotMode ? "Experiment will run in pilot mode" : "Experiment will run in run mode"}
             bind:value={
                 () => current.experiment.pilotMode,
                 (value) => {
