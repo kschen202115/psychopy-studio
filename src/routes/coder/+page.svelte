@@ -16,6 +16,7 @@
     import SetupPython from "$lib/python/SetupPython.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
     import { updateLocale } from "$lib/translation";
+    import { translate } from "$lib/translation";
     
 
     // reference current in context for ease of access
@@ -40,7 +41,7 @@
 
 </script>
 
-<title>PsychoPy Coder</title>
+<title>{translate("PsychoPy Coder")}</title>
 <Frame
     onFileDrop={(evt, file) => current.openFile(file)}
 >
@@ -51,7 +52,7 @@
     <PaneGroup direction="horizontal">
         {#if electron}
             <Pane defaultSize={1/5}>
-                <Panel title=Files>
+                <Panel title={translate("Files")}>
                     <FileExplorer />
                 </Panel>
             </Pane>
@@ -63,7 +64,7 @@
 
             <PaneGroup direction="vertical">
                 <Pane defaultSize={3/4}>
-                    <Panel title=Editor>
+                    <Panel title={translate("Editor")}>
                         <CoderNotebook />
                     </Panel>
                 </Pane>
@@ -72,7 +73,7 @@
 
                 {#if python?.ready}
                     <Pane defaultSize={1/4}>
-                        <Panel title=Console>
+                        <Panel title={translate("Console")}>
                             <ShellNotebook />
                         </Panel>
                     </Pane>
@@ -84,7 +85,7 @@
         <PaneResizer style="width: .3rem;"/>
             
         <Pane defaultSize={1/5}>
-            <Panel title=Outline>
+            <Panel title={translate("Outline")}>
                 <OutlinePanel />
             </Panel>
         </Pane>
