@@ -1,6 +1,9 @@
-
+/**
+ * This defines the configuration for `i18next-cli extract`, which can be used to scan PsychoPy 
+ * Studio's code for strings which need to have a translation defined.
+ */
 import { parse } from "svelte/compiler";
-import { walk } from 'estree-walker'
+import { walk } from "estree-walker";
 
 let functions = ["t", "i18next.t", "translate"]
 
