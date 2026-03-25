@@ -13,19 +13,10 @@ if (!fs.existsSync(path.join(app.getPath("appData"), "psychopy4"))) {
 const { handlers: pythonHandlers } = require("./python");
 const { handlers: gitHandlers } = require("./git.js")
 const logging = require("./logging.js");
-const { UsageReport } = require("./usage.js")
+const { UsageReport } = require("./usage.js");
+const { favicon } = require("./resources.js");
 const { appVersion, isDev } = require('./version.js');
 const { default: test } = require('node:test');
-
-// figure out best file to use for a favicon
-var favicon = path.join(__dirname, 'favicon')
-if (process.platform === "win32") {
-  favicon += ".ico"
-} else if (process.platform === "darwin") {
-  favicon += ".icns"
-} else {
-  favicon += "@1024x1024.png"
-}
 
 var svelte = {
   address: {
