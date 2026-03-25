@@ -2,7 +2,7 @@
     import { Dialog } from "$lib/utils/dialog";
     import { git } from "$lib/globals.svelte";
     import { getContext, onMount } from "svelte";
-    import { auth } from "./pavlovia.svelte";
+    import { auth, findProject } from "./pavlovia.svelte";
 
     let {
         shown=$bindable(),
