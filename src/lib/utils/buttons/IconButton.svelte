@@ -45,6 +45,7 @@
         onfocusin={() => {show.tooltip = true}}
         onfocusout={() => {show.tooltip = false}}
         class:borderless={borderless}
+        aria-label={label}
     >
         <Icon 
             src={{
