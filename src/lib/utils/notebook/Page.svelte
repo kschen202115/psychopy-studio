@@ -155,16 +155,17 @@
         display: grid;
         position: relative;
         grid-template-columns: [icon] min-content [label] 1fr [close] min-content;
-        gap: .5rem;
+        justify-items: center;
         border: none;
         border-radius: 0;
-        padding: .25rem .5rem;
+        padding: 0 .5rem;
         margin: 0;
         transition: background .2s;
     }
     .notebook-tab .label {
         grid-column-start: label;
         text-wrap: nowrap;
+        padding: .5rem;
     }
     .notebook-tab .label.highlight {
         font-weight: bold;
@@ -173,6 +174,7 @@
         position: relative;
         color: var(--outline);
         opacity: 0.5;
+        padding: .5rem;
         grid-column-start: close;
         z-index: 2;
     }
