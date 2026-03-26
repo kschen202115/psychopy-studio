@@ -141,6 +141,10 @@ export class UV {
         let folder = path.join(
             app.getPath("appData"), "psychopy4", ".python"
         )
+        // if there's no folder, there's no subfolders
+        if (!fs.existsSync(folder)) {
+            return output
+        }
         // iterate through subfolders in the python folder
         for (let subfolder of fs.readdirSync(folder)) {
             // reinstate .* syntax
@@ -235,9 +239,10 @@ export class UV {
      * @param {array<string>} args Arguments to execute
      * @param {int} timeout Time (ms) after which to give up
      * @param {string} tag Tag to send output to (use undefined to not emit an event)
+     * @param {boolean} silent Set true to prevent UV output from going to stdout
      */
-    execSync(args, timeout=undefined, tag="uv") {
-        return execSync(tag, `"${this.executable}"`, args, timeout)
+    execSync(args, timeout=undefined, tag="uv", silent=false) {
+        return execSync(tag, `"${this.executable}"`, args, timeout, silent)
     }
 
     /**
