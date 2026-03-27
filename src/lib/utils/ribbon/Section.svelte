@@ -47,7 +47,7 @@
     }
     .ribbon-section-label {
         display: grid;
-        grid-template-columns: [icon] 1rem [label] min-content;
+        grid-template-columns: [icon] 1rem [label] auto;
         gap: .5rem;
         align-items: center;
         position: absolute;

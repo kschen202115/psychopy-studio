@@ -3,6 +3,7 @@
     import { CompactButton } from "$lib/utils/buttons";
     import path from "path-browserify";
     import { getContext } from "svelte";
+    import { translate } from "$lib/translation";
 
     let {
         value=$bindable(),
@@ -22,7 +23,7 @@
     />
     <CompactButton 
         icon="/icons/btn-open.svg"
-        tooltip="Open folder..."
+        tooltip={translate("Open folder...")}
         onclick={async evt => {
             // get folder path from electron dialog
             let folder = await electron.files.openDialog({
@@ -39,7 +40,7 @@
     />
     <CompactButton 
         icon="/icons/btn-dirup.svg"
-        tooltip="Up to parent directory"
+        tooltip={translate("Up to parent directory")}
         onclick={evt => {
             // set
             value = path.dirname(value)
@@ -48,7 +49,7 @@
     />
     <CompactButton 
         icon="/icons/btn-target.svg"
-        tooltip="Navigate to current file"
+        tooltip={translate("Navigate to current file")}
         onclick={evt => {
             // set
             value = current.pages[current.tab].file.parent

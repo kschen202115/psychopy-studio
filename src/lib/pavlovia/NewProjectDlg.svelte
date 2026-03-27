@@ -3,6 +3,7 @@
     import { git } from "$lib/globals.svelte";
     import { getContext, onMount } from "svelte";
     import { auth } from "./pavlovia.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         shown=$bindable(),
@@ -19,7 +20,7 @@
 </script>
 
 <Dialog 
-    title="New project"
+    title={translate("New project")}
     buttons={{
         OK: async evt => {
             await git.newProject(

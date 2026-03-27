@@ -29,7 +29,8 @@
     import { IconButton, SwitchButton } from '$lib/utils/buttons';
     import { users, UserCtrl, ProjectCtrl } from '$lib/pavlovia/pavlovia.svelte';
     import MonitorCenterDlg from '$lib/dialogs/monitorCenter/MonitorCenterDlg.svelte';
-    import PavloviaSync from "$lib/pavlovia/Sync.svelte"
+    import PavloviaSync from "$lib/pavlovia/Sync.svelte";
+    import { translate } from "$lib/translation";
 
     let current = getContext("current");
 
@@ -69,10 +70,10 @@
 <Ribbon>
     <Menu />
     
-    <RibbonSection label=File icon="/icons/rbn-file.svg">
+    <RibbonSection label={translate("File")} icon="/icons/rbn-file.svg">
         <IconButton 
             icon="/icons/btn-new.svg" 
-            label="New file" 
+            label={translate("New file")} 
             onclick={(evt) => prompts.NEW = true}
             borderless
         />
@@ -82,7 +83,7 @@
         />  
         <IconButton 
             icon="/icons/btn-open.svg" 
-            label="Open file" 
+            label={translate("Open file")} 
             onclick={(evt) => prompts.OPEN = true} 
             borderless
         />
@@ -92,37 +93,37 @@
         />
         <IconButton 
             icon="/icons/btn-save.svg" 
-            label="Save file" 
+            label={translate("Save file")} 
             onclick={file_save}
             disabled={!current.experiment.history.past.length && current.experiment.file.file} 
             borderless
         />
         <IconButton 
             icon="/icons/btn-saveas.svg" 
-            label="Save file as"
+            label={translate("Save file as")}
             onclick={file_save_as} 
             borderless
         />
     </RibbonSection>
 
-    <RibbonSection label=Edit icon="/icons/rbn-edit.svg">
+    <RibbonSection label={translate("Edit")} icon="/icons/rbn-edit.svg">
         <IconButton 
             icon="/icons/btn-undo.svg" 
-            label="Undo{lastAction}" 
+            label={translate("Undo")} 
             onclick={undo} 
             disabled={!current.experiment.file.file || !current.experiment.history.past.length} 
             borderless
         />
         <IconButton 
             icon="/icons/btn-redo.svg" 
-            label="Redo {nextAction}" 
+            label={translate("Redo")} 
             onclick={redo} 
             disabled={!current.experiment.file.file || !current.experiment.history.future.length} 
             borderless
         />
         <IconButton 
             icon="/icons/btn-find.svg" 
-            label="Find" 
+            label={translate("Find")} 
             onclick={() => show.findDlg = true}
             borderless
         />
@@ -131,11 +132,11 @@
         ></FindDialog>
     </RibbonSection>
     
-    <RibbonSection label=Experiment icon="/icons/rbn-experiment.svg">
+    <RibbonSection label={translate("Experiment")} icon="/icons/rbn-experiment.svg">
         {#if python?.ready}
             <IconButton
                 icon="/icons/btn-monitors.svg"
-                label="Open the monitor center"
+                label={translate("Open the monitor center")}
                 onclick={(evt) => show.monitorCenterDlg = true}
                 borderless
             ></IconButton>
@@ -144,7 +145,7 @@
             />
             <IconButton
                 icon="/icons/btn-devices.svg"
-                label="Open the device manager"
+                label={translate("Open the device manager")}
                 onclick={(evt) => show.deviceMgrDlg = true}
                 borderless
             ></IconButton>
@@ -155,7 +156,7 @@
 
         <IconButton 
             icon="/icons/btn-settings.svg" 
-            label="Experiment settings" 
+            label={translate("Experiment settings")} 
             onclick={(evt) => show.settingsDlg = true}
             disabled={current.experiment === null}
             borderless
@@ -167,8 +168,8 @@
         ></ParamsDialog>
         {/if}
         <SwitchButton 
-            labels={["Pilot", "Run"]} 
-            tooltip="Experiment will run in {current.experiment.pilotMode ? "pilot" : "run"} mode"
+            labels={[translate("Pilot"), translate("Run")]} 
+            tooltip={current.experiment?.pilotMode ? "Experiment will run in pilot mode" : "Experiment will run in run mode"}
             bind:value={
                 () => current.experiment.pilotMode,
                 (value) => {
@@ -184,7 +185,7 @@
         {#if python?.ready}
             <IconButton 
                 icon="/icons/btn-send{current.experiment.pilotMode ? "pilot" : "run"}.svg" 
-                label="Send experiment to runner" 
+                label={translate("Send experiment to runner")} 
                 onclick={sendToRunner}
                 disabled={!current.experiment.file.file}
                 borderless
@@ -193,10 +194,10 @@
     </RibbonSection>
 
     {#if python?.ready}
-        <RibbonSection label=Desktop icon="/icons/rbn-desktop.svg">
+        <RibbonSection label={translate("Desktop")} icon="/icons/rbn-desktop.svg">
             <IconButton 
                 icon="/icons/btn-compilepy.svg" 
-                label="Write experiment as a .py file" 
+                label={translate("Write experiment as a .py file")} 
                 onclick={evt => compilePython()}
                 disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.compilepy}
@@ -204,7 +205,7 @@
             /> 
             <IconButton 
                 icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}py.svg" 
-                label="{current.experiment.pilotMode ? "Pilot" : "Run"} experiment locally" 
+                label={current.experiment.pilotMode ? translate("Pilot experiment locally") : translate("Run experiment locally")}
                 onclick={evt => runPython()}
                 disabled={!current.experiment.file.file}
                 bind:awaiting={awaiting.runpy}
@@ -213,10 +214,10 @@
             />
         </RibbonSection>
 
-        <RibbonSection label=Browser icon="/icons/rbn-browser.svg">
+        <RibbonSection label={translate("Browser")} icon="/icons/rbn-browser.svg">
             <IconButton 
                     icon="/icons/btn-compilejs.svg" 
-                    label="Write experiment as a .js file" 
+                    label={translate("Write experiment as a .js file")} 
                     onclick={(evt) => compileJS()}
                     disabled={!current.experiment.file.file}
                     bind:awaiting={awaiting.compilejs}
@@ -224,7 +225,7 @@
                 />
                 <IconButton 
                     icon="/icons/btn-{current.experiment.pilotMode ? "pilot" : "run"}js.svg" 
-                    label="{current.experiment.pilotMode ? "Pilot" : "Run"} experiment in browser" 
+                    label={current.experiment.pilotMode ? translate("Pilot experiment in browser") : translate("Run experiment in browser")}
                     onclick={(evt) => runJS()}
                     disabled={!current.experiment.file.file || (!current.experiment.pilotMode && !current.project)}
                     bind:awaiting={awaiting.runjs}
@@ -237,17 +238,17 @@
         <IconButton 
             id="ribbon-btn-sync" 
             icon="/icons/btn-sync.svg" 
-            label="Sync to Pavlovia" 
+            label={translate("Sync to Pavlovia")} 
         />
     -->
 
-    <RibbonSection label=Pavlovia icon="/icons/rbn-pavlovia.svg">
+    <RibbonSection label={translate("Pavlovia")} icon="/icons/rbn-pavlovia.svg">
         
         <PavloviaSync>
             {#snippet button(sync)}
                 <IconButton 
                     icon="/icons/btn-sync.svg" 
-                    label="Sync experiment" 
+                    label={translate("Sync experiment")} 
                     onclick={(evt) => sync(
                         $state.snapshot(current.experiment.file.parent), 
                         $state.snapshot(current.user),
@@ -267,21 +268,21 @@
     <RibbonSection label=Views icon="/icons/rbn-windows.svg">
         <IconButton 
             icon="/icons/btn-builder.svg" 
-            label="Builder view" 
+            label={translate("Builder view")} 
             onclick={(evt) => showWindow("builder")} 
             borderless
             disabled
         />
         <IconButton 
             icon="/icons/btn-coder.svg" 
-            label="Coder view" 
+            label={translate("Coder view")} 
             onclick={(evt) => showWindow("coder")} 
             borderless
         />
         {#if electron}
             <IconButton 
                 icon="/icons/btn-runner.svg" 
-                label="Runner view" 
+                label={translate("Runner view")} 
                 onclick={(evt) => showWindow("runner")} 
                 borderless
             />

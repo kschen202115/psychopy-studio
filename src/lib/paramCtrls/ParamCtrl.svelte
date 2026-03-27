@@ -2,6 +2,7 @@
     import { mapping } from "./ctrls";
     import Tooltip from "$lib/utils/tooltip/Tooltip.svelte";
     import { current } from "../../routes/builder/globals.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         name,
@@ -135,7 +136,9 @@
                     <option value={ud}>{ud}</option>
                 {/each}
                 {#each current.experiment.updateTargets as ud}
-                    <option value="set during: {ud.name}">set during: {ud.name}</option>
+                    <option value="set during: {ud.name}">
+                        {translate("set during: {}").replace("{}", ud.name)}
+                    </option>
                 {/each}
             </select>
         {/if}

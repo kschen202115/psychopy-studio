@@ -4,6 +4,7 @@
     import { login, logout, users } from "./pavlovia.svelte";
     import { MenuItem, MenuSeparator, SubMenu } from "$lib/utils/menu";
     import { electron } from "$lib/globals.svelte";
+    import { translate } from "$lib/translation";
 
     let current = getContext("current");
 
@@ -33,7 +34,7 @@
 </script>
 
 <DropdownButton
-    label={current.user ? current.user.profile.name : "No user"}
+    label={current.user ? current.user.profile.name : translate("No user")}
     onclick={(evt) => {
         if (current.user) {
             window.open(current.user.profile.web_url);
@@ -42,11 +43,13 @@
     disabled={!current.user}
 >
     <MenuItem
-        label="Edit user..."
+        label={translate("Edit user...")}
         icon="/icons/btn-edit.svg"
         onclick={evt => window.open("https://gitlab.pavlovia.org/-/profile", "_blank")}
     />
-    <SubMenu label="Switch user...">
+    <SubMenu 
+        label={translate("Switch user...")}
+    >
         {#each Object.values(users) as user}
             <MenuItem
                 label={user.profile.name}
@@ -58,7 +61,7 @@
         {/each}
         <MenuSeparator />
         <MenuItem
-            label="New user..."
+            label={translate("New user...")}
             onclick={(evt) =>
                 login().then((username) => (current.user = users[username]))}
         />
@@ -66,7 +69,7 @@
     <MenuSeparator />
     {#if current.user}
         <MenuItem
-            label="Logout"
+            label={translate("Logout")}
             onclick={(evt) => {
                 logout();
                 current.user = undefined;
@@ -74,7 +77,7 @@
         />
     {:else}
         <MenuItem
-            label="Login"
+            label={translate("Login")}
             onclick={(evt) => {
                 if (Object.keys(users).length > 0) {
                     // Try existing user first

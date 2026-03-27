@@ -8,7 +8,8 @@
     import { Device, Param } from "$lib/experiment"
     import { setContext } from "svelte";
     import { devices, python } from "$lib/globals.svelte";
-    import { pending as profilesPending, profiles } from "$lib/experiment/profiles.svelte"
+    import { pending as profilesPending, profiles } from "$lib/experiment/profiles.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         shown=$bindable()
@@ -43,7 +44,7 @@
 
 <Dialog
     id=add-device
-    title="Add device..."
+    title={translate("Add device...")}
     bind:shown={shown}
     onopen={evt => {
         // no name
@@ -77,14 +78,14 @@
             <span style:flex-grow={1}>Available devices</span>
             <CompactButton
                 icon="/icons/btn-refresh.svg"
-                tooltip=Refresh
+                tooltip={translate("Refresh")}
                 onclick={refresh}
             />
         </div>
         <div class=devices-list>
             {#await profilesPending.devices}
                 <div class=loading-msg>
-                    Getting device backends...
+                    {translate("Getting device backends...")}
                 </div>
             {:then}
                 {#if profiles.devices}
@@ -94,7 +95,7 @@
                             args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
                         }, timeout)}
                             <PanelButton
-                                label="Getting {backend.label} devices..."
+                                label={translate(`Getting {} devices...`).replace("{}", backend.label)}
                                 open={false}
                             />
                         {:then deviceProfiles}
@@ -116,12 +117,12 @@
                             {/if}
                         {:catch err}
                             <div class=timeout-msg>
-                                <p>Getting available devices took longer than expected.</p>
+                                <p>{translate("Getting available devices took longer than expected.")}</p>
                                 <pre>
 {err.error.join("\n")}
                                 </pre>
                                 
-                                <p>Try again with a longer wait time (in milliseconds)?</p>
+                                <p>{translate("Try again with a longer wait time (in milliseconds)?")}</p>
                                 <div class=retry>
                                     <input 
                                         type=number 
@@ -130,7 +131,7 @@
                                     />
                                     <CompactButton
                                         icon="/icons/btn-refresh.svg"
-                                        tooltip=Retry
+                                        tooltip={translate("Retry")}
                                         onclick={refresh}
                                     />
                                 </div>
@@ -139,7 +140,7 @@
                     {/each}
                 {/if}
             {:catch err}
-                {console.log(err)}
+                {console.error(err)}
             {/await}
         </div>
     </div>

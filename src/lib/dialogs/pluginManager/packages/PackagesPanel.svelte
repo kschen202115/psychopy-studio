@@ -61,7 +61,7 @@
             <!-- if search matches a pypi package, include that too -->
             {#if searchterm && !Object.keys(children.installed).includes(searchterm)}
                 {#await checkPyPi(searchterm).then(resp => resp)}
-                    Searching PyPi...
+                    {translate("Searching PyPi...")}
                 {:then profile}
                     {#if profile}
                         <PackageItem 

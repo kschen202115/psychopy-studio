@@ -1,5 +1,6 @@
 <script>
     import { Version } from "$lib/utils/versions.js";
+    import { translate } from "$lib/translation";
 
     let {
         param=$bindable(),
@@ -49,15 +50,15 @@
     {...attachments}
 >
     {#await options}
-        <option value="">Fetching versions from GitHub...</option>
+        <option value="">{translate("Fetching versions from GitHub...")}</option>
     {:then options}
-        <option value="">latest</option>
+        <option value="">{translate("latest")}</option>
         {#each Object.entries(options) as [minor, versions]}
             <optgroup label={minor}>
                 <option 
                     value={`${minor}.*`} 
                     selected={param.val === `${minor}.*`}
-                >{minor} (final)</option>
+                >{minor} ({translate("final")})</option>
                 {#each versions as [version, label]}
                     <option 
                         value={version} 

@@ -2,6 +2,7 @@
     import { getContext } from "svelte";
     import OutlineNode from "./OutlineNode.svelte";
     import TreeRoot from "$lib/utils/tree/TreeRoot.svelte";
+    import { translate } from "$lib/translation";
     
     let current = getContext("current");
 
@@ -19,7 +20,7 @@
         </TreeRoot>
     {:else}
         <div class=message>
-            No open file
+            {translate("No open file")}
         </div>
     {/if}
 </div>

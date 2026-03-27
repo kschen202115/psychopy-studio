@@ -2,7 +2,7 @@
     import { devices, python } from "$lib/globals.svelte";
     import { DeviceManagerDialog } from "$lib/dialogs/deviceManager"
     import { CompactButton } from "$lib/utils/buttons";
-    import ChoiceCtrl from "./ChoiceCtrl.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         param=$bindable(),
@@ -51,7 +51,7 @@
     <option
         value=""
         selected={param.val === ""}
-    >Default</option>
+    >{translate("Default")}</option>
     {#each options as option}
         <option 
             value={option} 

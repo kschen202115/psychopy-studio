@@ -2,7 +2,8 @@
     import { ParamCtrl } from "$lib/paramCtrls"
     import { Dialog } from "$lib/utils/dialog";
     import { CalibrationSetup } from "./configuration.svelte";
-    import { python } from "$lib/globals.svelte"
+    import { python } from "$lib/globals.svelte";
+    import { translate } from "$lib/translation";
 
     let {
         param=$bindable(),
@@ -66,7 +67,7 @@
 </script>
 
 <Dialog
-    title="Monitor calibration setup"
+    title={translate("Monitor calibration setup")}
     buttons={{
         OK: calibrate,
         CANCEL: reset
@@ -76,7 +77,7 @@
 >
     <div class=calibration-config>
         {#await config.ready}
-            Getting photodiode classes...
+            {translate("Getting photometer classes...")}
         {:then}
             {#each Object.keys(config.params) as key}
                 <ParamCtrl 

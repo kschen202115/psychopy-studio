@@ -34,7 +34,7 @@
         <div class=message>
             Failed setup: {err}
             <Button
-                label="Try again?"
+                label={translate("Try again?")}
                 icon="/icons/btn-refresh.svg"
                 onclick={evt => setupPython()}
                 horizontal
@@ -53,13 +53,15 @@
     }}
 >
     {@html marked(status.dlg.message || "")}
-    <p>See below for details:</p>
+    <p>
+        {translate("See below for details:")}
+    </p>
     <div class=output-container>
         <CodeOutput bind:value={status.logs} />
     </div>
     {#await status.ready.promise then ready}
         <div class=finished-msg>
-            Install completed successfully, you can safely close this window.
+            {translate("Install completed successfully, you can safely close this window.")}
         </div>
     {:catch err}
         <div class=finished-msg style:color=var(--red)>
@@ -67,7 +69,7 @@
                 src="/icons/sym-error.svg"
                 size=1rem
             />
-            Install failed, see above for error.
+            {translate("Install failed, see above for error.")}
         </div>
         
         <Button

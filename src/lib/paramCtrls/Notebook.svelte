@@ -3,7 +3,7 @@
     import StartStopCtrl from "./StartStopCtrl.svelte";
     import { Notebook, NotebookPage } from "$lib/utils/notebook"
     import { python } from "$lib/globals.svelte";
-    import { getContext } from "svelte";
+    import { translate } from "$lib/translation";
 
     let {
         element=$bindable(),
@@ -86,10 +86,10 @@
                             if (resp.success) {
                                 element.params[jskey].val = resp.result
                             } else {
-                                element.params[jskey].val = `// Error in Python code`
+                                element.params[jskey].val = `// ${translate("Error in Python code")}`
                             }
                         }).catch(
-                            err => element.params[jskey].val = `// Error in Python code`
+                            err => element.params[jskey].val = `// ${translate("Error in Python code")}`
                         )
                     }
                 }

@@ -5,7 +5,7 @@
     import PackagesPanel from "./packages/PackagesPanel.svelte";
     import VenvChooser from "./VenvChooser.svelte";
     import { python } from "$lib/globals.svelte"
-    import { setContext } from "svelte";
+    import { translate } from "$lib/translation";
 
     let {
         shown=$bindable()
@@ -21,7 +21,7 @@
 
 <Dialog
     id=plugin-mgr
-    title="Plugins & packages"
+    title={translate("Plugins & packages")}
     buttons={{
         OK: evt => {}
     }}

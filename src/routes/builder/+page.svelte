@@ -19,6 +19,7 @@
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
     import TipsDialog from '../../lib/dialogs/tips/TipsDialog.svelte';
+    import { updateLocale, translate } from "$lib/translation";
 
     // parse url params
     let params = new URLSearchParams(location.search)
@@ -36,13 +37,15 @@
         // mark ready
         electron.windows.emit("ready", true)
     }
+
+    $effect(updateLocale)
     
 </script>
 
 {#if current.experiment.file}
-    <title>PsychoPy Builder: {current.experiment.file?.name}</title>
+    <title>{translate("PsychoPy Builder")}: {current.experiment.file?.name}</title>
 {:else}
-    <title>PsychoPy Builder</title>
+    <title>{translate("PsychoPy Builder")}</title>
 {/if}
 
 <Frame
@@ -56,7 +59,7 @@
             <PaneGroup direction="horizontal">
                 <Pane defaultSize={3/4}>
                     <Panel 
-                        title=Routines 
+                        title={translate("Routines")} 
                     >
                         <RoutinesNotebook />
                     </Panel>
@@ -66,7 +69,7 @@
 
                 <Pane defaultSize={1/4}>
                     <Panel 
-                        title=Components 
+                        title={translate("Components")} 
                     >
                         <ComponentsPanel />
                     </Panel>
@@ -78,7 +81,7 @@
 
         <Pane defaultSize={1/3}>
             <Panel 
-                title=Flow 
+                title={translate("Flow")} 
                 hspan={4}
             >
                 <FlowPanel />

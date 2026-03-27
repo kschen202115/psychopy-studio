@@ -6,6 +6,7 @@
     import { electron, git } from "$lib/globals.svelte";
     import ManageProjectsDlg from "$lib/dialogs/projects/manage/ManageProjectsDlg.svelte";
     import NewProjectDlg from "./NewProjectDlg.svelte";
+    import { translate } from "$lib/translation";
 
     let current = getContext("current")
 
@@ -55,7 +56,7 @@
             }
         } else {
             // if no project, no label
-            return "No project"
+            return translate("No project")
         }
     })
 </script>
@@ -70,23 +71,23 @@
     disabled={!current.project}
 >
     <MenuItem
-        label="New project"
+        label={translate("New project")}
         icon="/icons/btn-add.svg"
         onclick={evt => show.newProjectDlg = true}
         disabled={!current.user || !current.experiment?.file?.file}
-    ></MenuItem>
+    />
     <MenuItem
-        label="Edit project"
+        label={translate("Edit project")}
         icon="/icons/btn-edit.svg"
         onclick={evt => window.open(`${current.project.web_url}/edit`, "_blank")}
         disabled={!current.project}
-    ></MenuItem>
+    />
     <MenuSeparator/>
     <MenuItem
-        label="Search projects..."
+        label={translate("Search projects...")}
         icon="/icons/btn-find.svg"
         onclick={(evt) => window.open("https://pavlovia.org/explore", "_blank")}
-    ></MenuItem>
+    />
 </DropdownButton>
 
 <ManageProjectsDlg 

@@ -1,6 +1,6 @@
 export { default as UserCtrl } from "./UserCtrl.svelte";
 export { default as ProjectCtrl } from "./ProjectCtrl.svelte";
-
+import { translate } from "$lib/translation";
 import { randint, randof } from "$lib/utils/tools/random";
 import { electron } from "$lib/globals.svelte";
 
@@ -78,7 +78,7 @@ async function getUserInfo(token) {
     if (resp.ok) {
         return await resp.json();
     } else {
-        throw new Error(resp.statusText || 'Failed to get user info');
+        throw new Error(resp.statusText || translate('Failed to get user info'));
     }
 }
 
