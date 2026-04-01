@@ -37,7 +37,7 @@ import zh_TW from "./locales/zh-TW.json";
 
 // initialise i18next with locales
 i18next.init({
-    debug: true,
+    debug: false,
     returnEmptyString: false,
     resources: {
         ar_001: {translation: ar_001},
@@ -81,8 +81,8 @@ export const translate = i18next.t;
 // export available localtes
 export const locales = Object.keys(i18next.toJSON().store.data)
 // export functions to get/set locale
-export const setLocale = i18next.setLocale
-export const getLocale = i18next.getLocale
+export const setLocale = i18next.changeLanguage
+export const getLocale = () => i18next.language
 // export effect to update from prefs (needs to be mounted to root element)
 export function updateLocale() {
     // get locale from prefs
