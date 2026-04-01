@@ -3,6 +3,7 @@ import FallbackLoopProfiles from "$lib/experiment/fallbacks/loops.json";
 import FallbackDeviceProfiles from "$lib/experiment/fallbacks/devices.json";
 import FallbackPreferencesProfile from "$lib/preferences.json";
 import { python } from "$lib/globals.svelte";
+import { getLocale } from "$lib/translation";
 
 
 export var profiles = $state({
@@ -22,6 +23,15 @@ export var pending = $state({
 // populate on Liaison starting (if it ever does)
 if ( python ) {
     python.liaison.ready("app").then(
+        // set language before getting profiles
+        () => python.liaison.send("app", {
+            command: "try",
+            args: [
+                "psychopy.localization:setLocale",
+                getLocale()
+            ]
+        })
+    ).then(
         () => {
             // get components
             pending.components = python.liaison.send("app", {

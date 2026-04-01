@@ -8,6 +8,7 @@
     import { status } from "./globals.svelte.js";
     import { setupPython } from "./functions.svelte.js";
     import { electron } from "$lib/globals.svelte";
+    import { translate } from "$lib/translation";
     
     // setup logging to app
     electron.windows.listen("uv", (evt, message) => status.logs += `${message}\n`)
