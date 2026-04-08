@@ -2,6 +2,7 @@
     import PackageItem from "./PackageItem.svelte";
     import { electron, python } from "$lib/globals.svelte";
     var decoder = new TextDecoder();
+    import { translate } from "$lib/translation"
 
     
     import { setContext, untrack } from "svelte";
