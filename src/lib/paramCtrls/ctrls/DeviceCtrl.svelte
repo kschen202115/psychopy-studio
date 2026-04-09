@@ -43,6 +43,7 @@
 <select 
     class=param-device-input
     disabled={disabled || options.length === 0} 
+    id={param.name}
     bind:value={param.val}
     style:color={param.valid.value ? "inherit" : "var(--red)"}
     {@attach element => param.registerValidator("device", validateDevice, 0)}

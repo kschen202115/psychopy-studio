@@ -20,6 +20,7 @@
     disabled={disabled || locales.length === 0} 
     bind:value={param.val}
     style:color={param.valid.value ? "inherit" : "var(--red)"}
+    id={param.name}
     {@attach element => param.registerValidator("locale", validateLocale, 0)}
     {...attachments}
 >
