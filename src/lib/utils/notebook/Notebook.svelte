@@ -45,6 +45,7 @@
         align-items: stretch;
         margin: auto;
         height: 100%;
+        width: 100%;
     }
 
     .notebook-tabs {

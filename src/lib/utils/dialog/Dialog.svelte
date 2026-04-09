@@ -184,6 +184,7 @@
         border: 1px solid var(--outline);
         width: fit-content;
         height: fit-content;
+        resize: horizontal;
     }
     dialog .content {
         position: relative;

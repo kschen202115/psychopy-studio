@@ -26,7 +26,6 @@
 >
     <CodeEditor 
         bind:value={param.val}
-        resize=vertical
         language={language}
         readonly={disabled}
         disabled={disabled}

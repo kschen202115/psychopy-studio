@@ -137,7 +137,7 @@
                         <div 
                             class=params-panel
                             style:flex-direction={horizontal ? "row" : "column"}
-                            style:width={horizontal ? "65rem" : "45rem"}
+                            style:min-width={horizontal ? "65rem" : "45rem"}
                         >
                             <!-- start ctrl, if needed -->
                             {#if "startVal" in params}
@@ -182,6 +182,7 @@
         padding: 1rem;
         padding-bottom: 3rem;
         height: 100%;
+        width: 100%;
         min-height: 10rem;
     }
     .uncategorised-params-panel {
