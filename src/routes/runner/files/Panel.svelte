@@ -25,6 +25,7 @@
                 />
                 <CompactButton 
                     icon="/icons/btn-delete.svg"
+                    tooltip={translate("Remove item")}
                     onclick={evt => delete current.runlist[parseInt(i)]}
                 />
             </div>
