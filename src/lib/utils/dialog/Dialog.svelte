@@ -182,7 +182,7 @@
         outline: none;
         padding: 0;
         border: 1px solid var(--outline);
-        width: fit-content;
+        min-width: fit-content;
         height: fit-content;
         resize: horizontal;
     }
