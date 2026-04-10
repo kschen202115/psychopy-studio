@@ -35,6 +35,7 @@
     </div>
     <CodeInput 
         bind:value={input.present}
+        label={translate("Python shell input")}
         onsubmit={evt => {
             // get command
             let cmd = $state.snapshot(input.present)

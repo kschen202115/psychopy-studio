@@ -19,6 +19,7 @@
         class=directory
         style:flex-grow=1
         bind:value={value} 
+        aria-label={translate("Current file path")}
         disabled 
     />
     <CompactButton 

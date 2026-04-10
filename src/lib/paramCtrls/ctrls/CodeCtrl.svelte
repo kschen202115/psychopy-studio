@@ -21,6 +21,7 @@
 </script>
 <div 
     class=param-code-input-multi
+    id={param.name}
     {@attach element => param.registerValidator("code", validateCode, 10)}
     {...attachments}
 >

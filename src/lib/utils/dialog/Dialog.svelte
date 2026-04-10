@@ -68,6 +68,7 @@
                             buttons.CANCEL(evt)
                         }
                     }}
+                    aria-label={translate("Close")}
                 >
                     <Icon 
                         src="/icons/sym-close.svg"

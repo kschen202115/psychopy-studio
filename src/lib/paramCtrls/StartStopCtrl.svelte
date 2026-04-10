@@ -41,7 +41,11 @@
                     {typeParam.hint}
                 </Tooltip>
             {/if}
-            <select disabled={typeParam.allowedVals.length == 1} bind:value={typeParam.val}>
+            <select 
+                aria-label={typeParam.label}
+                bind:value={typeParam.val}
+                disabled={typeParam.allowedVals.length == 1}
+            >
                 {#each typeParam.allowedVals as val}
                     <option value={val} selected={typeParam.val === val}>{val}</option>
                 {/each}
@@ -49,13 +53,20 @@
         </div>
     {/if}
     {#if valueParam}
-        <input class=param-value type="text" bind:value={valueParam.val} />
+        <input 
+            class=param-value 
+            type="text" 
+            id={valueParam.name}
+            bind:value={valueParam.val} 
+        />
     {/if}
     {#if expectedParam !== null}
         <label 
             class=param-estim-label 
             for={expectedParam?.name}
-        >{expectedParam.label}</label>
+        >
+            {expectedParam.label}
+        </label>
         <input 
             class=param-estim 
             type="text" 

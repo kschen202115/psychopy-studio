@@ -1,6 +1,7 @@
 <script>
     let {
         value=$bindable(),
+        label=undefined,
         onsubmit=evt => {},
         onprevious=evt => {},
         onnext=evt => {}
@@ -12,6 +13,7 @@
 <textarea 
     bind:this={ctrl}
     bind:value={value}
+    aria-label={label}
     onkeyup={evt => {
         // on submit...
         if (evt.key === "Enter" && !evt.shiftKey) {

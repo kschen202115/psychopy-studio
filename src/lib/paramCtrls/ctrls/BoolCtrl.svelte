@@ -9,6 +9,7 @@
 <input 
     class=param-bool-input 
     type="checkbox" 
+    id={param.name}
     bind:checked={param.val} 
     disabled={disabled}
 />
