@@ -297,6 +297,6 @@
 <style>
     .padded {
         display: flex;
-        padding: .25rem;
+        padding: 0 .25rem;
     }
 </style>

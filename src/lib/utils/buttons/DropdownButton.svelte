@@ -125,8 +125,9 @@
     button .icon-container {
         display: flex;
         align-items: center;
-        margin: .75rem 0;
+        margin: .6em 0;
         border-radius: .5rem;
+        overflow: hidden;
     }
 
     button .label {
@@ -147,8 +148,8 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: .5rem;
-        padding: 0 .75rem;
+        gap: .75rem;
+        padding: 0 .75em;
     }
     .more-btn {
         border-top-left-radius: 0;
