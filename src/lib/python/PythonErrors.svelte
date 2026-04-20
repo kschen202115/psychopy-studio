@@ -5,51 +5,57 @@
     import { python } from "$lib/globals.svelte.js";
     import { translate } from "$lib/translation";
 
-    let errors = $state([])
-    let showDlg = $state.raw(false)
+    let {
+        enabled=$bindable()
+    } = $props()
 
+    let errors = $state([])
+
+    // listener for messages
+    let listener = (evt, message) => {
+        if (enabled) {
+            console.log(message)
+            errors.push({
+                showDlg: false,
+                dismissed: false,
+                message: message.error?.join?.("\n") || message
+            })
+        }
+    }
     // listen to Python stderr
-    python.output.stderr.listen(
-        (evt, message) => errors.push({
-            dismiss: new Promise(
-                (resolve, reject) => setTimeout(resolve, 5000)
-            ),
-            content: message
-        })
-    )
+    python.output.stderr.listen(listener)
     // listen for Liaison too
-    python.liaison.listen("error", 
-        (evt, message) => errors.push({
-            dismiss: new Promise(
-                (resolve, reject) => setTimeout(resolve, 5000)
-            ),
-            content: message
-        })
-    )
+    python.liaison.listen("error", listener)
 </script>
 
 
 <MessageArray>
-    {#each errors as error}
-        {#await error.dismiss}
+    {#each Object.keys(errors) as i}
+        {#if !errors[i].dismissed}
             <Message
                 message={translate("Python error, click to show")}
                 icon="/icons/sym-error.svg"
-                onclick={evt => showDlg = true}
+                onclick={evt => errors[i].showDlg = true}
             />
-        {:then}
-            {""}
-        {/await}
+            <MessageDialog
+                title={translate("Python error")}
+                bind:shown={errors[i].showDlg}
+                buttons={{
+                    OK: evt => errors[i].dismissed = true,
+                    CANCEL: evt => {}
+                }}
+            >
+                <div class=output-container>
+                    <CodeOutput value={errors[i].message} />
+                </div>
+            </MessageDialog>
+        {/if}
     {/each}
 </MessageArray>
 
-<MessageDialog
-    bind:shown={showDlg}
-    buttons={{
-        CANCEL: evt => {}
-    }}
->
-    <div class=output-container>
-        <CodeOutput value={errors.map(err => err.content.error).join("\n")} />
-    </div>
-</MessageDialog>
+<style>
+    .output-container {
+        position: relative;
+        height: 40rem;
+    }
+</style>
