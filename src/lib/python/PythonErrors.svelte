@@ -14,7 +14,6 @@
     // listener for messages
     let listener = (evt, message) => {
         if (enabled) {
-            console.log(message)
             errors.push({
                 showDlg: false,
                 dismissed: false,
