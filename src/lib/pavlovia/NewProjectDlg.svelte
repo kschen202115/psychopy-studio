@@ -39,7 +39,7 @@
     }}
     onopen={evt => {
         details.name = current.experiment.file.stem
-        details.group = current.user?.profile.username
+        details.group = $state.snapshot(current.user)
         // refresh promise
         let newPromise = Promise.withResolvers();
         awaiting.resolve(newPromise.promise);
@@ -52,8 +52,8 @@
         <div class=ctrl>
             pavlovia.org / 
             <select bind:value={details.group} style:flex-grow=1>
-                <option value={current.user.profile.username}>{current.user.profile.username}</option>
-                {#await git.listGroups() then groups}
+                <option value={current.user}>{current.user}</option>
+                {#await git.listGroups($state.snapshot(current.user)) then groups}
                     {#each groups as group}
                         <option value={group.path}>{group.path}</option>
                     {/each}

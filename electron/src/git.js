@@ -294,7 +294,7 @@ export function clearUsers() {
 }
 
 
-export async function listGroups() {
+export async function listGroups(username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups`)
     // apply auth
@@ -570,7 +570,7 @@ export const handlers = {
     loadUsers: ipcMain.handle("git.loadUsers", (evt) => loadUsers()),
     clearUsers: ipcMain.handle("git.clearUsers", (evt) => clearUsers()),
     listUsers: ipcMain.handle("git.listUsers", (evt) => Object.keys(users)),
-    listGroups: ipcMain.handle("git.listGroups", (evt) => listGroups()),
+    listGroups: ipcMain.handle("git.listGroups", (evt, username) => listGroups(username)),
     getUserInfo: ipcMain.handle("git.getUserInfo", (evt, username) => users[username]?.profile),
     getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => getRemote(folder, user)),
     getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, group, name, username) => getProjectInfo(group, name, username)),
