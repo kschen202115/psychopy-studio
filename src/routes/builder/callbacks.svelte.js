@@ -250,8 +250,12 @@ export async function compileJS() {
 export async function runPython() {
     // send to runner
     await sendToRunner()
+    // mute error popups (errors will be shown in Runner)
+    current.errorPopups = false
     // run script
     await current.experiment.runPython(true)
+    // re-enable error popups
+    current.errorPopups = true
 
     return true
 }
@@ -259,6 +263,8 @@ export async function runPython() {
 export async function stopPython(executable) {
     // cancel running
     await current.experiment.stopPython()
+    // re-enable error popups
+    current.errorPopups = true
 }
 
 export async function runJS() {

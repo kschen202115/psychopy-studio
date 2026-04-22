@@ -1,5 +1,6 @@
 <script>
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
+    import { showWindow } from "$lib/utils/views.svelte";
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
@@ -18,6 +19,7 @@
     import { shortcuts } from "./callbacks.svelte";
     import TipsDialog from '$lib/dialogs/tips/TipsDialog.svelte';
     import { updateLocale, translate } from "$lib/translation"
+    
 
     setContext("current", current)
 
@@ -43,7 +45,10 @@
             if (!current.output.alerts.some(
                 item => item.code === message.message.code
             )) {
-                current.output.alerts.push(message.message)
+                current.output.alerts.push(message.message);
+                // focus runner and switch to alerts tab
+                showWindow("runner", true)
+                current.tab = "alerts";
             }
         }
     )
@@ -52,15 +57,28 @@
         (evt, message) => current.output.stdout += `${message}\n`
     )
     python.output.stderr.listen(
-        (evt, message) => current.output.stdout += `${message}\n`
+        (evt, message) => {
+            current.output.stdout += `${message}\n`;
+            // focus runner and switch to stdout tab
+            showWindow("runner", true)
+            current.tab = "stdout";
+        }
     )
     python.liaison.listen("error",
-        (evt, message) => current.output.stdout += `${message.error}\n`
+        (evt, message) => {
+            current.output.stdout += `${message.error}\n`;
+            // focus runner and switch to stdout tab
+            showWindow("runner", true)
+            current.tab = "stdout";
+        }
     )
     // setup listener for pavlovia
     git.listen(
         (evt, message) => {
-            current.output.pavlovia += message + "\n"
+            current.output.pavlovia += message + "\n";
+            // focus runner and switch to pavlovia tab
+            showWindow("runner", true)
+            current.tab = "pavlovia";
         }
     )
 

@@ -106,7 +106,9 @@
     <!-- this will setup a Python instance -->
     {#if python}
         <SetupPython />
-        <PythonErrors />
+        <PythonErrors 
+            bind:enabled={current.errorPopups}
+        />
     {/if}
 
 </Frame>
