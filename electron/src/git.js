@@ -15,8 +15,6 @@ const client = "944b87ee0e6b4f510881d6f6bc082f64c7bba17d305efdb829e6e0e7ed466b34
 
 
 class User {
-    
-
     constructor({
         token: token, 
         profile: profile
@@ -213,14 +211,19 @@ export async function loadUsers() {
         fs.mkdirSync(folder, { recursive: true })
     }
     if (!fs.existsSync(file)) {
-        fs.writeFileSync(file, JSON.stringify({}))
+        saveUsers()
     }
     // read file (decrypt if possible)
     let content
     if (safeStorage.isEncryptionAvailable()) {
-        content = safeStorage.decryptString(
-            fs.readFileSync(file)
-        )
+        try {
+            content = safeStorage.decryptString(
+                fs.readFileSync(file)
+            )
+        } catch {
+            // if decryption fails, it's probably because file wasn't encrypted
+            content = fs.readFileSync(file, { encoding: 'utf8' })
+        }
     } else {
         content = fs.readFileSync(file, { encoding: 'utf8' })
     }
