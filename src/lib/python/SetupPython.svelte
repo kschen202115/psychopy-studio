@@ -7,15 +7,30 @@
     import { marked } from "marked";
     import { status } from "./globals.svelte.js";
     import { setupPython } from "./functions.svelte.js";
-    import { electron } from "$lib/globals.svelte";
+    import { electron, python } from "$lib/globals.svelte";
     import { translate } from "$lib/translation";
+    import ChooseDirectory from "./ChooseDirectory.svelte";
+    import { prefs } from "$lib/preferences.svelte.js";
     
     // setup logging to app
     electron.windows.listen("uv", (evt, message) => status.logs += `${message}\n`)
     // setup on initial load
-    setupPython()
+    $effect(() => {
+        if (prefs.params.environmentsFolder.val) {
+            // set directory when we have one
+            python.uv.setDirectory(
+                $state.snapshot(prefs.params.environmentsFolder.val)
+            ).then(
+                // setup Python once we have a folder
+                evt => setupPython("app")
+            )
+        }
+    })
 </script>
 
+{#if !prefs.params.environmentsFolder.val}
+    <ChooseDirectory />
+{/if}
 
 <MessageArray>
     {#await status.ready.promise}
