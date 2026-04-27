@@ -73,8 +73,7 @@
 		},
 		"linux": {
 			"target": [
-				"AppImage",
-				"flatpak"
+				"AppImage"
 			],
 			"icon": "./static/branding/favicon@1024x1024.png",
 			"category": "Science",
