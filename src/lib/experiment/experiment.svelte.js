@@ -226,13 +226,18 @@ export class Experiment {
         return results
     }
 
-    pilotMode = $derived(this.settings.params['runMode'].val)
+    pilotMode = $derived(![true, "true", "True", 1, "1"].includes(this.settings.params['runMode']?.val))
 
     getPilotMode() {
         return this.settings.params['runMode'].val
     }
 
     setPilotMode(value) {
+        // convert to integer for inter-language compatibility
+        if ([true, false].includes(value)) {
+            value = value ? 0 : 1
+        }
+        // set param val
         this.settings.params['runMode'].val = value
     }
 
@@ -334,7 +339,9 @@ export class Experiment {
             routine.exp = this;
             routine.fromXML(routineNode);
             // make sure name matches node name (in case experiment was made before Routine Settings existed)
-            routine.settings.params['name'].val = routineNode.getAttribute("name")
+            if (routine.settings) {
+                routine.settings.params['name'].val = routineNode.getAttribute("name")
+            }
             // parse and append node
             this.routines[routine.name] = routine
         }
