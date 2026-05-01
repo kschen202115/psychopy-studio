@@ -18,7 +18,9 @@
 			"output": "out"
 		},
 		"nsis": {
-			"perMachine": true
+			"oneClick": false,
+			"allowElevation": true,
+			"selectPerMachineByDefault": true
 		},
 		"win": {
 			"target": [
@@ -44,10 +46,7 @@
 				"endpoint": "https://eus.codesigning.azure.net/",
 				"certificateProfileName": "OpenScienceTools",
 				"codeSigningAccountName": "PsychoPy"
-			},
-			"oneClick": false,
-			"allowElevation": true,
-			"selectPerMachineByDefault": true
+			}
 		},
 		"mac": {
 			"target": [
