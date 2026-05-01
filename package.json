@@ -44,7 +44,9 @@
 				"endpoint": "https://eus.codesigning.azure.net/",
 				"certificateProfileName": "OpenScienceTools",
 				"codeSigningAccountName": "PsychoPy"
-			}
+			},
+			"allowElevation": true,
+			"allowToChangeInstallationDirectory": true
 		},
 		"mac": {
 			"target": [
