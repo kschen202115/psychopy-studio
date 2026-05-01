@@ -102,10 +102,6 @@ const createWindow = () => {
   let ready = {
     svelte: Promise.withResolvers()
   }
-  // if on windows, get frame to open with from argv
-  if (process.platform === "win32") {
-    onFileOpen(undefined, process.argv[isDev ? 2 : 1])
-  }
   // start timers 
   let mintime = new Promise((resolve, reject) => setTimeout(resolve, prefs.params?.showSplash?.val !== "False" ? 1000 : 0));
   let maxtime = new Promise((resolve, reject) => setTimeout(resolve, 10000));
@@ -246,11 +242,25 @@ const createWindow = () => {
  */
 function startingWindows() {
   let targets
+  // get starting windows from prefs
   try {
     targets = JSON.parse(prefs.params?.defaultView?.val)
   } catch {
     targets = ["builder"]
   }
+  // if given a launch arg, ignore prefs
+  if ( ["--builder", "-b"].includes(process.argv[isDev ? 2 : 1]) ) {
+    targets = ["builder"]
+  } else if ( ["--coder", "-c"].includes(process.argv[isDev ? 2 : 1]) ) {
+    targets = ["coder"]
+  } else if ( ["--runner", "-r"].includes(process.argv[isDev ? 2 : 1]) ) {
+    targets = ["runner"]
+  } else if (process.argv[isDev ? 2 : 1] && process.platform === "win32") {
+    // if on windows, file to open may have been passed via args
+    onFileOpen(undefined, process.argv[isDev ? 2 : 1])
+    return
+  }
+  // open starting windows
   for (let target of targets) {
     newWindow(target, true, false).then(
       // show tips if requested
