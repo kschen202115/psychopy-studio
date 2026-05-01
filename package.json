@@ -45,8 +45,9 @@
 				"certificateProfileName": "OpenScienceTools",
 				"codeSigningAccountName": "PsychoPy"
 			},
+			"oneClick": false,
 			"allowElevation": true,
-			"allowToChangeInstallationDirectory": true
+			"selectPerMachineByDefault": true
 		},
 		"mac": {
 			"target": [
