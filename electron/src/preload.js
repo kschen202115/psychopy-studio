@@ -72,6 +72,8 @@ const python = {
     folder: () => ipcRenderer.invoke("python.uv.folder").then(resp => resp),
     executable: () => ipcRenderer.invoke("python.uv.executable").then(resp => resp),
     exists: () => ipcRenderer.invoke("python.uv.exists").then(resp => resp),
+    findDirectory: (option) => ipcRenderer.invoke("python.uv.findDirectory", option).then(resp => resp),
+    setDirectory: (option) => ipcRenderer.invoke("python.uv.setDirectory", option).then(resp => resp),
     install: () => ipcRenderer.invoke("python.uv.install").then(resp => resp),
     makeExecutable: (psychopyVersion, pythonVersion) => ipcRenderer.invoke("python.uv.makeExecutable", psychopyVersion, pythonVersion).then(resp => resp),
     findPython: (version) => ipcRenderer.invoke("python.uv.findPython", version).then(resp => resp),

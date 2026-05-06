@@ -34,6 +34,8 @@ export const handlers = {
     uv: {
         folder: ipcMain.handle("python.uv.folder", (evt) => uv.folder),
         executable: ipcMain.handle("python.uv.executable", (evt) => uv.executable),
+        findDirectory: ipcMain.handle("python.uv.findDirectory", (evt, option) => uv.findDirectory(option)),
+        setDirectory: ipcMain.handle("python.uv.setDirectory", (evt, option) => uv.setDirectory(option)),
         exists: ipcMain.handle("python.uv.exists", (evt) => uv.exists()),
         install: ipcMain.handle("python.uv.install", (evt) => uv.install()),
         makeExecutable: ipcMain.handle("python.uv.makeExecutable", (evt, psychopyVersion, pythonVersion) => uv.makeExecutable(psychopyVersion, pythonVersion)),
