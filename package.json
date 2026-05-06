@@ -18,7 +18,9 @@
 			"output": "out"
 		},
 		"nsis": {
-			"perMachine": true
+			"oneClick": false,
+			"allowElevation": true,
+			"selectPerMachineByDefault": true
 		},
 		"win": {
 			"target": [
