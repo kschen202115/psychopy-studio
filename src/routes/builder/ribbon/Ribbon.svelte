@@ -171,12 +171,12 @@
             labels={[translate("Pilot"), translate("Run")]} 
             tooltip={current.experiment?.pilotMode ? "Experiment will run in pilot mode" : "Experiment will run in run mode"}
             bind:value={
-                () => current.experiment.pilotMode,
+                () => !current.experiment.pilotMode,
                 (value) => {
                     // update history
                     current.experiment.history.update(`toggle pilot mode`)
                     // set pilot mode
-                    current.experiment.settings.params['runMode'].val = value;
+                    current.experiment.setPilotMode(!value);
                 }
             } 
             disabled={current.experiment === null}
