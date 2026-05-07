@@ -167,7 +167,7 @@ export class Experiment {
     /**
      * Reset this Experiment as if from new
      */
-    reset(keepHistory=false) {
+    reset(keepHistory=false, defaultRoutine=true) {
         // clear file
         this.file = {
             file: undefined,
@@ -189,10 +189,12 @@ export class Experiment {
         // clear the flow
         this.flow.clear()
         // add a default routine
-        this.routines['trial'] = new Routine();
-        this.routines['trial'].exp = this;
-        this.routines['trial'].settings.params['name'].val = "trial";
-        this.flow.flat.push(this.routines['trial'])
+        if (defaultRoutine) {
+            this.routines['trial'] = new Routine();
+            this.routines['trial'].exp = this;
+            this.routines['trial'].settings.params['name'].val = "trial";
+            this.flow.flat.push(this.routines['trial'])
+        }
     }
 
     /**
@@ -283,7 +285,7 @@ export class Experiment {
      */
     fromJSON(node) {
         // reset experiment
-        this.reset(true)
+        this.reset(true, false)
         // set basic attributes
         this.file = parsePath(node.filename);
         this.version = node.version;
@@ -315,7 +317,7 @@ export class Experiment {
             node = document.getElementsByTagName("PsychoPy2experiment")[0];
         }
         // reset experiment
-        this.reset()
+        this.reset(true, false)
         // get version
         this.version = node.getAttribute("version");
         // get settings
