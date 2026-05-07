@@ -16,6 +16,7 @@ const logging = require("./logging.js");
 const { UsageReport } = require("./usage.js");
 const { favicon } = require("./resources.js");
 const { appVersion, isDev } = require('./version.js');
+const { handlers: stateHandlers, lastState, newFrame, updateFrame, saveState } = require('./state.js');
 const { windows, newWindow, setMenu } = require("./frames.js");
 const { details: svelte, startSvelte } = require("./svelte.js");
 const { prefs, prefsFile } = require("./preferences.js");
@@ -133,12 +134,42 @@ function startingWindows() {
   }
   // open starting windows
   for (let target of targets) {
-    newWindow(target, true, false).then(
-      // show tips if requested
-      id => windows[id].webContents.send(
-        "showTips", prefs.params?.showStartupTips?.val === "True"
-      )
+    // get previous states for this target
+    let states = Object.values(lastState.frames).filter(
+      item => item.view === target
     )
+    // if no previous states, make a fresh one
+    if (!states.length) {
+      states.push({
+        pos: [null, null],
+        size: [null, null],
+        maximized: false,
+        files: [],
+        view: target
+      })
+    }
+    // create window(s)
+    for (let state of states) {
+      newWindow(
+        state.files.length ? `${state.view}?fileOpen=${state.files}` : state.view, 
+        true, 
+        state.maximized
+      ).then(id => {
+        // restore size and pos
+        if (state.size.every(item => item !== null)) {
+          windows[id].setSize(...state.size)
+        }
+        if (state.pos.every(item => item !== null)) {
+          windows[id].setPosition(...state.pos)
+        }
+        windows[id].setMax
+        // show tips if requested
+        windows[id].webContents.send(
+          "showTips", prefs.params?.showStartupTips?.val === "True"
+        )
+      })
+    }
+    
   }
 }
 
@@ -166,13 +197,12 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-// make sure the Svelte process is killed on exit
 process.on('SIGINT', app.quit);
 process.on('SIGTERM', app.quit);
-app.on("quit", (evt, code) => {
-  // close svelte
-  svelte.process.kill(0);
-})
+// save app state before closing windows on quit
+app.on("before-quit", (evt, code) => saveState());
+// make sure the Svelte process is killed on exit
+app.on("quit", (evt, code) => svelte.process.kill(0));
 
 
 /* handlers which can be invoked by electron */
@@ -234,7 +264,8 @@ const handlers = {
     quit: ipcMain.handle("electron.quit", (evt) => app.quit())
   },
   python: pythonHandlers,
-  git: gitHandlers
+  git: gitHandlers,
+  state: stateHandlers
 };
 
 // make sure user folder exists

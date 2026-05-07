@@ -6,6 +6,7 @@ import logging from "./logging.js";
 import { favicon } from "./resources.js";
 import { details as svelte } from "./svelte.js";
 import { prefs } from "./preferences.js";
+import state from "./state.js";
 
 
 export var windows = {
@@ -40,11 +41,23 @@ export async function newWindow(target = null, show = true, fullscreen = false) 
   )
 
   // load target URL
-  let url = `http://${svelte.address.host}:${svelte.address.port}/${target || ''}`;
+  let url = new URL(`http://${svelte.address.host}:${svelte.address.port}/${target || ''}`);
   logging.log(`Loading ${url}...`)
-  win.loadURL(url);
+  win.loadURL(url.toString());
   // store handle against id
   windows[win.webContents.id] = win;
+  // create new entry in states
+  state.newFrame(
+    win.webContents.id,
+    url.pathname.split("/")[1]
+  )
+  // track size and pos of window
+  win.on("resize", evt => state.updateFrame(win.webContents.id, { size: win.getSize() }))
+  win.on("move", evt => state.updateFrame(win.webContents.id, { pos: win.getPosition() }))
+  win.on("maximize", evt => state.updateFrame(win.webContents.id, { maximized: true }))
+  win.on("maximize", evt => state.updateFrame(win.webContents.id, { maximized: true }))
+  // track when window closes
+  win.on("close", evt => state.closeFrame(win.webContents.id))
   // create promise waiting for ready event
   let ready = Promise.withResolvers()
   // show when ready (if requested)

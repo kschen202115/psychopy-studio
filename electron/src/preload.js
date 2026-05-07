@@ -44,6 +44,9 @@ const electron = {
     get: () => ipcRenderer.invoke("electron.clipboard.get").then(resp => resp),
     set: (value) => ipcRenderer.invoke("electron.clipboard.set", value).then(resp => resp)
   },
+  state: {
+    updateFrame: (details) => ipcRenderer.invoke("electron.state.updateFrame", details).then(resp => resp)
+  },
   version: () => ipcRenderer.invoke("electron.version").then(resp => resp),
   platform: () => ipcRenderer.invoke("electron.platform").then(resp => resp),
   quit: () => ipcRenderer.invoke("electron.quit")

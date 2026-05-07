@@ -25,7 +25,9 @@
     let params = new URLSearchParams(location.search)
     // if given a file to open, open it
     if (params.get("fileOpen")) {
-        openFile(params.get("fileOpen"))
+        params.get("fileOpen").split(",").forEach(
+            item => openFile(item)
+        )
     }
 
     // reference current in context for ease of access
@@ -39,7 +41,17 @@
     }
 
     $effect(updateLocale)
-    
+
+    // keep app state up to date with open files
+    if (electron) {
+        $effect(() => {
+            electron.state.updateFrame(
+                {
+                    files: [current.experiment?.file?.file]
+                }
+            )
+        })
+    }
 </script>
 
 {#if current.experiment.file}
