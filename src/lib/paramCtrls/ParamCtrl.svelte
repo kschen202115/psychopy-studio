@@ -1,5 +1,6 @@
 <script>
     import { mapping } from "./ctrls";
+    import { marked } from "marked";
     import Tooltip from "$lib/utils/tooltip/Tooltip.svelte";
     import { current } from "../../routes/builder/globals.svelte";
     import { translate } from "$lib/translation";
@@ -157,7 +158,7 @@
             class=warning
         >
             {#if param.valid.warning}
-                {param.valid.warning}
+                {@html marked( param.valid.warning || "")}
             {/if}
         </div>
     </div>
@@ -203,5 +204,6 @@
         grid-column-end: end;
         justify-self: end;
         margin-top: -.25rem;
+        text-align: right;
     }
 </style>
