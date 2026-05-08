@@ -26,7 +26,9 @@
     let params = new URLSearchParams(location.search)
     // if given a file to open, open it
     if (params.get("fileOpen")) {
-        current.openFile(params.get("fileOpen"))
+        params.get("fileOpen").split(",").forEach(
+            item => current.openFile(item)
+        )
     }
 
     // listen for messages from other windows
@@ -38,6 +40,17 @@
     }
 
     $effect(updateLocale)
+
+    // keep app state up to date with open files
+    if (electron) {
+        $effect(() => {
+            electron.state.updateFrame(
+                {
+                    files: Object.values(current.pages).map(page => page.file?.file)
+                }
+            )
+        })
+    }
 
 </script>
 
