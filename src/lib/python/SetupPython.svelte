@@ -28,9 +28,11 @@
     })
 </script>
 
-{#if !prefs.params.environmentsFolder.val}
-    <ChooseDirectory />
-{/if}
+{#await prefs.ready then ready}
+    {#if !prefs.params.environmentsFolder.val}
+        <ChooseDirectory />
+    {/if}
+{/await}
 
 <MessageArray>
     {#await status.ready.promise}
