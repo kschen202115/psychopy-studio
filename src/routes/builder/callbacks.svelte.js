@@ -4,7 +4,7 @@ import { current } from './globals.svelte.js';
 import path from "path-browserify";
 import { newWindow, openIn, showDevTools } from "$lib/utils/views.svelte"
 import { browseFileOpen, browseFileSave, parsePath } from "$lib/utils/files.js";
-import { Routine, HasParams } from "$lib/experiment"
+import { Routine, Component, HasParams } from "$lib/experiment"
 import { prefs } from "$lib/preferences.svelte";
 import { translate } from "$lib/translation";
 
@@ -195,6 +195,41 @@ export async function pasteRoutine() {
     }
     // add to experiment and select
     current.experiment.routines[element.name] = current.routine = element
+}
+
+/**
+ * Copy the given Component to the app's (inter-window) clipboard
+ * 
+ * @param {HasParams} component Component to copy
+ */
+export function copyComponent(component) {
+    // store JSON representation in clipboard
+    current.clipboard.set(component.toJSON())
+}
+
+/**
+ * Paste a Component from the (inter-window) clipboard into the given Routine at the given position
+ * 
+ * @param {Routine} routine Routine to paste into
+ * @param {integer} index Index in the Routine to insert the Component
+ */
+export async function pasteComponent(routine, index) {
+    let clipboard = await current.clipboard.get()
+    // abort if nothing is in the clipboard
+    if (!clipboard) {
+        return
+    }
+    // create element from clipboard
+    let element = new Component(clipboard.tag)
+    element.fromJSON(clipboard)
+    // make name valid
+    let name = current.experiment.resolveNameConflict(element.name)
+    // set name
+    if (element.params['name']) {
+        element.params['name'].val = name
+    }
+    // add to Routine
+    routine.insertComponent(element, index)
 }
 
 /* Run */
