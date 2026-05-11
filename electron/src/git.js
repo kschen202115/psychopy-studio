@@ -324,6 +324,13 @@ export async function newProject(details, folder, username) {
         fs, 
         dir: folder 
     })
+    // setup merge strategy
+    await git.setConfig({
+        fs,
+        dir: folder,
+        path: "pull.rebase",
+        value: false
+    })
     // add remote
     await git.addRemote({
         fs,
