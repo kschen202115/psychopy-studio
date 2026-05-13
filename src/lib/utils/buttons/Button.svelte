@@ -1,6 +1,8 @@
 <script>
     import Icon from "$lib/utils/icons/Icon.svelte";
     import Tooltip from "$lib/utils/tooltip/Tooltip.svelte";
+    import { MessageArray, Message } from "$lib/utils/message";
+    import { MessageDialog } from "$lib/utils/dialog";
     import { translate } from "$lib/translation";
 
     let {

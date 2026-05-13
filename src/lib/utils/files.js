@@ -63,6 +63,10 @@ export async function browseFileOpen(
 ) {
     let output
     if (electron) {
+        // sanitize filepath if on Windows (surprised that electron doesn't do this for us...)
+        if (await electron.platform() === "win32") {
+            defaultPath = defaultPath.replaceAll("/", "\\")
+        }
         // get file path from electron dialog
         let file = await electron.files.openDialog({
             properties: ["openFile", "createDirectory"],

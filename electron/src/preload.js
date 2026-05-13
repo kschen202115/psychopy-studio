@@ -125,11 +125,13 @@ const git = {
   listGroups: (username) => ipcRenderer.invoke("git.listGroups", username).then(resp => resp),
   getUserInfo: (username) => ipcRenderer.invoke("git.getUserInfo", username).then(resp => resp),
   getRemote: (folder, user) => ipcRenderer.invoke("git.getRemote", folder, user).then(resp => resp),
-  getProjectInfo: (group, name, username) => ipcRenderer.invoke("git.getProjectInfo", group, name, username).then(resp => resp),
+  getProjectInfo: (details, username) => ipcRenderer.invoke("git.getProjectInfo", details, username).then(resp => resp),
+  clone: (details, username) => ipcRenderer.invoke("git.clone", details, username).then(resp => resp),
   pull: (folder, user, force=true) => ipcRenderer.invoke("git.pull", folder, user, force).then(resp => resp),
   stage: (folder) => ipcRenderer.invoke("git.stage", folder).then(resp => resp),
   commit: (message, folder, user) => ipcRenderer.invoke("git.commit", message, folder, user).then(resp => resp),
   push: (folder, user, force=false) => ipcRenderer.invoke("git.push", folder, user, force).then(resp => resp),
-  newProject: (details, folder, user) => ipcRenderer.invoke("git.newProject", details, folder, user).then(resp => resp)
+  newProject: (details, folder, user) => ipcRenderer.invoke("git.newProject", details, folder, user).then(resp => resp),
+  loadProjects: () => ipcRenderer.invoke("git.loadProjects").then(resp => resp),
 }
 contextBridge.exposeInMainWorld('git', git)
