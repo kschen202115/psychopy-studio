@@ -451,6 +451,19 @@ export async function pull(folder, username, force=true) {
     output(`Getting changes from online...`)
     // get auth token
     let token = await users[username].getToken()
+    // set a default merge strategy if none set
+    if (await git.getConfig({
+        fs,
+        dir: folder,
+        path: "pull.rebase"
+    }) === undefined) {
+        await git.setConfig({
+            fs,
+            dir: folder,
+            path: "pull.rebase",
+            value: false
+        })
+    }
     // fetch changes
     await git.fetch({
         fs,
