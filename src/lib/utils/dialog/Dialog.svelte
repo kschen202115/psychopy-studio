@@ -28,6 +28,8 @@
         onclose=() => {},
         /** @prop @type {Boolean} Determines whether the dialog box should shrink to fit its contents */
         shrink=false,
+        /** @prop @type {boolean} Whether or not to include a close button */
+        closable=true,
         /** @interface */
         children=undefined
     } = $props();
@@ -60,21 +62,23 @@
             <label for={id}>{title}</label>
             <div class=gap></div>
             <div class=title-btns>
-                <button 
-                    id=close
-                    onclick={(evt) => {
-                        shown = false;
-                        if (buttons.CANCEL) {
-                            buttons.CANCEL(evt)
-                        }
-                    }}
-                    aria-label={translate("Close")}
-                >
-                    <Icon 
-                        src="/icons/sym-close.svg"
-                        size=.75rem
-                    />
-                </button>
+                {#if closable}
+                    <button 
+                        id=close
+                        onclick={(evt) => {
+                            shown = false;
+                            if (buttons.CANCEL) {
+                                buttons.CANCEL(evt)
+                            }
+                        }}
+                        aria-label={translate("Close")}
+                    >
+                        <Icon 
+                            src="/icons/sym-close.svg"
+                            size=.75rem
+                        />
+                    </button>
+                {/if}
             </div>
         </div>
         <div 

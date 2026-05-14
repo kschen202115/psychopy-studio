@@ -81,13 +81,4 @@
         padding: 1rem;
         box-sizing: border-box;
     }
-    .preview {
-        text-wrap: nowrap;
-        overflow-x: auto;
-        padding: 1rem;
-        box-sizing: border-box;
-        background: var(--base);
-        border: 1px solid var(--overlay);
-        border-radius: .5rem;
-    }
 </style>

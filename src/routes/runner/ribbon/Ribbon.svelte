@@ -70,8 +70,8 @@
             labels={["Pilot", "Run"]} 
             tooltip={current.runlist[current.selection]?.pilotMode ? translate("Experiment will run in pilot mode") : translate("Experiment will run in run mode")}
             bind:value={
-                () => current.runlist[current.selection]?.pilotMode,
-                (value) => current.runlist[current.selection]?.setPilotMode(value)
+                () => !current.runlist[current.selection]?.pilotMode,
+                (value) => current.runlist[current.selection]?.setPilotMode(!value)
             } 
             disabled={current.selection === undefined}
         />

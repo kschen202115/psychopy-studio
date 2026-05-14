@@ -44,6 +44,9 @@ const electron = {
     get: () => ipcRenderer.invoke("electron.clipboard.get").then(resp => resp),
     set: (value) => ipcRenderer.invoke("electron.clipboard.set", value).then(resp => resp)
   },
+  state: {
+    updateFrame: (details) => ipcRenderer.invoke("electron.state.updateFrame", details).then(resp => resp)
+  },
   version: () => ipcRenderer.invoke("electron.version").then(resp => resp),
   platform: () => ipcRenderer.invoke("electron.platform").then(resp => resp),
   quit: () => ipcRenderer.invoke("electron.quit")
@@ -72,6 +75,8 @@ const python = {
     folder: () => ipcRenderer.invoke("python.uv.folder").then(resp => resp),
     executable: () => ipcRenderer.invoke("python.uv.executable").then(resp => resp),
     exists: () => ipcRenderer.invoke("python.uv.exists").then(resp => resp),
+    findDirectory: (option) => ipcRenderer.invoke("python.uv.findDirectory", option).then(resp => resp),
+    setDirectory: (option) => ipcRenderer.invoke("python.uv.setDirectory", option).then(resp => resp),
     install: () => ipcRenderer.invoke("python.uv.install").then(resp => resp),
     makeExecutable: (psychopyVersion, pythonVersion) => ipcRenderer.invoke("python.uv.makeExecutable", psychopyVersion, pythonVersion).then(resp => resp),
     findPython: (version) => ipcRenderer.invoke("python.uv.findPython", version).then(resp => resp),

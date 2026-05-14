@@ -102,11 +102,11 @@
             labels={["Pilot", "Run"]} 
             tooltip={current.pages[current.tab]?.pilotMode ? "Experiment will run in pilot mode" : "Experiment will run in run mode"}
             bind:value={
-                () => current.pages[current.tab]?.pilotMode,
-                (value) => current.pages[current.tab].pilotMode = value
+                () => !current.pages[current.tab]?.pilotMode,
+                (value) => current.pages[current.tab].setPilotMode(!value)
             } 
             disabled={!current.pages[current.tab]}
-        />  
+        />
         
         {#if python?.ready}
             <IconButton 

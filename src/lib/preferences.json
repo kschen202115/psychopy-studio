@@ -192,6 +192,29 @@
                 "enabled": []
             }
         },
+        "environmentsFolder": {
+            "val": null,
+            "valType": "str",
+            "inputType": "choice",
+            "categ": "Application",
+            "updates": null,
+            "allowedUpdates": null,
+            "allowedVals": [
+                "user",
+                "global"
+            ],
+            "allowedLabels": [
+                "User folder",
+                "Shared folder"
+            ],
+            "label": "Python environments",
+            "hint": "Where should we put Python on your machine?",
+            "plugin": null,
+            "depends": {
+                "shown": [],
+                "enabled": []
+            }
+        },
         "locale": {
             "val": "system locale",
             "valType": "str",
