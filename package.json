@@ -1,7 +1,7 @@
 {
 	"name": "psychopy-studio",
 	"author": "Open Science Tools Ltd.",
-	"version": "2026.1.3",
+	"version": "2026.2.0",
 	"description": "Open-source package for creating experiments in behavioral science.",
 	"main": "electron/src/index.cjs",
 	"type": "module",
@@ -11,7 +11,7 @@
 		"productName": "PsychoPy Studio",
 		"executableName": "PsychoPy Studio",
 		"artifactName": "PsychoPy_Studio_${version}.${ext}",
-		"copyright": "Copyright PsychoPy® 2024 Open Science Tools Ltd.",
+		"copyright": "Copyright PsychoPy® 2026 Open Science Tools Ltd.",
 		"asar": true,
 		"publish": [],
 		"directories": {
