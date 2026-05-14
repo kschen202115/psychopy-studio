@@ -459,7 +459,7 @@ export class Experiment {
             args: ["prefs.setDevicesFile", path.join(
                 await electron.paths.user(), "devices.json"
             )]
-        }, 10000).catch(
+        }).catch(
             err => console.error([`Failed to set devices file`, err])
         )
 
