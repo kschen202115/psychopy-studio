@@ -1,6 +1,6 @@
 <script>
     import { getContext } from "svelte";
-    import { Menu, MenuItem, MenuSeparator, SubMenu, isHamburger } from '$lib/utils/menu/frameMenu';
+    import { Menu, MenuItem, MenuSeparator, SubMenu } from '$lib/utils/menu/frameMenu';
     import PrefsDialog from '$lib/dialogs/preferences/PrefsDialog.svelte';
     import ParamsDialog from "$lib/paramCtrls/ParamsDialog.svelte";
     import { FindDialog } from "$lib/dialogs/find";

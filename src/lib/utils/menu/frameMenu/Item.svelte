@@ -2,7 +2,6 @@
     import { electron } from "$lib/globals.svelte";
     import { getContext } from "svelte";
     import { MenuItem } from "..";
-    import { isHamburger } from ".";
 
     let {
         /** @prop @type {string} Label for this menu item */
@@ -50,17 +49,15 @@
     }))
 </script>
 
-{#await isHamburger then hamburger}
-    {#if hamburger}
-        <MenuItem
-            label={label}
-            icon={icon}
-            shortcut={shortcut}
-            onclick={onclick}
-            data={data}
-            close={close}
-            bind:disabled={disabled}
-            submenu={submenu}
-        />
-    {/if}
-{/await}
+{#if !electron}
+    <MenuItem
+        label={label}
+        icon={icon}
+        shortcut={shortcut}
+        onclick={onclick}
+        data={data}
+        close={close}
+        bind:disabled={disabled}
+        submenu={submenu}
+    />
+{/if}
