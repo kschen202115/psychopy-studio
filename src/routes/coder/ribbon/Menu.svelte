@@ -8,6 +8,7 @@
     import { BugReportDlg } from "$lib/dialogs/bugReport";
     import { setupPython } from "$lib/python";
     import { Version } from "$lib/utils/versions";
+    import Demos from "./Demos.svelte";
     import { translate } from "$lib/translation";
 
     import {
@@ -202,6 +203,10 @@
 
         </SubMenu>
     {/if}
+
+    <SubMenu label={translate("Demos")}>
+        <Demos />
+    </SubMenu>
 
     <SubMenu label={translate("Tools")} icon="/icons/btn-hamburger.svg">
         <MenuItem 
