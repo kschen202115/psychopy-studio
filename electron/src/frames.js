@@ -9,9 +9,14 @@ import { prefs } from "./preferences.js";
 import state from "./state.js";
 
 
+// store window objects against their ID
 export var windows = {
   splash: undefined
 };
+// store menus for each window against the window's ID
+export var menus = {
+  splash: undefined
+}
 
 
 export async function newWindow(target = null, show = true, fullscreen = false) {
@@ -39,6 +44,15 @@ export async function newWindow(target = null, show = true, fullscreen = false) 
       return { action: 'deny' }
     }
   )
+  // on mac, we have to setup menu to update on focus (Windows and Linux windows have their own menu)
+  if (process.platform === "darwin") {
+    win.on("focus", evt => {
+      if (menus[win.webContents.id]) {
+        Menu.setApplicationMenu(menus[win.webContents.id])
+      }
+    })
+  }
+  
 
   // load target URL
   let url = new URL(`http://${svelte.address.host}:${svelte.address.port}/${target || ''}`);
@@ -128,6 +142,15 @@ export function setMenu(win, template) {
     setupCallback(entry)
   }
   // create menu from template
-  let menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
+  menus[win.webContents.id] = Menu.buildFromTemplate(template)
+  // apply to the current window
+  if (process.platform === "darwin") {
+    // on Mac, menu has to be set for the whole application when the window gains focus, so set now 
+    // if window has focus, otherwise will set when window gets focus
+    if (win.isFocused()) {
+      Menu.setApplicationMenu(menus[win.webContents.id])
+    }
+  } else {
+    win.setMenu(menus[win.webContents.id])
+  }
 }

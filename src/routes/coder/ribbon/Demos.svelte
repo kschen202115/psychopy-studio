@@ -1,7 +1,6 @@
 <script>
     import { python } from "$lib/globals.svelte";
-    import { SubMenu, MenuItem } from "$lib/utils/menu";
-    import { translate } from "$lib/translation";
+    import { SubMenu, MenuItem } from "$lib/utils/menu/frameMenu";
     import { parsePath } from "$lib/utils/files";
     import { Script } from "$lib/experiment";
     import { getContext } from "svelte";
@@ -53,12 +52,7 @@
 {#await python.liaison.send("app", {
     command: "run",
     args: ["psychopy.demos.coder:listDemos"]
-})}
-    <MenuItem 
-        label={translate("Loading demos...")}
-        disabled
-    />
-{:then demos}
+}) then demos}
     {#each Object.entries(demos) as [label, value]}
         {@render item(label, value)}
     {/each}

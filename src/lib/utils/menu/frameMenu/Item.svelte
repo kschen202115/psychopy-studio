@@ -2,7 +2,6 @@
     import { electron } from "$lib/globals.svelte";
     import { getContext } from "svelte";
     import { MenuItem } from "..";
-    import { isHamburger } from ".";
 
     let {
         /** @prop @type {string} Label for this menu item */
@@ -28,38 +27,37 @@
         submenu=undefined
     } = $props()
 
+    // generate a uniq ID which electron will use to call this button's method
+    let id = $props.id()
     // add self to template
     let template = getContext("template");
     template.push({
         label: label,
         enabled: !disabled,
-        click: onclick.name
+        click: id
     })
     let index = template.length - 1
     // listen for calls from backend
-    electron.windows.listen(`menu:${onclick.name}`, evt => {
-        evt.preventDefault()
+    electron.windows.listen(`menu:${id}`, evt => {
         onclick(evt, data)
     })
 
     $effect(() => Object.assign(template[index] || {}, {
         label: label,
         enabled: !disabled,
-        click: onclick.name
+        click: id
     }))
 </script>
 
-{#await isHamburger then hamburger}
-    {#if hamburger}
-        <MenuItem
-            label={label}
-            icon={icon}
-            shortcut={shortcut}
-            onclick={onclick}
-            data={data}
-            close={close}
-            bind:disabled={disabled}
-            submenu={submenu}
-        />
-    {/if}
-{/await}
+{#if !electron}
+    <MenuItem
+        label={label}
+        icon={icon}
+        shortcut={shortcut}
+        onclick={onclick}
+        data={data}
+        close={close}
+        bind:disabled={disabled}
+        submenu={submenu}
+    />
+{/if}

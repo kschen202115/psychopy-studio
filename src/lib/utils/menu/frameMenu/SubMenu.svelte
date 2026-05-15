@@ -1,7 +1,7 @@
 <script>
+    import { electron } from "$lib/globals.svelte";
     import { getContext, setContext } from "svelte";
     import { SubMenu } from "..";
-    import { isHamburger } from ".";
 
     let {
         /** @prop @type {string} Label for this menu item */
@@ -25,18 +25,16 @@
     setContext("template", template[template.length - 1].submenu)
 </script>
 
-{#await isHamburger then hamburger}
-    {#if hamburger}
-        <SubMenu
-            label={label}
-            icon={icon}
-            data={data}
-            bind:disabled={disabled}
-        >
-            {@render children?.()}
-        </SubMenu>
-    {:else}
+{#if !electron}
+    <SubMenu
+        label={label}
+        icon={icon}
+        data={data}
+        bind:disabled={disabled}
+    >
         {@render children?.()}
-    {/if}
-{/await}
+    </SubMenu>
+{:else}
+    {@render children?.()}
+{/if}
 

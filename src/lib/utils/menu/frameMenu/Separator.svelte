@@ -1,7 +1,7 @@
 <script>
+import { electron } from "$lib/globals.svelte";
     import { getContext } from "svelte";
     import { MenuSeparator } from "..";
-    import { isHamburger } from ".";
 
     // add separator to backend
     let template = getContext("template")
@@ -11,8 +11,6 @@
 
 </script>
 
-{#await isHamburger then hamburger}
-    {#if hamburger}
-        <MenuSeparator />
-    {/if}
-{/await}
+{#if !electron}
+    <MenuSeparator />
+{/if}
