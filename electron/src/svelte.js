@@ -2,6 +2,7 @@ import proc from "child_process";
 import { app } from "electron";
 import logging from "./logging.js";
 import { isDev } from "./version.js";
+import path from "node:path";
 
 // details about the Svelte instance
 export var details = {
@@ -136,7 +137,7 @@ export async function startSvelte() {
     async function startSvelteStatic() {
         logging.log(`Running: ${process.argv.join(" | ")}`)
         // create an "express" server
-        let express = await import('express');
+        let { default: express } = await import('express');
         let server = express();
         // point to the static files
         server.use(
@@ -145,7 +146,7 @@ export async function startSvelte() {
         // setup API
         setupAPI()
         // listen for messages
-        app.listen(details.address.port, details.address.host, () => {
+        server.listen(details.address.port, details.address.host, evt => {
             // on first message, mark as ready
             details.ready.resolve();
             // log

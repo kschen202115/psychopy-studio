@@ -202,7 +202,7 @@ process.on('SIGTERM', app.quit);
 // save app state before closing windows on quit
 app.on("before-quit", (evt, code) => saveState());
 // make sure the Svelte process is killed on exit
-app.on("quit", (evt, code) => svelte.process.kill(0));
+app.on("quit", (evt, code) => svelte.process?.kill?.(0));
 
 
 /* handlers which can be invoked by electron */
