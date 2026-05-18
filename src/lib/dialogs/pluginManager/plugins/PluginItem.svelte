@@ -29,7 +29,7 @@
     )
 
     let selectedVersion = $state.raw(
-        siblings.installed[plugin.pipname]
+        siblings.installed[$state.snapshot(plugin.pipname)]
     )
 
     async function install(version=undefined) {
@@ -259,72 +259,4 @@
         gap: .5rem;
         margin: 1rem 0;
     }
-    .version-ctrl {
-        display: flex;
-        flex-direction: row;
-        gap: .5rem;
-        width: 100%;
-    }
-    #version-ctrl {
-        flex-grow: 1;
-    }
-
-/*     
-
-    .plugin-install-btn {
-        margin-top: .5rem;
-        grid-row-start: button;
-        grid-column-start: start;
-    }
-    .plugin-item {
-        border: 1px solid var(--overlay);
-        border-radius: .5rem;
-        padding: 1rem;
-        box-sizing: border-box;
-        background-color: var(--mantle);
-    }
-    .plugin-item.selected {
-        border: 1px solid var(--blue);
-    }
-    .plugin-item.installed {
-        background-color: var(--base)
-    }
-
-    .plugin-name {
-        font-weight: bold;
-        text-decoration: none;
-        color: var(--text);
-        font-size: 1.25rem;
-        grid-column: start / button;
-        text-align: left;
-    }
-    .plugin-item .plugin-name {
-        font-size: 1.25rem;
-    }
-    .plugin-page .plugin-name {
-        font-size: 2rem;
-    }
-
-    .plugin-pipname {
-        grid-column: start / button;
-    }
-
-    .plugin-avatar {
-        border-radius: .5rem;
-        grid-row: start / end;
-    }
-    .plugin-item .plugin-avatar {
-        width: 4rem;
-    }
-    .plugin-page .plugin-avatar {
-        width: 8rem;
-    }
-
-    .plugin-page {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        gap: .5rem;
-        width: 45rem;
-    } */
 </style>

@@ -69,13 +69,6 @@
         justify-content: center;
         background-color: var(--mantle);
     }
-
-    .message {
-        display: flex;
-        flex-direction: column;
-        gap: .5rem;
-        align-items: center;
-    }
     .background {
         position: absolute;
         width: 120%;

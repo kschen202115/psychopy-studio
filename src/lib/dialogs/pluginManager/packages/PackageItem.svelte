@@ -12,7 +12,7 @@
     } = $props()
 
     let siblings = getContext("siblings");
-    siblings.all.push(name)
+    siblings.all.push($state.snapshot(name))
 
     $effect(() => {
         if (siblings.selected === undefined) {

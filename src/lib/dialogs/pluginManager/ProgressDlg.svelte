@@ -9,7 +9,7 @@
         shown=$bindable()
     } = $props()
     let output = $state.raw("")
-    electron.windows.listen(tag, (evt, value) => output += value)
+    electron.windows.listen($state.snapshot(tag), (evt, value) => output += value)
 </script>
 
 <MessageDialog
