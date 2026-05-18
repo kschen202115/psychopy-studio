@@ -124,7 +124,11 @@
                 icon="/icons/btn-{current.pages[current.tab]?.pilotMode ? "pilot" : "run"}py.svg" 
                 label={current.pages[current.tab]?.pilotMode ? translate("Pilot locally") : translate("Run locally")}
                 onclick={evt => runPython()}
-                disabled={!current.pages[current.tab]?.file?.file || current.pages[current.tab]?.file?.ext !== ".py"}
+                disabled={
+                    !current.pages[current.tab]?.file?.file || 
+                    !current.pages[current.tab]?.file?.parent || 
+                    current.pages[current.tab]?.file?.ext !== ".py"
+                }
                 bind:awaiting={awaiting.runpy}
                 cancel={evt => stopPython()}
                 borderless

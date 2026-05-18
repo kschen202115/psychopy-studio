@@ -1,18 +1,20 @@
 <script>
     import { python } from "$lib/globals.svelte";
     import { SubMenu, MenuItem } from "$lib/utils/menu/frameMenu";
+    import { MessageDialog } from "$lib/utils/dialog";
     import { parsePath } from "$lib/utils/files";
     import { Script } from "$lib/experiment";
     import { getContext } from "svelte";
+    import { translate } from "$lib/translation";
 
     let current = getContext("current")
 
-    function openDemo(file) {
+    async function openDemo(file) {
         // parse path to an object
         file = parsePath(file)
         // create script from file
         let script = new Script(file);
-        script.fromFile(file)
+        await script.fromFile(file)
         // remove file path so it just has a name (forcing "save as" rather than "save")
         script.file.file = script.file.name
         script.file.parent = ""
@@ -22,7 +24,11 @@
         )
         // focus
         current.tab = current.pages.findIndex(item => item.file.file === script.file.file)
+        // show save reminder
+        reminder = true
     }
+
+    let reminder = $state.raw(false)
 </script>
 
 
@@ -57,3 +63,16 @@
         {@render item(label, value)}
     {/each}
 {/await}
+
+
+<MessageDialog
+    title={translate("Reminder")}
+    buttons={{
+        OK: evt => {}
+    }}
+    bind:shown={reminder}
+>
+    {translate(
+        "Click 'Save as...' to save this demo before running"
+    )}
+</MessageDialog>
