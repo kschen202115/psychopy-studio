@@ -18,78 +18,127 @@ export var details = {
 /**
  * Setup API handlers to be called within Svelte
  */
-function setupAPI() {
-    // API routes
-    app.get('/api/plugins', async (req, res) => {
+function setupAPI(server) {
+    /**
+     * Make a GET request
+     * 
+     * @param {string} url URL to call via GET
+     * @param {function} onerror Function to be called if GET fails
+     */
+    async function apiGet(
+        url, 
+        onerror = (code, err) => {}
+    ) {
         try {
-            const response = await fetch('https://psychopy.org/plugins.json');
-            const data = await response.json();
-            res.json(data);
+            // make fetch request
+            return await fetch(
+                url
+            ).then(
+                resp => resp.json()
+            );
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            onerror(500, error)
         }
-    });
+    }
 
-    app.post('/api/report', express.json(), async (req, res) => {
+    /**
+     * Make a POST request
+     * 
+     * @param {string} url URL to call via POST
+     * @param {object} content Content to send in the POST request
+     * @param {function} onerror Function to be called if POST fails
+     * 
+     */
+    async function apiPost(
+        url, 
+        { headers: headers={}, body: body="{}"}, 
+        onerror = (code, err) => {}
+    ) {
         try {
-        const snapshot = req.body;
-        const response = await fetch("https://api.clickup.com/api/v2/list/128673336/task", {
-            method: "POST",
-            headers: {
-            "Authorization": snapshot.token,
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-            name: snapshot.title,
-            description: snapshot.description,
-            priority: snapshot.priority,
-            custom_fields: [
-                { id: "1cc82c18-79c6-470b-aa63-b39a108afe90", value: ["39244b7f-eea7-47d2-8760-418d86dc525d"] },
-                { id: "90ee49a2-01ce-49be-a3bb-c7b12160eb03", value: snapshot.email },
-                { id: "e649173f-4f1a-4275-abff-1e699962eda1", value: snapshot.version.match(/(?<=\w+)\d+$/)?.[0] || "" }
-            ]
-            })
-        });
-        const data = await response.json();
+            // make fetch request
+            return await fetch(
+                url, 
+                {
+                    method: "POST",
+                    headers: headers,
+                    body: body
+                }
+            ).then(
+                resp => resp.json()
+            );
+        } catch (error) {
+            onerror(500, error)
+        }
+    }
 
+    // API for getting plugins list
+    server.get('/api/plugins', async (req, res) => await apiGet(
+        "https://psychopy.org/plugins.json",
+        (code, err) => res.status(500).json({ error: error.message})
+    ));
+    console.log("Mapped API: Get plugins list")
+
+    // API for submitting a bug to clickup from dogfood release
+    server.post('/api/report', async (req, res) => {
+        // post request to clickup to create a task
+        let data = await apiPost(
+            "https://api.clickup.com/api/v2/list/128673336/task",
+            {
+                headers: {
+                    "Authorization": req.body.token,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: req.body.title,
+                    description: req.body.description,
+                    priority: req.body.priority,
+                    custom_fields: [
+                        { id: "1cc82c18-79c6-470b-aa63-b39a108afe90", value: ["39244b7f-eea7-47d2-8760-418d86dc525d"] },
+                        { id: "90ee49a2-01ce-49be-a3bb-c7b12160eb03", value: req.body.email },
+                        { id: "e649173f-4f1a-4275-abff-1e699962eda1", value: req.body.version.match(/(?<=\w+)\d+$/)?.[0] || "" }
+                    ]
+                })
+            },
+            (code, err) => res.status(500).json({ error: error.message})
+        )
+        
+        // post additional requests to add comments with details
         for (let [name, content] of [
-            ["last_app_load.log", snapshot.logs.app],
-            ["liaison.log", snapshot.logs.liaison],
-            ["context.json", JSON.stringify(snapshot.context, undefined, 4)]
+            ["last_app_load.log", req.body.logs.app],
+            ["liaison.log", req.body.logs.liaison],
+            ["context.json", JSON.stringify(req.body.context, undefined, 4)]
         ]) {
-            await fetch(`https://api.clickup.com/api/v2/task/${data.id}/comment`, {
-            method: "POST",
-            headers: {
-                "Authorization": snapshot.token,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                notify_all: false,
-                comment_text: `${name}\n---\n${content}\n`
-            })
-            });
+            await apiPost(
+                `https://api.clickup.com/api/v2/task/${data.id}/comment`,
+                {
+                    headers: {
+                        "Authorization": req.body.token,
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        notify_all: false,
+                        comment_text: `${name}\n---\n${content}\n`
+                    })
+                },
+                (code, err) => res.status(500).json({ error: `Failed to post comment: ${error.message}`})
+            )
         }
-
+        // return what we got back
         res.json(data);
-        } catch (error) {
-        res.status(500).json({ error: error.message });
-        }
     });
+    console.log("Mapped API: Submit a bug report to ClickUp")
 
-    app.get('/api/surveys', async (req, res) => {
-        try {
-        const response = await fetch(`https://pavlovia.org/api/v2/surveys?oauthToken=${req.headers.access}`);
-        const data = await response.json();
-        res.json(data);
-        } catch (error) {
-        res.status(500).json({ error: error.message });
-        }
-    });
+    // API for getting user's surveys
+    server.get('/api/surveys', async (req, res) => await apiGet(
+        `https://pavlovia.org/api/v2/surveys?oauthToken=${req.headers.access}`,
+        (code, err) => res.status(500).json({ error: error.message})
+    ));
+    console.log("Mapped API: Get user's Pavlovia surveys")
 
-    // Handle SPA fallback without wildcard
-    app.use((req, res) => {
+    // handle SPA fallback without wildcard
+    server.use((req, res) => {
         res.sendFile(path.join(import.meta.dirname, '../../dist/index.html'));
     });
 }
@@ -144,7 +193,7 @@ export async function startSvelte() {
             express.static(path.join(import.meta.dirname, '../../dist'))
         );
         // setup API
-        setupAPI()
+        setupAPI(server)
         // listen for messages
         server.listen(details.address.port, details.address.host, evt => {
             // on first message, mark as ready
