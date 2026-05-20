@@ -22,41 +22,52 @@ function setupAPI(server) {
     /**
      * Make a GET request
      * 
+     * @param req Request object passed directly from `server.get`
+     * @param res Response object passed directly from `server.get`
      * @param {string} url URL to call via GET
-     * @param {function} onerror Function to be called if GET fails
      */
     async function apiGet(
-        url, 
-        onerror = (code, err) => {}
+        req, 
+        res,
+        url
     ) {
         try {
             // make fetch request
-            return await fetch(
+            let data = await fetch(
                 url
             ).then(
                 resp => resp.json()
             );
+            // return result
+            res.json(data)
         } catch (error) {
-            onerror(500, error)
+            // return error if this fails
+            res.status(
+                500
+            ).json({
+                error: error.message
+            })
         }
     }
 
     /**
      * Make a POST request
      * 
+     * @param req Request object passed directly from `server.post`
+     * @param res Response object passed directly from `server.post`
      * @param {string} url URL to call via POST
      * @param {object} content Content to send in the POST request
-     * @param {function} onerror Function to be called if POST fails
      * 
      */
     async function apiPost(
+        req, 
+        res,
         url, 
-        { headers: headers={}, body: body="{}"}, 
-        onerror = (code, err) => {}
+        { headers: headers={}, body: body="{}"}
     ) {
         try {
             // make fetch request
-            return await fetch(
+            let data = await fetch(
                 url, 
                 {
                     method: "POST",
@@ -66,15 +77,23 @@ function setupAPI(server) {
             ).then(
                 resp => resp.json()
             );
+            // return result
+            res.json(data)
         } catch (error) {
-            onerror(500, error)
+            // return error if this fails
+            res.status(
+                500
+            ).json({
+                error: error.message
+            })
         }
     }
 
     // API for getting plugins list
     server.get('/api/plugins', async (req, res) => await apiGet(
-        "https://psychopy.org/plugins.json",
-        (code, err) => res.status(500).json({ error: error.message})
+        req, 
+        res,
+        "https://psychopy.org/plugins.json"
     ));
     console.log("Mapped API: Get plugins list")
 
@@ -82,6 +101,8 @@ function setupAPI(server) {
     server.post('/api/report', async (req, res) => {
         // post request to clickup to create a task
         let data = await apiPost(
+            req,
+            res,
             "https://api.clickup.com/api/v2/list/128673336/task",
             {
                 headers: {
@@ -132,8 +153,9 @@ function setupAPI(server) {
 
     // API for getting user's surveys
     server.get('/api/surveys', async (req, res) => await apiGet(
-        `https://pavlovia.org/api/v2/surveys?oauthToken=${req.headers.access}`,
-        (code, err) => res.status(500).json({ error: error.message})
+        req,
+        res,
+        `https://pavlovia.org/api/v2/surveys?oauthToken=${req.headers.access}`
     ));
     console.log("Mapped API: Get user's Pavlovia surveys")
 
@@ -211,7 +233,7 @@ export async function startSvelte() {
 
     
     // start Svelte server
-    if (isDev) {
+    if (!isDev) {
         return await startSvelteDev()
     } else {
         return await startSvelteStatic()
