@@ -104,7 +104,7 @@
 					"type": "file"
 				},
 				{
-					"x": 360,
+					"x": 420,
 					"y": 260,
 					"type": "link",
 					"path": "/Applications"
