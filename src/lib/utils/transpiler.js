@@ -1,10 +1,10 @@
 export function js2py(val) {
     // substitute JS style booleans
     if (val === true || val === "true") {
-        val = "1"
+        val = "True"
     }
     if (val === false || val === "false") {
-        val = "0"
+        val = "False"
     }
     if (val === null) {
         val = "None"
