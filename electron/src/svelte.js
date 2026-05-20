@@ -233,7 +233,7 @@ export async function startSvelte() {
 
     
     // start Svelte server
-    if (!isDev) {
+    if (isDev) {
         return await startSvelteDev()
     } else {
         return await startSvelteStatic()
