@@ -1,6 +1,7 @@
 <script>
     import { Notebook, NotebookPage } from "$lib/utils/notebook";
     import { showWindow } from "$lib/utils/views.svelte";
+    import { DeepLink } from "$lib/dialogs/deepLink";
     import Frame from "$lib/utils/Frame.svelte";
     import Panel from "$lib/utils/Panel.svelte";
     import { PaneGroup, Pane, PaneResizer } from "paneforge";
@@ -188,4 +189,8 @@
     />
     <!-- this will setup a Python instance -->
     <SetupPython />
+    <!-- this will handle opening Pavlovia projects from a URI -->
+    <DeepLink 
+        project={params.get("projectOpen")}
+    />
 </Frame>

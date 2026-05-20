@@ -22,6 +22,9 @@ const { details: svelte, startSvelte } = require("./svelte.js");
 const { prefs, prefsFile } = require("./preferences.js");
 const { default: test } = require('node:test');
 
+// get a single-instance lock
+const lock = app.requestSingleInstanceLock()
+
 // redirect app gubbins to a subfolder so it's distinct from user data
 app.setPath("userData", path.join(app.getPath("appData"), "psychopy4", ".node"))
 
@@ -38,10 +41,13 @@ function onFileOpen(evt, file) {
     // do nothing if no file
     return
   }
-  if (file.endsWith(".psyexp")) {
+  if (file.startsWith("pavlovia://")) {
+    params = file.match(/pavlovia\:\/\/(?<group>.*?)\/(?<name>.*?)$/).groups
+    newWindow(`runner?projectOpen=${params.group}/${params.name}`, true, false, [800, 600])
+  } else if (file.endsWith(".psyexp")) {
     // open psyexp in Builder
     newWindow(`builder?fileOpen=${file}`, true, false)
-  } else if (startFile.endsWith(".psyrun")) {
+  } else if (file.endsWith(".psyrun")) {
     // open psyrun in Runner
     newWindow(`runner?fileOpen=${file}`, true, false)
   } else {
@@ -50,6 +56,25 @@ function onFileOpen(evt, file) {
   }
 }
 app.on("open-file", onFileOpen)
+
+// mark self as default opener for URI links
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('pavlovia', process.execPath, [path.resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('pavlovia')
+}
+// handle when a second instance is created via URI
+if (!lock) {
+  app.quit()
+} else {
+  if (process.platform === "darwin") {
+    app.on('open-url', (evt, url) => onFileOpen(evt, url))
+  } else {
+    app.on('second-instance', (evt, cmd, cd) => onFileOpen(evt, cmd.pop()) )
+  }
+}
 
 var started = false
 

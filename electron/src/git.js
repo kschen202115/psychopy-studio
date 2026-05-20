@@ -91,6 +91,8 @@ class User {
 
 // object storing authentication info for users against their username
 var users = {};
+// object storing file paths of known projects on this machine
+var projects = {};
 
 
 /**
@@ -297,6 +299,66 @@ export function clearUsers() {
 }
 
 
+/**
+ * Load known projects from JSON file in the user folder
+ */
+export function loadProjects() {
+    // get path to pavlovia projects file
+    let folder = path.join(app.getPath("appData"), "psychopy4", "pavlovia")
+    let file = path.join(folder, "projects.json")
+    // make sure it exists
+    if (!fs.existsSync(folder)) {
+        fs.mkdirSync(folder, { recursive: true })
+    }
+    if (!fs.existsSync(file)) {
+        saveProjects()
+    }
+    // read file
+    let content = fs.readFileSync(file, { encoding: 'utf8' })
+    // parse as JSON
+    projects = JSON.parse(content)
+    // check that each project still exists
+    for (let key of Object.keys(projects)) {
+        if (!fs.existsSync(projects[key])) {
+            // remove any which don't exist anymore
+            delete projects[key]
+        }
+    }
+    // save filtered projects
+    saveProjects()
+
+    return projects
+}
+
+/**
+ * Save known projects to a JSON file in the user folder
+ */
+export function saveProjects() {
+    // get path to pavlovia projects file
+    let folder = path.join(app.getPath("appData"), "psychopy4", "pavlovia")
+    let file = path.join(folder, "projects.json")
+    // make sure folder exists
+    if (!fs.existsSync(folder)) {
+        fs.mkdirSync(folder, { recursive: true })
+    }
+    // save file
+    let content = JSON.stringify(projects, undefined, 4)
+    // write output
+    fs.writeFileSync(file, content)
+}
+
+
+/**
+ * Clear saved information on all projects
+ */
+export function clearProjects() {
+    // clear projects dict
+    projects = {}
+    // save
+    saveProjects()
+}
+
+
 export async function listGroups(username) {
     // create URL
     let url = new URL(`${server}/api/v4/groups`)
@@ -331,6 +393,9 @@ export async function newProject(details, folder, username) {
         remote: "origin",
         url: `${server}/${details.group}/${details.name}.git`
     })
+    // store reference
+    projects[`${details.group}/${details.name}`] = folder
+    saveProjects()
     // stage and commit all local files
     await stage(folder)
     await commit("Create project", folder, username)
@@ -390,6 +455,13 @@ export async function getRemote(folder, username=undefined) {
     if (!remote) {
         return null
     }
+    // store reference in known projects list
+    loadProjects()
+    let key = remote.match(`${RegExp.escape(server)}\/(.*?).git$`)?.[1]
+    if (key) {
+        projects[key] = folder
+    }
+    saveProjects()
     // parse to a URL
     let url = new URL(remote)
     // apply auth
@@ -443,6 +515,33 @@ export async function getProjectInfo({
     ).then(
         resp => resp?.[0]
     )
+}
+
+
+export async function clone({
+    group: group,
+    name: name,
+    folder: folder
+}, username) {
+    // log
+    output(`Cloning repo ${group}/${name} to ${folder}...`)
+    // get auth token
+    let token = await users[username].getToken()
+    // clone to folder
+    await git.clone({
+        fs,
+        http,
+        dir: folder,
+        url: `${server}/${group}/${name}.git`,
+        onAuth: evt => { 
+            return { username: "oauth2", password: token } 
+        }
+    })
+    // store reference in known projects list
+    projects[`${group}/${name}`] = folder
+    saveProjects()
+    // log
+    output(`Finished cloning repo.`)
 }
 
 
@@ -591,10 +690,12 @@ export const handlers = {
     listGroups: ipcMain.handle("git.listGroups", (evt, username) => listGroups(username)),
     getUserInfo: ipcMain.handle("git.getUserInfo", (evt, username) => users[username]?.profile),
     getRemote: ipcMain.handle("git.getRemote", (evt, folder, user) => getRemote(folder, user)),
-    getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, group, name, username) => getProjectInfo(group, name, username)),
+    getProjectInfo: ipcMain.handle("git.getProjectInfo", (evt, details, username) => getProjectInfo(details, username)),
+    clone: ipcMain.handle("git.clone", (evt, details, username) => clone(details, username)),
     pull: ipcMain.handle("git.pull", (evt, folder, user, force=true) => pull(folder, user, force)),
     stage: ipcMain.handle("git.stage", (evt, folder) => stage(folder)),
     commit: ipcMain.handle("git.commit", (evt, message, folder, user) => commit(message, folder, user)),
     push: ipcMain.handle("git.push", (evt, folder, user, force=false) => push(folder, user, force)),
-    newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => newProject(details, folder, user))
+    newProject: ipcMain.handle("git.newProject", (evt, details, folder, user) => newProject(details, folder, user)),
+    loadProjects: ipcMain.handle("git.loadProjects", (evt) => loadProjects())
 }
