@@ -26,13 +26,15 @@
     let timeout = $state.raw(60000)
 
     function refresh(evt) {
-        profilesPending.devices = python.liaison.send("app", {
-            command: "run",
-            args: [
-                "psychopy.experiment:getDeviceProfiles"
-            ]
-        }).then(
-            resp => Object.assign(profiles.devices, resp)
+        profilesPending.devices.resolve(
+            python.liaison.send("app", {
+                command: "run",
+                args: [
+                    "psychopy.experiment:getDeviceProfiles"
+                ]
+            }).then(
+                resp => Object.assign(profiles.devices, resp)
+            )
         )
     }
 
@@ -83,7 +85,7 @@
             />
         </div>
         <div class=devices-list>
-            {#await profilesPending.devices}
+            {#await profilesPending.devices.promise}
                 <div class=loading-msg>
                     {translate("Getting device backends...")}
                 </div>

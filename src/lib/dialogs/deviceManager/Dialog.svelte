@@ -51,7 +51,7 @@
             return
         }
         // wait for Python to have started so we have necessary class defs
-        await pending.devices
+        await pending.devices.promise
         // get devices file path
         let file = await electron.paths.devices();
         // make sure devices.json exists
