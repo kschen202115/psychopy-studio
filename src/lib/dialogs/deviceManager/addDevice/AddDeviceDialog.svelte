@@ -26,13 +26,15 @@
     let timeout = $state.raw(60000)
 
     function refresh(evt) {
-        profilesPending.devices = python.liaison.send("app", {
-            command: "run",
-            args: [
-                "psychopy.experiment:getDeviceProfiles"
-            ]
-        }).then(
-            resp => Object.assign(profiles.devices, resp)
+        profilesPending.devices.resolve(
+            python.liaison.send("app", {
+                command: "run",
+                args: [
+                    "psychopy.experiment:getDeviceProfiles"
+                ]
+            }).then(
+                resp => Object.assign(profiles.devices, resp)
+            )
         )
     }
 
@@ -83,7 +85,7 @@
             />
         </div>
         <div class=devices-list>
-            {#await profilesPending.devices}
+            {#await profilesPending.devices.promise}
                 <div class=loading-msg>
                     {translate("Getting device backends...")}
                 </div>
@@ -92,7 +94,7 @@
                     {#each Object.values(profiles.devices).filter(profile => profile.device) as backend}
                         {#await python.liaison.send("app", {
                             command: "run",
-                            args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
+                            args: ["psychopy.hardware.manager:DeviceManager.getAvailableDevices", sanitizeImportString(backend.device)]
                         }, timeout)}
                             <PanelButton
                                 label={translate(`Getting {} devices...`).replace("{}", backend.label)}

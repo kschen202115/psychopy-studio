@@ -47,7 +47,7 @@
     <Menu 
         bind:shown={showMenu}
     >
-        {#await pending.loops}
+        {#await pending.loops.promise}
             <MenuItem 
                 label={translate("Loading loops...")}
             />

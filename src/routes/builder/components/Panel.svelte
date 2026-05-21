@@ -74,11 +74,13 @@
      */
     async function refreshProfiles() {
         if (await python?.ready) {
-            profilesPending.components = python.liaison.send("app", {
-                command: "run",
-                args: ["psychopy.experiment:getElementProfiles"]
-            }, 100000).then(
-                data => Object.assign(allProfiles.components, data)
+            profilesPending.components.resolve(
+                python.liaison.send("app", {
+                    command: "run",
+                    args: ["psychopy.experiment:getElementProfiles"]
+                }, 100000).then(
+                    data => Object.assign(allProfiles.components, data)
+                )
             )
         }
     }
@@ -116,7 +118,7 @@
     </div>
     <div class=components>
         {#await python?.ready then ready}
-            {#await profilesPending.components}
+            {#await profilesPending.components.promise}
                 <div class=message>
                     {translate("Loading Components...")}
                 </div>
