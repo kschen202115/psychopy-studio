@@ -135,7 +135,7 @@
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/adapter-static": "^3.0.9",
 		"@sveltejs/kit": "^2.16.0",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"concurrently": "^9.2.1",
 		"electron": "^38.8.6",
 		"electron-builder": "*",
