@@ -94,7 +94,7 @@
                     {#each Object.values(profiles.devices).filter(profile => profile.device) as backend}
                         {#await python.liaison.send("app", {
                             command: "run",
-                            args: [`${sanitizeImportString(backend.device)}.getAvailableDevices`]
+                            args: ["psychopy.hardware.manager:DeviceManager.getAvailableDevices", sanitizeImportString(backend.device)]
                         }, timeout)}
                             <PanelButton
                                 label={translate(`Getting {} devices...`).replace("{}", backend.label)}
