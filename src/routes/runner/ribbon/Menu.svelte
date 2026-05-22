@@ -209,7 +209,7 @@
         {#if electron}
             {#await electron.version() then version}
                 <MenuItem
-                    label={[translate("PsychoPy"), `${version.major}.${version.minor}`].join(" ")}
+                    label="{translate("PsychoPy")} {version}"
                     disabled
                 />
             {/await}
