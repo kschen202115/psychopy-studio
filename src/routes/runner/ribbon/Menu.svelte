@@ -222,7 +222,13 @@
 <PrefsDialog
     bind:shown={show.prefsDlg}
 />
+<DeviceManagerDialog
+    bind:shown={show.deviceMgrDlg}
+/>
 {#if python}
+    <PluginManagerDlg 
+        bind:shown={show.pluginMgr}
+    />
     <PsychoPyBranchDlg 
         bind:shown={show.psychopyBranchDlg}
     />
