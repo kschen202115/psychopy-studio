@@ -209,15 +209,15 @@ export async function startSvelte() {
         logging.log(`Running: ${process.argv.join(" | ")}`)
         // create an "express" server
         let { default: express } = await import('express');
-        let server = express();
+        let expressApp = express();
         // point to the static files
-        server.use(
+        expressApp.use(
             express.static(path.join(import.meta.dirname, '../../dist'))
         );
         // setup API
-        setupAPI(server)
+        setupAPI(expressApp)
         // listen for messages
-        server.listen(details.address.port, details.address.host, evt => {
+        let server = expressApp.listen(details.address.port, details.address.host, evt => {
             // on first message, mark as ready
             details.ready.resolve();
             // log
