@@ -6,7 +6,8 @@
     import { prefs } from "$lib/preferences.svelte"; 
     import { electron, python } from "$lib/globals.svelte";
     import { showDevTools } from "$lib/utils/views.svelte";
-    import { PsychoPyBranchDlg } from "$lib/dialogs/pluginManager";
+    import { DeviceManagerDialog } from "$lib/dialogs/deviceManager/index.js";
+    import { PluginManagerDlg, PsychoPyBranchDlg } from "$lib/dialogs/pluginManager";
     import { setupPython } from "$lib/python";
     import { Version } from "$lib/utils/versions";
     import { translate } from "$lib/translation";
@@ -222,7 +223,13 @@
 <PrefsDialog
     bind:shown={show.prefsDlg}
 />
+<DeviceManagerDialog
+    bind:shown={show.deviceMgrDlg}
+/>
 {#if python}
+    <PluginManagerDlg 
+        bind:shown={show.pluginMgr}
+    />
     <PsychoPyBranchDlg 
         bind:shown={show.psychopyBranchDlg}
     />
