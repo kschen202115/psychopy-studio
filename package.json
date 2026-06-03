@@ -97,16 +97,16 @@
 		},
 		"dmg": {
 			"background": "./static/branding/mac-install-backboard.png",
-			"iconSize": 60,
+			"iconSize": 80,
 			"contents": [
 				{
 					"x": 120,
-					"y": 260,
+					"y": 220,
 					"type": "file"
 				},
 				{
 					"x": 420,
-					"y": 260,
+					"y": 220,
 					"type": "link",
 					"path": "/Applications"
 				}
