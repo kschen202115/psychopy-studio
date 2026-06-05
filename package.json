@@ -150,7 +150,7 @@
 	},
 	"dependencies": {
 		"@lezer/javascript": "^1.5.4",
-		"@lezer/python": "^1.1.18",
+		"@lezer/python": "^1.1.19",
 		"@monaco-editor/loader": "^1.5.0",
 		"@unly/universal-language-detector": "^2.0.3",
 		"express": "^5.1.0",
