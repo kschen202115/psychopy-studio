@@ -1,5 +1,6 @@
 import path from "path-browserify";
 import { electron } from "$lib/globals.svelte"
+import { isWebPath, readWebFS, writeWebFS } from "$lib/webfs/storage.js"
 import { Mime } from 'mime/lite';
 import standardTypes from 'mime/types/standard.js';
 import otherTypes from 'mime/types/other.js';
@@ -13,87 +14,6 @@ mime.define({
     "text/python": ["py"],
     "text/config": ["cfg"],
 })
-
-export const WEBFS_ROOT = "/webfs"
-const WEBFS_DB = "PsychoPyWebFS"
-const WEBFS_STORE = "files"
-
-export function normalizeWebPath(file="") {
-    file = String(file || "").replaceAll("\\", "/").trim()
-    if (file.startsWith(WEBFS_ROOT + "/")) file = file.slice(WEBFS_ROOT.length + 1)
-    if (file.startsWith("/")) file = file.slice(1)
-    return file.split("/").filter(part => part && part !== "." && part !== "..").join("/")
-}
-
-export function browserPath(file="") {
-    const key = normalizeWebPath(file)
-    return WEBFS_ROOT + (key ? `/${key}` : "")
-}
-
-function isWebPath(file) {
-    const value = typeof file === "string" ? file : file?.file
-    return String(value || "").startsWith(WEBFS_ROOT + "/")
-}
-
-async function openWebFS() {
-    return await new Promise((resolve, reject) => {
-        const request = indexedDB.open(WEBFS_DB, 1)
-        request.onupgradeneeded = () => {
-            if (!request.result.objectStoreNames.contains(WEBFS_STORE)) {
-                request.result.createObjectStore(WEBFS_STORE)
-            }
-        }
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-    })
-}
-
-export async function dbWrite(file, content) {
-    const key = normalizeWebPath(file)
-    const db = await openWebFS()
-    const tx = db.transaction(WEBFS_STORE, "readwrite")
-    tx.objectStore(WEBFS_STORE).put(content, key)
-    await new Promise((resolve, reject) => {
-        tx.oncomplete = resolve
-        tx.onerror = () => reject(tx.error)
-    })
-    return key
-}
-
-export async function dbRead(file) {
-    const key = normalizeWebPath(file)
-    const db = await openWebFS()
-    const tx = db.transaction(WEBFS_STORE, "readonly")
-    const request = tx.objectStore(WEBFS_STORE).get(key)
-    return await new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-    })
-}
-
-export async function dbDelete(file) {
-    const key = normalizeWebPath(file)
-    const db = await openWebFS()
-    const tx = db.transaction(WEBFS_STORE, "readwrite")
-    tx.objectStore(WEBFS_STORE).delete(key)
-    await new Promise((resolve, reject) => {
-        tx.oncomplete = resolve
-        tx.onerror = () => reject(tx.error)
-    })
-}
-
-export async function dbList(prefix="") {
-    prefix = normalizeWebPath(prefix)
-    const db = await openWebFS()
-    const tx = db.transaction(WEBFS_STORE, "readonly")
-    const request = tx.objectStore(WEBFS_STORE).getAllKeys()
-    const keys = await new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-    })
-    return keys.filter(key => !prefix || key.startsWith(prefix))
-}
-
 
 /**
  * path-browserify is fine, but it's no pathlib.Path
@@ -228,7 +148,7 @@ export async function readFile(file) {
     }
     // load content from file
     if (isWebPath(file)) {
-        return await dbRead(file.file)
+        return await readWebFS(file.file)
     } else if (electron) {
          return await electron.files.load(file.file)
     } else {
@@ -244,9 +164,9 @@ export async function writeFile(file, content) {
     }
     // write content to file
     if (isWebPath(file)) {
-        await dbWrite(file.file, content)
+        await writeWebFS(file.file, content)
     } else if (electron) {
-        electron.files.save(
+        await electron.files.save(
             file.file, 
             content
         )
@@ -254,8 +174,8 @@ export async function writeFile(file, content) {
         // get file writable from handle
         let writable = await file.handle.createWritable();
         // write to file
-        writable.seek(0);
-        writable.write(content);
-        writable.close();
+        await writable.seek(0);
+        await writable.write(content);
+        await writable.close();
     }
 }

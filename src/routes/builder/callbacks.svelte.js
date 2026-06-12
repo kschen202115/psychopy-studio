@@ -266,6 +266,12 @@ export async function compilePython() {
 }
 
 export async function compileJS() {
+    // Browser-only exports are handled by the isolated WebFS layer in the
+    // Builder ribbon. Desktop/Electron compile keeps using PsychoPy's normal
+    // writeScript path.
+    if (!python) {
+        return
+    }
     // if no file, save as
     if (current.experiment.file === undefined) {
         await file_save_as()

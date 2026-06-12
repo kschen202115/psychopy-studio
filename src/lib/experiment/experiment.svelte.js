@@ -1,7 +1,7 @@
 import { devices } from "$lib/globals.svelte";
 import { python, electron } from "$lib/globals.svelte";
 import path from "path-browserify";
-import { parsePath } from "$lib/utils/files";
+import { parsePath, readFile, writeFile } from "$lib/utils/files";
 import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
 import { Component } from "./component.svelte";
@@ -389,13 +389,7 @@ export class Experiment {
             file = parsePath(file)
         }
         // read text content from file
-        let content
-        if (electron) {
-            content = await electron.files.load(file.file)
-        } else {
-            // without electron, file needs to have a handle (from a UI interaction)
-            content = await file.handle.text()
-        }
+        let content = await readFile(file)
         // load from content
         this.fromXML(content)
         // store file
@@ -411,19 +405,7 @@ export class Experiment {
         // make human readable
         content = xmlFormat(content)
         // write file
-        if (electron) {
-            await electron.files.save(
-                $state.snapshot(file.file), 
-                content
-            )
-        } else {
-            // get file writable from handle
-            file.writable = await file.handle.createWritable();
-            // write to file
-            file.writable.seek(0);
-            file.writable.write(content);
-            file.writable.close();
-        }
+        await writeFile($state.snapshot(file), content)
         // if indicated in exp settings, export JS
         if (this.settings.params['exportHTML'].val === "on Save") {
             this.writeScript("PsychoJS")

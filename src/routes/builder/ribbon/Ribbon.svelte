@@ -31,6 +31,8 @@
     import MonitorCenterDlg from '$lib/dialogs/monitorCenter/MonitorCenterDlg.svelte';
     import PavloviaSync from "$lib/pavlovia/Sync.svelte";
     import { translate } from "$lib/translation";
+    import ExportDialog from "$lib/webfs/ExportDialog.svelte";
+    import WebFSFileManager from "$lib/webfs/FileManager.svelte";
 
     let current = getContext("current");
 
@@ -38,7 +40,9 @@
         settingsDlg: false,
         findDlg: false,
         deviceMgrDlg: false,
-        monitorCenterDlg: false
+        monitorCenterDlg: false,
+        webExportDlg: false,
+        webfsManager: false
     })
 
     let awaiting = $state({
@@ -193,6 +197,24 @@
         {/if}
     </RibbonSection>
 
+    {#if !electron}
+        <RibbonSection label={translate("Browser export")} icon="/icons/rbn-browser.svg">
+            <IconButton
+                icon="/icons/btn-compilejs.svg"
+                label={translate("Export official browser files to WebFS")}
+                onclick={(evt) => show.webExportDlg = true}
+                disabled={current.experiment === null}
+                borderless
+            />
+            <IconButton
+                icon="/icons/btn-open.svg"
+                label={translate("Manage WebFS export files")}
+                onclick={(evt) => show.webfsManager = true}
+                borderless
+            />
+        </RibbonSection>
+    {/if}
+
     {#if python?.ready}
         <RibbonSection label={translate("Desktop")} icon="/icons/rbn-desktop.svg">
             <IconButton 
@@ -293,6 +315,14 @@
         {/if}
     </RibbonSection>
 </Ribbon>
+
+<ExportDialog
+    experiment={current.experiment}
+    bind:shown={show.webExportDlg}
+/>
+<WebFSFileManager
+    bind:shown={show.webfsManager}
+/>
 
 <style>
     .padded {
