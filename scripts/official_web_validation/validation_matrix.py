@@ -266,6 +266,7 @@ def check_backend_imports(core_src: Path) -> CheckResult:
         require(importlib.util.find_spec("websockets") is not None, "websockets package is not importable")
         require((core_src / "psychopy" / "experiment").exists(), f"official core source missing experiment package: {core_src}")
         require(backend.temp_path("/webfs/nested/demo.psyexp").name == "demo.psyexp", "temp_path did not isolate browser path to basename")
+        require(backend.temp_path("https://app.local/webfs/nested/demo.js").name == "demo.js", "temp_path did not isolate URL /webfs path to basename")
         return CheckResult("backend import/path isolation", True, f"core={core_src}")
     except Exception as exc:
         return CheckResult("backend import/path isolation", False, str(exc))

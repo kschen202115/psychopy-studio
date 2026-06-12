@@ -1,60 +1,90 @@
 #!/usr/bin/env python3
 """Official PsychoPy backend glue for PsychoPy Studio Web.
 
-This module intentionally delegates Builder semantics to PsychoPy's official
-Python code. It should stay thin: request parsing, path isolation, JSON-safe
-serialization, and calls into official `psychopy.experiment` APIs.
+This module intentionally stays thin. It validates request payloads, isolates
+browser-supplied paths, serializes JSON-safe responses, and delegates Builder
+semantics to PsychoPy's official ``psychopy.experiment`` and compiler APIs.
 """
 
 from __future__ import annotations
 
 import asyncio
+import base64
+import binascii
+import contextlib
+import io
 import json
 import logging
 import os
+import re
 import sys
 import tempfile
 import traceback
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import urlparse
 
 import websockets
 
 CORE_SRC = Path(os.environ.get("PSYCHOPY_CORE_SRC", "/root/.openclaw/workspace/psychopy-core-src"))
 PORT = int(os.environ.get("PSYCHOPY_WEB_BACKEND_PORT", "8002"))
 HOST = os.environ.get("PSYCHOPY_WEB_BACKEND_HOST", "0.0.0.0")
+TEMP_PREFIX = "psychopy-official-web-"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("OfficialPsychoPyWebBackend")
 
+_SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._ -]+")
+_BROWSER_SCHEMES = ("webfs:", "browser:", "indexeddb:", "blob:")
+_BROWSER_ROOTS = ("/webfs/", "webfs/")
+
+
+class OfficialBackendError(RuntimeError):
+    """Explicit, JSON-friendly backend error."""
+
+    def __init__(self, code: str, message: str, **details: Any) -> None:
+        super().__init__(message)
+        self.code = code
+        self.details = details
+
+    def as_dict(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {"code": self.code, "message": str(self)}
+        if self.details:
+            payload["details"] = json_safe(self.details)
+        return payload
+
 
 def ensure_core_path() -> None:
-    if CORE_SRC.exists() and str(CORE_SRC) not in sys.path:
+    """Make the official PsychoPy source importable, or fail explicitly."""
+    if not CORE_SRC.exists():
+        raise OfficialBackendError(
+            "psychopy-core-src-missing",
+            "Official PsychoPy source directory was not found",
+            coreSrc=str(CORE_SRC),
+            envVar="PSYCHOPY_CORE_SRC",
+        )
+    if str(CORE_SRC) not in sys.path:
         sys.path.insert(0, str(CORE_SRC))
 
 
 def send_ok(msg_id: Any, response: Any) -> str:
-    return json.dumps({"response": response, "evt": {"id": msg_id}})
+    return json.dumps({"response": json_safe(response), "evt": {"id": msg_id}}, ensure_ascii=False)
 
 
-def send_error(msg_id: Any, message: str, **extra: Any) -> str:
-    return json.dumps({"error": {"message": message, **extra}, "evt": {"id": msg_id}})
-
-
-def temp_path(value: str | None, default_name: str = "experiment.psyexp") -> Path:
-    """Map browser/client paths to isolated server temp paths.
-
-    Browser paths like `/webfs/foo.psyexp` are virtual and must never be used as
-    absolute server paths.
-    """
-    root = Path(tempfile.mkdtemp(prefix="psychopy-official-web-"))
-    name = Path(value or default_name).name or default_name
-    path = root / name
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return path
+def send_error(msg_id: Any, exc: BaseException | str, *, include_traceback: bool = True, **extra: Any) -> str:
+    if isinstance(exc, OfficialBackendError):
+        error = exc.as_dict()
+    else:
+        error = {"code": "backend-command-failed", "message": str(exc)}
+    if extra:
+        error.update(json_safe(extra))
+    if include_traceback:
+        error["traceback"] = traceback.format_exc(limit=12)
+    return json.dumps({"error": error, "evt": {"id": msg_id}}, ensure_ascii=False)
 
 
 def json_safe(value: Any) -> Any:
+    """Convert official PsychoPy profiles/results into JSON-safe values."""
     if isinstance(value, Path):
         return str(value)
     if isinstance(value, (list, tuple, set)):
@@ -66,171 +96,519 @@ def json_safe(value: Any) -> Any:
     return str(value)
 
 
-def param_profile(param: Any) -> dict[str, Any]:
-    return {
-        "val": json_safe(getattr(param, "val", None)),
-        "valType": json_safe(getattr(param, "valType", None)),
-        "inputType": json_safe(getattr(param, "inputType", None)),
-        "categ": json_safe(getattr(param, "categ", None)),
-        "updates": json_safe(getattr(param, "updates", None)),
-        "allowedUpdates": json_safe(getattr(param, "allowedUpdates", None)),
-        "allowedVals": json_safe(getattr(param, "allowedVals", [])),
-        "allowedLabels": json_safe(getattr(param, "allowedLabels", [])),
-        "ctrlParams": json_safe(getattr(param, "ctrlParams", {})),
-        "label": json_safe(getattr(param, "label", "")),
-        "hint": json_safe(getattr(param, "hint", "")),
-        "plugin": json_safe(getattr(param, "plugin", None)),
-        "depends": json_safe(getattr(param, "depends", {"shown": [], "enabled": []})),
+def is_browser_virtual_path(value: str | None) -> bool:
+    """Return whether a path names browser/WebFS storage, not server storage."""
+    if not value:
+        return False
+    normalized = str(value).strip().replace("\\", "/").lower()
+    if normalized.startswith(("http://", "https://")):
+        parsed = urlparse(normalized)
+        normalized = parsed.path or normalized
+    if normalized.startswith(_BROWSER_SCHEMES):
+        return True
+    if normalized in {"/webfs", "webfs"} or normalized.startswith(_BROWSER_ROOTS):
+        return True
+    # Browser file inputs commonly expose this placeholder on Windows.
+    if normalized.startswith("c:/fakepath/"):
+        return True
+    return False
+
+
+def safe_leaf_name(value: str | None, default_name: str) -> str:
+    """Extract a harmless filename from a client/browser path.
+
+    The backend never treats `/webfs/...`, browser fake paths, or user supplied
+    absolute paths as server paths. Only a sanitized leaf name is preserved for
+    official PsychoPy's filename-sensitive code.
+    """
+    raw = str(value or default_name).strip()
+    raw = raw.split("?", 1)[0].split("#", 1)[0].replace("\\", "/").rstrip("/")
+    name = PurePosixPath(raw).name or default_name
+    name = name.replace("\x00", "")
+    name = _SAFE_NAME_RE.sub("_", name).strip(" .")
+    if not name or name in {".", ".."}:
+        name = default_name
+    default_suffix = Path(default_name).suffix
+    if default_suffix and "." not in name:
+        name = f"{name}{default_suffix}"
+    return name[:180]
+
+
+def temp_path(value: str | None, default_name: str = "experiment.psyexp", *, root: Path | None = None) -> Path:
+    """Map a client path to an isolated server temp path.
+
+    Browser/WebFS paths are virtual client storage and must never be used as
+    server filesystem paths. This helper deliberately keeps WebFS separate by
+    preserving only a sanitized filename inside a fresh temp directory.
+    """
+    root = root or Path(tempfile.mkdtemp(prefix=TEMP_PREFIX))
+    path = root / safe_leaf_name(value, default_name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def safe_relative_path(value: str) -> Path:
+    """Sanitize a resource path for materializing browser-provided sidecars."""
+    raw = str(value).strip().split("?", 1)[0].split("#", 1)[0].replace("\\", "/")
+    lowered = raw.lower()
+    if lowered.startswith("webfs://"):
+        raw = raw[len("webfs://"):]
+    elif lowered.startswith("webfs:"):
+        raw = raw[len("webfs:"):]
+    if raw.lower().startswith("/webfs/"):
+        raw = raw[len("/webfs/"):]
+    elif raw.lower() == "/webfs":
+        raw = ""
+
+    parts: list[str] = []
+    for part in PurePosixPath(raw).parts:
+        if part in {"", ".", "..", "/"} or part.endswith(":"):
+            continue
+        cleaned = _SAFE_NAME_RE.sub("_", part.replace("\x00", "")).strip(" .")
+        if cleaned:
+            parts.append(cleaned[:120])
+    if not parts:
+        raise OfficialBackendError("invalid-resource-path", "Resource path did not contain a usable filename", path=value)
+    return Path(*parts)
+
+
+def materialize_resources(root: Path, resources: Any) -> list[str]:
+    """Write browser-provided resource contents into the isolated temp tree.
+
+    Resources are optional and intentionally copy-by-value. The backend does not
+    dereference WebFS paths; callers must send content if official PsychoPy needs
+    sidecar files such as conditions spreadsheets or media.
+    """
+    if not resources:
+        return []
+    if isinstance(resources, dict):
+        items = [{"path": key, "content": value} for key, value in resources.items()]
+    elif isinstance(resources, list):
+        items = resources
+    else:
+        raise OfficialBackendError(
+            "invalid-resources-payload",
+            "resources must be a mapping or list of resource descriptors",
+            receivedType=type(resources).__name__,
+        )
+
+    written: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            raise OfficialBackendError("invalid-resource", "Each resource must be an object", resource=json_safe(item))
+        rel = safe_relative_path(str(item.get("path") or item.get("name") or ""))
+        dest = root / rel
+        if not dest.resolve().is_relative_to(root.resolve()):
+            raise OfficialBackendError("unsafe-resource-path", "Resource path escaped the isolated temp root", path=str(rel))
+
+        if "base64" in item:
+            try:
+                payload = base64.b64decode(str(item["base64"]), validate=True)
+            except (binascii.Error, ValueError) as exc:
+                raise OfficialBackendError("invalid-resource-base64", "Resource base64 content is invalid", path=str(rel)) from exc
+        elif "bytes" in item:
+            try:
+                payload = bytes(item["bytes"])
+            except (TypeError, ValueError) as exc:
+                raise OfficialBackendError("invalid-resource-bytes", "Resource bytes content is invalid", path=str(rel)) from exc
+        else:
+            payload = str(item.get("content", item.get("text", ""))).encode("utf-8")
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(payload)
+        written.append(str(rel))
+    return written
+
+
+def error_result(mode: str, exc: BaseException, **extra: Any) -> dict[str, Any]:
+    if isinstance(exc, OfficialBackendError):
+        error = exc.as_dict()
+    else:
+        error = {"code": f"{mode}-failed", "message": f"{type(exc).__name__}: {exc}"}
+    result: dict[str, Any] = {
+        "ok": False,
+        "mode": mode,
+        "blocker": error["message"],
+        "error": error,
+        **json_safe(extra),
     }
+    if not isinstance(exc, OfficialBackendError):
+        result["traceback"] = traceback.format_exc(limit=12)
+    return result
 
 
 def official_component_profiles() -> dict[str, Any]:
+    """Delegate element profiles to official psychopy.experiment."""
     ensure_core_path()
-    from psychopy import experiment
-    from psychopy.experiment import components
-
-    exp = experiment.Experiment()
-    profiles: dict[str, Any] = {}
-    for name, cls in components.getAllComponents(fetchIcons=False).items():
-        # SettingsComponent is already represented by Experiment.settings and
-        # does not share the normal Component constructor signature.
-        if name == "SettingsComponent":
-            continue
-        try:
-            instance = cls(exp=exp, parentName="trial", name=name.replace("Component", "").lower())
-            profiles[name] = {
-                "__class__": f"{cls.__module__}:{cls.__name__}",
-                "__name__": name,
-                "categories": json_safe(getattr(cls, "categories", getattr(instance, "categories", []))),
-                "targets": json_safe(getattr(cls, "targets", getattr(instance, "targets", []))),
-                "plugin": json_safe(getattr(cls, "plugin", getattr(instance, "plugin", None))),
-                "iconFile": json_safe(getattr(cls, "iconFile", getattr(instance, "iconFile", None))),
-                "tooltip": json_safe(getattr(cls, "tooltip", getattr(instance, "tooltip", ""))),
-                "version": json_safe(getattr(cls, "version", getattr(instance, "version", "0.0.0"))),
-                "beta": json_safe(getattr(cls, "beta", getattr(instance, "beta", False))),
-                "validatorClasses": json_safe(getattr(cls, "validatorClasses", getattr(instance, "validatorClasses", []))),
-                "hidden": json_safe(getattr(cls, "hidden", getattr(instance, "hidden", False))),
-                "params": {key: param_profile(param) for key, param in instance.params.items()},
-            }
-        except Exception:
-            logger.warning("Could not build official component profile for %s", name, exc_info=True)
-    return profiles
+    try:
+        from psychopy.experiment import getElementProfiles
+        return json_safe(getElementProfiles())
+    except Exception as exc:
+        raise OfficialBackendError(
+            "official-element-profiles-failed",
+            f"Official PsychoPy could not build element profiles: {type(exc).__name__}: {exc}",
+            coreSrc=str(CORE_SRC),
+        ) from exc
 
 
 def official_loop_profiles() -> dict[str, Any]:
+    """Delegate loop profiles to official psychopy.experiment."""
     ensure_core_path()
-    from psychopy import experiment
-    from psychopy.experiment import loops
-
-    exp = experiment.Experiment()
-    profiles: dict[str, Any] = {}
-    for cls in [loops.TrialHandler, loops.StairHandler, loops.MultiStairHandler]:
-        instance = cls(exp=exp, name="trials")
-        name = cls.__name__
-        profiles[name] = {
-            "__class__": f"{cls.__module__}:{cls.__name__}",
-            "__name__": name,
-            "targets": ["PsychoPy", "PsychoJS"],
-            "params": {key: param_profile(param) for key, param in instance.params.items()},
-        }
-    return profiles
+    try:
+        from psychopy.experiment import getLoopProfiles
+        return json_safe(getLoopProfiles())
+    except Exception as exc:
+        raise OfficialBackendError(
+            "official-loop-profiles-failed",
+            f"Official PsychoPy could not build loop profiles: {type(exc).__name__}: {exc}",
+            coreSrc=str(CORE_SRC),
+        ) from exc
 
 
-def official_roundtrip_psyexp(psyexp_content: str | None = None, psyexp_path: str | None = None) -> dict[str, Any]:
+def official_device_profiles() -> dict[str, Any]:
+    """Delegate device profiles to official psychopy.experiment."""
     ensure_core_path()
-    from psychopy import experiment
+    try:
+        from psychopy.experiment import getDeviceProfiles
+        return json_safe(getDeviceProfiles())
+    except Exception as exc:
+        raise OfficialBackendError(
+            "official-device-profiles-failed",
+            f"Official PsychoPy could not build device profiles: {type(exc).__name__}: {exc}",
+            coreSrc=str(CORE_SRC),
+        ) from exc
 
+
+def _prepare_psyexp(
+    psyexp_content: str | None,
+    psyexp_path: str | None,
+    *,
+    resources: Any = None,
+) -> tuple[Path, Path, list[str]]:
     if psyexp_content is None:
-        return {"ok": False, "mode": "official-roundtrip", "blocker": "psyexpContent is required"}
-    infile = temp_path(psyexp_path)
-    outfile = infile.with_name(infile.stem + ".official.psyexp")
+        if is_browser_virtual_path(psyexp_path):
+            raise OfficialBackendError(
+                "virtual-psyexp-content-required",
+                "psyexpContent is required because psyexpPath names browser/WebFS storage, not a server file",
+                psyexpPath=psyexp_path,
+            )
+        raise OfficialBackendError(
+            "psyexp-content-required",
+            "psyexpContent is required; the web backend does not read arbitrary client paths",
+            psyexpPath=psyexp_path,
+        )
+    if not isinstance(psyexp_content, str):
+        raise OfficialBackendError(
+            "invalid-psyexp-content",
+            "psyexpContent must be a string containing .psyexp XML",
+            receivedType=type(psyexp_content).__name__,
+        )
+
+    root = Path(tempfile.mkdtemp(prefix=TEMP_PREFIX))
+    resource_paths = materialize_resources(root, resources)
+    infile = temp_path(psyexp_path, default_name="experiment.psyexp", root=root)
+    if infile.suffix.lower() != ".psyexp":
+        infile = infile.with_suffix(".psyexp")
     infile.write_text(psyexp_content, encoding="utf-8")
+    return root, infile, resource_paths
+
+
+def _roundtrip_impl(
+    psyexp_content: str | None,
+    psyexp_path: str | None,
+    *,
+    resources: Any = None,
+) -> dict[str, Any]:
+    ensure_core_path()
+    from psychopy import experiment
+
+    root, infile, resource_paths = _prepare_psyexp(psyexp_content, psyexp_path, resources=resources)
+    outfile = infile.with_name(f"{infile.stem}.official.psyexp")
 
     exp = experiment.Experiment()
     exp.loadFromXML(str(infile))
     exp.saveToXML(str(outfile), makeLegacy=False)
+    if not outfile.exists():
+        raise OfficialBackendError("official-roundtrip-missing-output", "Official saveToXML did not create an output .psyexp", outfile=str(outfile))
+
     return {
         "ok": True,
         "mode": "official-roundtrip",
         "psyexp": outfile.read_text(encoding="utf-8-sig"),
         "input": str(infile),
         "outfile": str(outfile),
+        "paths": {
+            "clientPsyexpPath": psyexp_path,
+            "clientPsyexpPathIsVirtual": is_browser_virtual_path(psyexp_path),
+            "serverInput": str(infile),
+            "serverOutput": str(outfile),
+            "tempRoot": str(root),
+        },
+        "resourceFiles": resource_paths,
     }
 
 
-def compile_psychojs(psyexp_content: str | None = None, psyexp_path: str | None = None, outfile: str | None = None) -> dict[str, Any]:
+def official_roundtrip_psyexp(
+    psyexp_content: str | None = None,
+    psyexp_path: str | None = None,
+    *,
+    resources: Any = None,
+) -> dict[str, Any]:
+    """Load and save .psyexp XML through official PsychoPy."""
+    try:
+        return _roundtrip_impl(psyexp_content, psyexp_path, resources=resources)
+    except Exception as exc:
+        return error_result(
+            "official-roundtrip",
+            exc,
+            paths={
+                "clientPsyexpPath": psyexp_path,
+                "clientPsyexpPathIsVirtual": is_browser_virtual_path(psyexp_path),
+            },
+        )
+
+
+def _compile_official(
+    *,
+    target: str,
+    psyexp_content: str | None,
+    psyexp_path: str | None,
+    outfile: str | None,
+    resources: Any = None,
+) -> dict[str, Any]:
     ensure_core_path()
     from psychopy.scripts.psyexpCompile import compileScript
 
-    roundtrip = official_roundtrip_psyexp(psyexp_content=psyexp_content, psyexp_path=psyexp_path)
-    if not roundtrip.get("ok"):
-        return roundtrip
-
+    roundtrip = _roundtrip_impl(psyexp_content, psyexp_path, resources=resources)
     infile = Path(roundtrip["outfile"])
-    js_out = temp_path(outfile, default_name=infile.with_suffix(".js").name)
-    compileScript(str(infile), version=None, outfile=str(js_out))
+    suffix = ".js" if target == "PsychoJS" else ".py"
+    requested_stem = Path(safe_leaf_name(psyexp_path, "experiment.psyexp")).stem or "experiment"
+    js_out = temp_path(outfile, default_name=f"{requested_stem}{suffix}", root=Path(roundtrip["paths"]["tempRoot"]))
+    if js_out.suffix.lower() != suffix:
+        js_out = js_out.with_suffix(suffix)
 
-    legacy = js_out.with_name(js_out.stem + "-legacy-browsers.js")
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+        if target == "PsychoJS":
+            # Official PsychoPy writes index.html from Settings.writeInitCodeJS
+            # only when the experiment has an HTML output folder. Set that on
+            # the isolated round-tripped experiment object before delegating to
+            # compileScript; do not hand-write PsychoJS or HTML here.
+            from psychopy import experiment
+
+            exp = experiment.Experiment()
+            exp.loadFromXML(str(infile))
+            if "HTML path" in exp.settings.params:
+                exp.settings.params["HTML path"].val = str(js_out.parent)
+            compileScript(exp, version=None, outfile=str(js_out))
+        else:
+            compileScript(str(infile), version=None, outfile=str(js_out))
+
+    if not js_out.exists():
+        raise OfficialBackendError(
+            "official-compile-missing-output",
+            "Official compileScript did not create the requested output file",
+            target=target,
+            outfile=str(js_out),
+        )
+    script = js_out.read_text(encoding="utf-8-sig")
+    if not script.strip():
+        raise OfficialBackendError(
+            "official-compile-empty-output",
+            "Official compileScript created an empty output file",
+            target=target,
+            outfile=str(js_out),
+        )
+
+    legacy = js_out.with_name(f"{js_out.stem}-legacy-browsers.js")
     html = js_out.parent / "index.html"
+    if target == "PsychoJS" and not html.exists():
+        raise OfficialBackendError(
+            "official-html-missing",
+            "Official PsychoJS compile did not create index.html",
+            outfile=str(js_out),
+            expectedHtml=str(html),
+        )
+
     return {
         "ok": True,
         "mode": "official-compileScript",
+        "target": target,
         "psyexpPath": str(infile),
         "outfile": str(js_out),
-        "script": js_out.read_text(encoding="utf-8-sig") if js_out.exists() else "",
-        "legacyScript": legacy.read_text(encoding="utf-8-sig") if legacy.exists() else None,
-        "html": html.read_text(encoding="utf-8-sig") if html.exists() else None,
+        "script": script,
+        "legacyScript": legacy.read_text(encoding="utf-8-sig") if target == "PsychoJS" and legacy.exists() else None,
+        "html": html.read_text(encoding="utf-8-sig") if target == "PsychoJS" and html.exists() else None,
         "psyexp": roundtrip.get("psyexp"),
+        "paths": {
+            **roundtrip["paths"],
+            "clientOutfile": outfile,
+            "clientOutfileIsVirtual": is_browser_virtual_path(outfile),
+            "serverOutfile": str(js_out),
+            "serverHtml": str(html) if target == "PsychoJS" else None,
+            "serverLegacyOutfile": str(legacy) if target == "PsychoJS" else None,
+        },
+        "resourceFiles": roundtrip.get("resourceFiles", []),
+        "stdout": stdout.getvalue(),
+        "stderr": stderr.getvalue(),
     }
 
 
-async def handle_command(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
+def compile_psychojs(
+    psyexp_content: str | None = None,
+    psyexp_path: str | None = None,
+    outfile: str | None = None,
+    *,
+    resources: Any = None,
+) -> dict[str, Any]:
+    """Compile .psyexp XML to PsychoJS JS and official index.html."""
+    try:
+        return _compile_official(
+            target="PsychoJS",
+            psyexp_content=psyexp_content,
+            psyexp_path=psyexp_path,
+            outfile=outfile,
+            resources=resources,
+        )
+    except Exception as exc:
+        return error_result(
+            "official-compileScript",
+            exc,
+            target="PsychoJS",
+            paths={
+                "clientPsyexpPath": psyexp_path,
+                "clientPsyexpPathIsVirtual": is_browser_virtual_path(psyexp_path),
+                "clientOutfile": outfile,
+                "clientOutfileIsVirtual": is_browser_virtual_path(outfile),
+            },
+        )
+
+
+def compile_psychopy(
+    psyexp_content: str | None = None,
+    psyexp_path: str | None = None,
+    outfile: str | None = None,
+    *,
+    resources: Any = None,
+) -> dict[str, Any]:
+    """Compile .psyexp XML to official PsychoPy Python code."""
+    try:
+        return _compile_official(
+            target="PsychoPy",
+            psyexp_content=psyexp_content,
+            psyexp_path=psyexp_path,
+            outfile=outfile,
+            resources=resources,
+        )
+    except Exception as exc:
+        return error_result(
+            "official-compileScript",
+            exc,
+            target="PsychoPy",
+            paths={
+                "clientPsyexpPath": psyexp_path,
+                "clientPsyexpPathIsVirtual": is_browser_virtual_path(psyexp_path),
+                "clientOutfile": outfile,
+                "clientOutfileIsVirtual": is_browser_virtual_path(outfile),
+            },
+        )
+
+
+def _arg(args: list[Any], index: int, default: Any = None) -> Any:
+    return args[index] if len(args) > index else default
+
+
+def handle_command(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
     if command == "ping":
         return "pong"
     if command in {"getElementProfiles", "psychopy.experiment:getElementProfiles"}:
         return official_component_profiles()
     if command in {"getLoopProfiles", "psychopy.experiment:getLoopProfiles"}:
         return official_loop_profiles()
+    if command in {"getDeviceProfiles", "psychopy.experiment:getDeviceProfiles"}:
+        return official_device_profiles()
     if command in {"roundtripPsyexp", "normalisePsyexp", "normalizePsyexp"}:
         return official_roundtrip_psyexp(
             psyexp_content=kwargs.get("psyexpContent"),
-            psyexp_path=kwargs.get("psyexpPath") or (args[0] if args else None),
+            psyexp_path=kwargs.get("psyexpPath") or _arg(args, 0),
+            resources=kwargs.get("resources"),
         )
     if command in {"compilePsychoJS", "compileOnline"}:
         return compile_psychojs(
             psyexp_content=kwargs.get("psyexpContent"),
-            psyexp_path=kwargs.get("psyexpPath") or (args[0] if args else None),
-            outfile=kwargs.get("outfile") or (args[1] if len(args) > 1 else None),
+            psyexp_path=kwargs.get("psyexpPath") or _arg(args, 0),
+            outfile=kwargs.get("outfile") or _arg(args, 1),
+            resources=kwargs.get("resources"),
         )
-    raise ValueError(f"Unsupported official web backend command: {command}")
+    if command in {"compilePsychoPy", "compilePython"}:
+        return compile_psychopy(
+            psyexp_content=kwargs.get("psyexpContent"),
+            psyexp_path=kwargs.get("psyexpPath") or _arg(args, 0),
+            outfile=kwargs.get("outfile") or _arg(args, 1),
+            resources=kwargs.get("resources"),
+        )
+    raise OfficialBackendError(
+        "unsupported-command",
+        f"Unsupported official web backend command: {command}",
+        command=command,
+        supported=[
+            "ping",
+            "psychopy.experiment:getElementProfiles",
+            "psychopy.experiment:getLoopProfiles",
+            "psychopy.experiment:getDeviceProfiles",
+            "roundtripPsyexp",
+            "compilePsychoJS",
+            "compilePsychoPy",
+        ],
+    )
 
 
-async def handler(websocket):
+def handle_command_sync(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
+    """Backward-compatible sync entry point for validation scripts/importers."""
+    return handle_command(command, args, kwargs)
+
+
+def parse_command_message(message: str) -> tuple[Any, str, list[Any], dict[str, Any]]:
+    try:
+        data = json.loads(message)
+    except json.JSONDecodeError as exc:
+        raise OfficialBackendError("invalid-json", f"Message was not valid JSON: {exc}") from exc
+
+    if not isinstance(data, dict):
+        raise OfficialBackendError("invalid-message", "Message must be a JSON object", receivedType=type(data).__name__)
+    msg_id = data.get("id")
+    cmd_data = data.get("command", {})
+    if not isinstance(cmd_data, dict):
+        raise OfficialBackendError("invalid-command-payload", "command must be an object", receivedType=type(cmd_data).__name__)
+
+    command = cmd_data.get("command")
+    args = cmd_data.get("args", [])
+    kwargs = cmd_data.get("kwargs", {})
+    if not isinstance(args, list):
+        raise OfficialBackendError("invalid-command-args", "command.args must be a list", receivedType=type(args).__name__)
+    if not isinstance(kwargs, dict):
+        raise OfficialBackendError("invalid-command-kwargs", "command.kwargs must be an object", receivedType=type(kwargs).__name__)
+
+    if command == "run" and args:
+        command = str(args[0])
+        args = args[1:]
+    if not command:
+        raise OfficialBackendError("missing-command", "Missing command")
+    return msg_id, str(command), args, kwargs
+
+
+async def handler(websocket: Any) -> None:
     logger.info("Accepted connection from %s", websocket.remote_address)
     async for message in websocket:
         msg_id = None
         try:
-            data = json.loads(message)
-            msg_id = data.get("id")
-            cmd_data = data.get("command", {})
-            command = cmd_data.get("command") if isinstance(cmd_data, dict) else None
-            args = cmd_data.get("args", []) if isinstance(cmd_data, dict) else []
-            kwargs = cmd_data.get("kwargs", {}) if isinstance(cmd_data, dict) else {}
-
-            if command == "run" and args:
-                command = str(args[0])
-                args = args[1:]
-            if not command:
-                raise ValueError("Missing command")
-            response = await asyncio.to_thread(handle_command_sync, command, args, kwargs)
+            msg_id, command, args, kwargs = parse_command_message(message)
+            response = await asyncio.to_thread(handle_command, command, args, kwargs)
             await websocket.send(send_ok(msg_id, response))
         except Exception as exc:
             logger.error("Command failed: %s", exc, exc_info=True)
-            await websocket.send(send_error(msg_id, str(exc), traceback=traceback.format_exc(limit=12)))
-
-
-def handle_command_sync(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
-    return asyncio.run(handle_command(command, args, kwargs))
+            await websocket.send(send_error(msg_id, exc))
 
 
 async def main() -> None:
