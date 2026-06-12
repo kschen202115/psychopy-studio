@@ -60,7 +60,9 @@ def main() -> int:
 
     check(backend.is_browser_virtual_path(virtual_in), "WebFS paths must be detected as browser-virtual")
     mapped = backend.temp_path(virtual_in)
-    check(str(mapped).startswith("/tmp/psychopy-official-web-"), f"Virtual path mapped outside temp root: {mapped}")
+    import tempfile
+    temp_root = str(Path(tempfile.gettempdir()).resolve())
+    check(str(mapped.resolve()).startswith(f"{temp_root}/{backend.TEMP_PREFIX}"), f"Virtual path mapped outside temp root: {mapped}")
     check("webfs" not in mapped.parts, f"Virtual WebFS segment leaked into server path: {mapped}")
     check(mapped.name == "smoke.psyexp", f"Unexpected sanitized filename: {mapped.name}")
 

@@ -16,6 +16,7 @@ export function normalizeWebPath(file="") {
             file = new URL(file).pathname;
         }
     } catch {}
+    if (file === WEBFS_ROOT) file = "";
     if (file.startsWith(WEBFS_ROOT + "/")) file = file.slice(WEBFS_ROOT.length + 1);
     if (file.startsWith("/")) file = file.slice(1);
     return file.split("/").filter(part => part && part !== "." && part !== "..").join("/");

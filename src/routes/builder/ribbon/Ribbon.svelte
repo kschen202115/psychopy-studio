@@ -198,17 +198,24 @@
     </RibbonSection>
 
     {#if !electron}
-        <RibbonSection label={translate("Browser export")} icon="/icons/rbn-browser.svg">
+        <RibbonSection label={translate("Browser")} icon="/icons/rbn-browser.svg">
+            <IconButton
+                icon="/icons/btn-runjs.svg"
+                label={translate("Compile to JS and preview in a new tab")}
+                onclick={runJS}
+                disabled={current.experiment === null}
+                borderless
+            />
             <IconButton
                 icon="/icons/btn-compilejs.svg"
-                label={translate("Export official browser files to WebFS")}
+                label={translate("Export official browser files (JS, HTML, PsychoJS library)")}
                 onclick={(evt) => show.webExportDlg = true}
                 disabled={current.experiment === null}
                 borderless
             />
             <IconButton
                 icon="/icons/btn-open.svg"
-                label={translate("Manage WebFS export files")}
+                label={translate("Manage browser files")}
                 onclick={(evt) => show.webfsManager = true}
                 borderless
             />

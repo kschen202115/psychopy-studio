@@ -39,3 +39,6 @@ mprocs.log
 out/
 .velopack
 dist
+# web backend venv & local tooling
+.venv-backend/
+.claude/

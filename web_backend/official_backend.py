@@ -26,9 +26,26 @@ from urllib.parse import urlparse
 
 import websockets
 
-CORE_SRC = Path(os.environ.get("PSYCHOPY_CORE_SRC", "/root/.openclaw/workspace/psychopy-core-src"))
+def _default_core_src() -> Path:
+    """Resolve the official PsychoPy source checkout.
+
+    Priority: PSYCHOPY_CORE_SRC env var, then a `psychopy-core-src` checkout
+    next to or inside this repository. If none exists, fall back to an
+    installed `psychopy` package (CORE_SRC then doesn't need to exist).
+    """
+    env = os.environ.get("PSYCHOPY_CORE_SRC")
+    if env:
+        return Path(env)
+    repo = Path(__file__).resolve().parents[1]
+    for candidate in (repo.parent / "psychopy-core-src", repo / "psychopy-core-src"):
+        if (candidate / "psychopy" / "experiment").is_dir():
+            return candidate
+    return repo.parent / "psychopy-core-src"
+
+
+CORE_SRC = _default_core_src()
 PORT = int(os.environ.get("PSYCHOPY_WEB_BACKEND_PORT", "8002"))
-HOST = os.environ.get("PSYCHOPY_WEB_BACKEND_HOST", "0.0.0.0")
+HOST = os.environ.get("PSYCHOPY_WEB_BACKEND_HOST", "127.0.0.1")
 TEMP_PREFIX = "psychopy-official-web-"
 
 logging.basicConfig(level=logging.INFO)
@@ -56,15 +73,20 @@ class OfficialBackendError(RuntimeError):
 
 def ensure_core_path() -> None:
     """Make the official PsychoPy source importable, or fail explicitly."""
-    if not CORE_SRC.exists():
+    if CORE_SRC.exists():
+        if str(CORE_SRC) not in sys.path:
+            sys.path.insert(0, str(CORE_SRC))
+        return
+    # no source checkout; accept an installed psychopy package instead
+    try:
+        import psychopy  # noqa: F401
+    except ImportError:
         raise OfficialBackendError(
             "psychopy-core-src-missing",
-            "Official PsychoPy source directory was not found",
+            "Official PsychoPy source directory was not found and no psychopy package is installed",
             coreSrc=str(CORE_SRC),
             envVar="PSYCHOPY_CORE_SRC",
-        )
-    if str(CORE_SRC) not in sys.path:
-        sys.path.insert(0, str(CORE_SRC))
+        ) from None
 
 
 def send_ok(msg_id: Any, response: Any) -> str:
@@ -387,21 +409,39 @@ def _compile_official(
     if js_out.suffix.lower() != suffix:
         js_out = js_out.with_suffix(suffix)
 
+    required_resources: list[dict[str, Any]] = []
     stdout = io.StringIO()
     stderr = io.StringIO()
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
         if target == "PsychoJS":
-            # Official PsychoPy writes index.html from Settings.writeInitCodeJS
-            # only when the experiment has an HTML output folder. Set that on
-            # the isolated round-tripped experiment object before delegating to
-            # compileScript; do not hand-write PsychoJS or HTML here.
+            # Official Settings.writeInitCodeJS writes index.html whenever the
+            # experiment has an expPath (set from outfile by writeScript).
+            # Keep "HTML path" empty, as in official desktop local runs: with
+            # an HTML folder set, official Flow.writeFlowSchedulerJS omits the
+            # `resources:` list from psychoJS.start(), and the experiment then
+            # cannot resolve stimuli/conditions when served statically.
             from psychopy import experiment
 
             exp = experiment.Experiment()
             exp.loadFromXML(str(infile))
             if "HTML path" in exp.settings.params:
-                exp.settings.params["HTML path"].val = str(js_out.parent)
+                exp.settings.params["HTML path"].val = ""
             compileScript(exp, version=None, outfile=str(js_out))
+            # official manifest of the files this experiment needs at runtime
+            # (same source prepareResourcesJS uses when copying to an HTML dir)
+            try:
+                for res in exp.getResourceFiles():
+                    if not isinstance(res, dict):
+                        continue
+                    if "https://" in str(res.get("abs", "")) or res.get("name") == "surveyId":
+                        continue
+                    required_resources.append({
+                        "name": res.get("name"),
+                        "rel": str(res.get("rel", "")).replace("\\", "/"),
+                        "exists": bool(res.get("abs")) and Path(str(res.get("abs"))).is_file(),
+                    })
+            except Exception:
+                logger.warning("Official getResourceFiles failed", exc_info=True)
         else:
             compileScript(str(infile), version=None, outfile=str(js_out))
 
@@ -450,6 +490,7 @@ def _compile_official(
             "serverLegacyOutfile": str(legacy) if target == "PsychoJS" else None,
         },
         "resourceFiles": roundtrip.get("resourceFiles", []),
+        "requiredResources": json_safe(required_resources),
         "stdout": stdout.getvalue(),
         "stderr": stderr.getvalue(),
     }
@@ -606,9 +647,17 @@ async def handler(websocket: Any) -> None:
             msg_id, command, args, kwargs = parse_command_message(message)
             response = await asyncio.to_thread(handle_command, command, args, kwargs)
             await websocket.send(send_ok(msg_id, response))
+        except websockets.exceptions.ConnectionClosed:
+            # client navigated away/reloaded before the reply was ready
+            logger.info("Client disconnected before receiving the reply")
+            return
         except Exception as exc:
             logger.error("Command failed: %s", exc, exc_info=True)
-            await websocket.send(send_error(msg_id, exc))
+            try:
+                await websocket.send(send_error(msg_id, exc))
+            except websockets.exceptions.ConnectionClosed:
+                logger.info("Client disconnected before receiving the error reply")
+                return
 
 
 async def main() -> None:

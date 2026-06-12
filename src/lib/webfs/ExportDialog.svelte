@@ -46,19 +46,25 @@
                 <p>
                     {translate("Official compiler outputs were written to isolated browser storage.")}
                 </p>
+                {#if result.missingResources?.length}
+                    <p class="error">
+                        {translate("Missing files this experiment needs (upload them next to the experiment, then export again):")}
+                        {result.missingResources.join(", ")}
+                    </p>
+                {/if}
                 <dl>
                     <dt>{translate("Entry point")}</dt>
                     <dd><a href={result.entryUrl} target="_blank">{result.entryUrl}</a></dd>
                     <dt>{translate("ZIP")}</dt>
                     <dd><a href={result.zip.url} target="_blank">{result.zip.url}</a></dd>
                 </dl>
-                <ol>
-                    {#each result.files as file}
-                        <li><a href={file.url} target="_blank">{file.name}</a></li>
-                    {/each}
-                </ol>
+                <p class="hint">
+                    {translate("ZIP contains")}:
+                    {result.files.length} {translate("files")}
+                    ({translate("experiment, scripts, PsychoJS library")}{result.resources?.length ? `, ${result.resources.length} ${translate("resource files")}: ${result.resources.join(", ")}` : ""})
+                </p>
                 <div class="actions">
-                    <Button label={translate("Open entry point")} onclick={() => window.open(result.entryUrl, "_blank")} horizontal />
+                    <Button label={translate("Open entry point")} onclick={() => window.open(result.previewUrl || result.entryUrl, "_blank")} horizontal />
                     <Button label={translate("Download ZIP")} onclick={() => downloadExportZip(result)} horizontal primary />
                     <Button label={translate("Export again")} onclick={startExport} horizontal />
                 </div>

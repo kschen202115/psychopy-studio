@@ -1,6 +1,7 @@
 import path from "path-browserify";
 import { electron } from "$lib/globals.svelte"
 import { isWebPath, readWebFS, writeWebFS } from "$lib/webfs/storage.js"
+import { pickWebFSFile } from "$lib/webfs/picker.svelte.js"
 import { Mime } from 'mime/lite';
 import standardTypes from 'mime/types/standard.js';
 import otherTypes from 'mime/types/other.js';
@@ -80,23 +81,31 @@ export async function browseFileOpen(
         // parse
         output = parsePath(file[0])
     } else {
-        // get file handle from system dialog
-        let handle = await window.showOpenFilePicker({
-            types: filters
-        }).catch(err => undefined);
+        // in browser mode, files live in WebFS (browser storage); the picker
+        // also lets the user upload files from their computer, dropping them
+        // into the calling context's folder (e.g. the experiment's folder)
+        let file = await pickWebFSFile({
+            mode: "open",
+            extensions: filterExtensions(filters),
+            uploadPrefix: defaultPath || "uploads",
+        })
         // abort if no file
-        if (handle === undefined) {
+        if (file === undefined) {
             return
         }
-        // get file blob from handle
-        let file = await handle[0].getFile();
-        // parse file
-        output = parsePath(file.name)
-        // add handle
-        output.handle = file;
+        // parse
+        output = parsePath(file)
     }
 
     return output
+}
+
+
+/**
+ * Flatten a filters list in the JS style to a list of extensions, e.g. [".psyexp"]
+ */
+function filterExtensions(filters) {
+    return filters.map(item => Object.values(item.accept || {}).flat()).flat()
 }
 
 
@@ -119,22 +128,18 @@ export async function browseFileSave(
         // parse path
         output = parsePath(file)
     } else {
-        // open a file picker
-        let handle = await window.showSaveFilePicker({
-            types: filters,
-            defaultPath: parsePath(defaultFile).parent,
-            suggestedName: parsePath(defaultFile).name
-        });
+        // in browser mode, files live in WebFS (browser storage)
+        let file = await pickWebFSFile({
+            mode: "save",
+            extensions: filterExtensions(filters),
+            defaultName: defaultFile,
+        })
         // abort if no file
-        if (handle === undefined) {
+        if (file === undefined) {
             return
         }
-        // get file blob from handle
-        let file = await handle[0].getFile()[0];
         // parse path
-        output = parsePath(file);
-        // append handle
-        output.handle = handle[0];
+        output = parsePath(file)
     }
 
     return output

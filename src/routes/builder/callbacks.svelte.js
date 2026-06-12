@@ -303,8 +303,17 @@ export async function stopPython(executable) {
 }
 
 export async function runJS() {
+    // in browser mode, compile via the official web backend and preview the
+    // WebFS outputs in a new tab
     if (!python) {
-        return
+        // if no file, save as first (compile needs a file name)
+        if (!current.experiment.file?.file) {
+            await file_save_as()
+            if (!current.experiment.file?.file) {
+                return
+            }
+        }
+        return await current.experiment.runJS(true)
     }
     // compile to JS
     await compileJS()

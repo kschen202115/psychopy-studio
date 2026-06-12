@@ -2,7 +2,9 @@ import { devices } from "$lib/globals.svelte";
 import { python, electron } from "$lib/globals.svelte";
 import path from "path-browserify";
 import { parsePath, readFile, writeFile } from "$lib/utils/files";
-import { webfsPath } from "$lib/webfs/storage.js";
+import { isWebPath, webfsPath } from "$lib/webfs/storage.js";
+import { ensurePsychoJSLib } from "$lib/webfs/psychojsLib.js";
+import { collectExperimentResources } from "$lib/webfs/resources.js";
 import { compilePsychoJS, roundtripPsyexp } from "$lib/official/backend.js";
 import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
@@ -448,10 +450,14 @@ export class Experiment {
             const outfile = path.join(this.file.parent || ".", this.file.stem + ".js")
             try {
                 const psyexpContent = await this.officialRoundtrip(this.toXMLString(), this.file)
+                // send sidecar files (stimuli, conditions, ...) so the official
+                // compiler can read and register them next to the .psyexp
+                const resources = await collectExperimentResources(this.file)
                 const compileResult = await compilePsychoJS({
                     psyexpContent,
                     psyexpPath: this.file.file,
                     outfile,
+                    resources,
                 })
                 if (!compileResult?.ok || !compileResult.script) {
                     console.error("Official PsychoPy web backend could not compile PsychoJS.", compileResult)
@@ -465,9 +471,12 @@ export class Experiment {
                 if (compileResult.legacyScript) {
                     await writeFile(parsePath(webfsPath(path.join(this.file.parent || ".", this.file.stem + "-legacy-browsers.js"))), compileResult.legacyScript)
                 }
-                if (compileResult.psyexp) {
+                if (compileResult.psyexp && isWebPath(this.file.file)) {
                     await writeFile($state.snapshot(this.file), xmlFormat(compileResult.psyexp))
                 }
+                // the compiled outputs import ./lib/psychojs-<version>.*, so
+                // mirror official getPsychoJS into browser storage alongside them
+                await ensurePsychoJSLib(this.file.parent || ".", compileResult.html, compileResult.script)
                 return targetFile.file
             } catch (err) {
                 console.error("Official PsychoPy web backend is required to compile PsychoJS in browser mode.", err)
@@ -636,12 +645,19 @@ export class Experiment {
             )
         }
 
-        if (this.pilotMode) {
-            // fail if there's no Python to run server in
-            if (!python) {
-                console.error("Script running is not available in browser.")
+        // in browser mode, the compiled outputs (including the official
+        // PsychoJS library) live in WebFS; preview them in a new tab, served
+        // by the WebFS service worker
+        if (!python) {
+            if (!target || !isWebPath(target)) {
+                console.error("Could not compile the experiment to PsychoJS in browser mode.")
                 return
             }
+            const entry = webfsPath(path.join(parsePath(target).parent, "index.html"))
+            return window.open(`${entry}?__pilotToken=local`, "_blank")
+        }
+
+        if (this.pilotMode) {
             // get PsychoJS library
             await python.liaison.send("app",
                 {
