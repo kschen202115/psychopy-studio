@@ -19,7 +19,6 @@ The matrix runs:
 6. Presence checks for the optional browser smoke script.
 
 Set `PSYCHOPY_CORE_SRC` or pass `--core-src` if the official PsychoPy checkout is
-not at `/root/.openclaw/workspace/psychopy-core-src`.
 
 For a faster matrix that validates an existing `dist/` without rebuilding:
 
