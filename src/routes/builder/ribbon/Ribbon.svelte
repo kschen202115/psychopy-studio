@@ -264,30 +264,32 @@
         />
     -->
 
-    <RibbonSection label={translate("Pavlovia")} icon="/icons/rbn-pavlovia.svg">
-        
-        <PavloviaSync>
-            {#snippet button(sync)}
-                <IconButton 
-                    icon="/icons/btn-sync.svg" 
-                    label={translate("Sync experiment")} 
-                    onclick={(evt) => sync(
-                        $state.snapshot(current.experiment.file.parent), 
-                        $state.snapshot(current.user),
-                        true
-                    )}
-                    disabled={!current.user || !current.experiment.file.file}
-                    borderless
-                />
-            {/snippet}
-        </PavloviaSync>
-        <div class=padded>
-            <UserCtrl />
-        </div>
-        <div class=padded>
-            <ProjectCtrl />
-        </div>
-    </RibbonSection>
+    {#if git}
+        <RibbonSection label={translate("Pavlovia")} icon="/icons/rbn-pavlovia.svg">
+            
+            <PavloviaSync>
+                {#snippet button(sync)}
+                    <IconButton 
+                        icon="/icons/btn-sync.svg" 
+                        label={translate("Sync experiment")} 
+                        onclick={(evt) => sync(
+                            $state.snapshot(current.experiment.file.parent), 
+                            $state.snapshot(current.user),
+                            true
+                        )}
+                        disabled={!current.user || !current.experiment.file.file}
+                        borderless
+                    />
+                {/snippet}
+            </PavloviaSync>
+            <div class=padded>
+                <UserCtrl />
+            </div>
+            <div class=padded>
+                <ProjectCtrl />
+            </div>
+        </RibbonSection>
+    {/if}
 
     <RibbonGap></RibbonGap>
 

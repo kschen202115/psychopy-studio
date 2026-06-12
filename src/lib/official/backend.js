@@ -1,10 +1,17 @@
 export const DEFAULT_OFFICIAL_BACKEND_URL = "ws://localhost:8002";
 
+function browserDefaultUrl() {
+    if (typeof window === "undefined") return DEFAULT_OFFICIAL_BACKEND_URL;
+    const protocol = window.location?.protocol === "https:" ? "wss:" : "ws:";
+    const hostname = window.location?.hostname || "localhost";
+    return `${protocol}//${hostname}:8002`;
+}
+
 function browserConfiguredUrl() {
     if (typeof window === "undefined") return DEFAULT_OFFICIAL_BACKEND_URL;
     return window.__PSYCHOPY_OFFICIAL_BACKEND_URL__
         || window.localStorage?.getItem?.("psychopy.officialBackendUrl")
-        || DEFAULT_OFFICIAL_BACKEND_URL;
+        || browserDefaultUrl();
 }
 
 function commandId() {
