@@ -1,198 +1,206 @@
-# PsychoPy Studio — Web Mode Fork
+# PsychoPy Studio — Browser-First Fork
 
-> **Fork of [psychopy/psychopy-studio](https://github.com/psychopy/psychopy-studio)**
-> that adds a fully browser-based mode: edit experiments in the browser,
-> compile `.psyexp` → PsychoJS with the **official PsychoPy compiler**,
-> and preview them directly in a new tab — no Electron, no server-side file storage.
+> **Goal: run PsychoPy entirely in the browser — no installation, no local Python, no Electron.**
+>
+> Fork of [psychopy/psychopy-studio](https://github.com/psychopy/psychopy-studio).
 
 ---
 
-## What this fork adds
+## Vision
 
-| Feature | Upstream | This fork |
+The upstream PsychoPy Studio is an Electron desktop app that ships its own Python runtime.
+This fork explores what it takes to move the full workflow — experiment editing, `.psyexp` → PsychoJS
+compilation, stimulus management, and in-browser preview — into a plain web page, so researchers can
+use PsychoPy on any device without installing anything.
+
+### Roadmap
+
+```
+Phase 1 — Python backend (current)
+  Browser UI  ←WebSocket→  local Python process  →  official psychopy compiler
+  Files: browser IndexedDB.  Compiler: official psychopy.experiment + psyexpCompile.
+  Status: working end-to-end, some rough edges.
+
+Phase 2 — Python in WASM (planned)
+  Eliminate the local Python process entirely.
+  Run the official PsychoPy compiler inside the browser via Pyodide / python-wasm.
+  No backend, no WebSocket.  Pure browser, works offline.
+
+Phase 3 — Native JS compiler (long-term)
+  Port the .psyexp → PsychoJS compilation pipeline to JavaScript.
+  Zero Python dependency.  Full offline capability.  Embeddable in any page.
+```
+
+Each phase keeps the same browser-storage architecture and UI — only the compilation
+layer changes.  Phase 1 is complete and usable today.
+
+---
+
+## What this fork adds (Phase 1)
+
+| | Upstream | This fork |
 |---|---|---|
-| Interface | Electron desktop app | Electron **and** browser (SvelteKit dev/build) |
-| File storage | Local filesystem | **Browser IndexedDB** (WebFS, `/webfs/*`) — nothing leaves your machine |
-| `.psyexp` → PsychoJS | Desktop-only via local Python | **In-browser via WebSocket** to the official `psychopy.experiment` + `psyexpCompile` |
-| PsychoJS library | Bundled with Pavlovia | Auto-downloaded from `lib.pavlovia.org` and **cached in browser storage** |
-| Resource files | On disk next to `.psyexp` | Uploaded to browser storage, sent to compiler as base64, resolved via official `exp.getResourceFiles()` |
-| Browser preview | Not available | **One click** — opens `index.html` in a new tab with `__pilotToken=local` |
-| Deployable export | Pavlovia upload | **Download ZIP** (experiment + PsychoJS lib + all resources) for self-hosting |
-| File manager | None (OS filesystem) | Built-in: multi-select, upload files/folders, ZIP download, delete, clear all |
+| **Deployment** | Electron desktop app | Electron + plain browser (SvelteKit) |
+| **File storage** | Local OS filesystem | Browser IndexedDB (`/webfs/*`) — nothing leaves your machine |
+| **Compilation** | Desktop Python only | Via WebSocket to a local Python process (official `psychopy.experiment` + `psyexpCompile`) |
+| **PsychoJS library** | Bundled with Pavlovia upload | Auto-fetched from `lib.pavlovia.org`, cached in browser storage |
+| **Resource files** | On disk | Uploaded to browser storage; sent to compiler as base64; resolved with `exp.getResourceFiles()` |
+| **Preview** | Not available | One click → new tab, `__pilotToken=local` |
+| **Export** | Pavlovia only | Download ZIP (experiment + PsychoJS lib + all resources) for self-hosting |
+| **File manager** | None | Multi-select, upload files/folders, ZIP download, delete, clear all |
 
-The compiler, the resource manifest, and the PsychoJS runtime are all taken from the official PsychoPy/Pavlovia pipeline — this fork does not reimplement them.
+The compiler, resource manifest, and PsychoJS runtime are taken unchanged from the
+official PsychoPy/Pavlovia pipeline — this fork does not reimplement them.
 
 ---
 
-## Quick start (web mode)
+## Quick start
 
-### 1 — Clone & set up the official PsychoPy source
+### 1 — Python compiler backend
 
 ```bash
-# Place the official source next to this repo
+# Put the official PsychoPy source next to this repo
 git clone --depth 1 -b dev https://github.com/psychopy/psychopy.git ../psychopy-core-src
 
-# Back in this repo — create a minimal Python venv (no GUI deps needed)
+# Minimal Python env (no GUI packages needed)
 python3 -m venv .venv-backend
 .venv-backend/bin/pip install websockets esprima dukpy astunparse numpy scipy pandas \
     openpyxl json-tricks i18next pyyaml pyserial
 .venv-backend/bin/pip install javascripthon --no-deps
+
+# Start (listens on ws://127.0.0.1:8002)
+.venv-backend/bin/python web_backend/official_backend.py
+# or: npm run web:backend
 ```
 
-Alternatively, point to an existing PsychoPy checkout with the env var:
+To use a different PsychoPy checkout:
 ```bash
 export PSYCHOPY_CORE_SRC=/path/to/psychopy
 ```
 
-### 2 — Start the compile backend
-
-```bash
-.venv-backend/bin/python web_backend/official_backend.py
-# Listens on ws://127.0.0.1:8002
-# Override: PSYCHOPY_WEB_BACKEND_HOST / PSYCHOPY_WEB_BACKEND_PORT
-```
-
-Or use the npm shortcut:
-```bash
-npm run web:backend
-```
-
-### 3 — Start the frontend
+### 2 — Frontend
 
 ```bash
 npm install
-npm run svelte:dev      # → http://localhost:5173
+npm run svelte:dev   # → http://localhost:5173
 ```
 
-Open `http://localhost:5173` in a browser and switch to **Builder**.
+Open `http://localhost:5173`, switch to **Builder**.
 
 ---
 
 ## Browser workflow
 
 ```
-Upload .psyexp (+ stimuli folder)
+Upload .psyexp + stimuli
         │
         ▼
-   Browser storage (IndexedDB / WebFS)
+  Browser storage (IndexedDB)     ← nothing leaves the browser
         │
         ▼
   [Compile to JS and preview]
-        │  sends .psyexp + resource files (base64) over WebSocket
+        │  WebSocket: { psyexp, resources: [{path, base64}] }
         ▼
   official_backend.py
     psychopy.experiment.fromFile()
     psychopy.scripts.psyexpCompile()
-    exp.getResourceFiles()  ← official resource manifest
+    exp.getResourceFiles()   ← official resource manifest
         │
         ▼
-  compiled outputs written back to WebFS
-  PsychoJS lib downloaded from lib.pavlovia.org → WebFS
-  Service Worker serves /webfs/* from IndexedDB
+  compiled HTML + JS written to IndexedDB
+  PsychoJS lib fetched from lib.pavlovia.org → IndexedDB (cached)
+  Service Worker intercepts GET /webfs/* → reads from IndexedDB
         │
         ▼
-  New tab opens index.html?__pilotToken=local
-  (PsychoJS loads stimuli from /webfs/<experiment>/ via Service Worker)
+  New tab: /webfs/myexp/index.html?__pilotToken=local
+  PsychoJS runs, fetches stimuli via /webfs/myexp/stim/… (Service Worker)
 ```
 
 ### Ribbon — Browser section
 
 | Button | Action |
 |---|---|
-| **Compile to JS and preview** | Compile with official backend, open in new tab |
-| **Export official browser files** | Export JS + HTML + PsychoJS lib + resources → download ZIP |
-| **Manage browser files** | File manager: upload, download, ZIP, delete |
-
-### File manager
-
-- **Upload** single files or entire **folders** (directory structure preserved)
-- **Multi-select** with checkboxes + Select all
-- **Download ZIP** — all files, or selected files only
-- **Delete** selected / **Clear all** (with confirmation)
+| **Compile to JS and preview** | Compile via backend, open in new tab |
+| **Export official browser files** | JS + HTML + PsychoJS lib + resources → ZIP |
+| **Manage browser files** | Upload (files or folders), ZIP download, delete |
 
 ---
 
-## Architecture
+## Architecture (Phase 1)
 
 ```
-Browser                               Python (local)
-────────────────────────────────      ──────────────────────────────
-SvelteKit UI (Svelte 5)               web_backend/official_backend.py
-  │                                     │  thin WebSocket shell
-  │  WebSocket (ws://127.0.0.1:8002)    │
-  ├────────────────────────────────────►│  psychopy.experiment.fromFile()
-  │  { psyexp, resources: [{base64}] }  │  psychopy.scripts.psyexpCompile()
-  │◄────────────────────────────────────│  exp.getResourceFiles()
-  │  { html, js, requiredResources }    │
-  │                                     └── temp dir discarded after compile
+Browser                                     Python (local, Phase 1 only)
+─────────────────────────────────────       ──────────────────────────────────
+SvelteKit UI (Svelte 5)                     web_backend/official_backend.py
+  │                                           thin WebSocket shell
+  │  ws://127.0.0.1:8002
+  ├──────────────────────────────────────►  psychopy.experiment.fromFile()
+  │  { psyexp, resources:[{path,base64}] }  psychopy.scripts.psyexpCompile()
+  │◄──────────────────────────────────────  exp.getResourceFiles()
+  │  { html, js, requiredResources }         temp dir discarded after compile
+  │
   ▼
 IndexedDB (PsychoPyWebFS)
-  │  key: "myexp/index.html"
-  │  key: "myexp/myexp.js"
-  │  key: "myexp/lib/psychojs-*.js"
-  │  key: "myexp/stim/face.png"
+  key: "myexp/index.html"
+  key: "myexp/myexp.js"
+  key: "myexp/lib/psychojs-2025.x.x.js"
+  key: "myexp/stim/face.png"
   │
 Service Worker (/webfs-sw.js)
-  │  intercepts GET /webfs/*
-  │  reads from IndexedDB → HTTP Response
+  intercepts GET /webfs/* → reads from IndexedDB → HTTP Response
   │
   ▼
-New tab: /webfs/myexp/index.html?__pilotToken=local
-  PsychoJS runs, fetches stimuli from /webfs/myexp/stim/face.png
+/webfs/myexp/index.html?__pilotToken=local
+  PsychoJS loads → fetches /webfs/myexp/stim/face.png (Service Worker)
 ```
 
-**Key constraint:** do not set *HTML path* in your experiment's online settings.
-When that field is non-empty, the official Flow omits the `resources:` array from
-`psychoJS.start()`, which breaks browser-mode resource loading.
+> **Note:** do not set *HTML path* in the experiment's online settings.
+> When non-empty, the official Flow omits `resources:` from `psychoJS.start()`,
+> which breaks resource loading in browser mode.
 
 ---
 
-## Production deployment
-
-Build the frontend as a static site:
+## Production deployment (Phase 1)
 
 ```bash
-npm run svelte:build    # outputs to dist/
+npm run svelte:build   # static output → dist/
 ```
 
-Host `dist/` on any static server (Nginx, Caddy, GitHub Pages …).
-Run the Python backend on the same server and reverse-proxy it to
-`wss://yourdomain.com/ws-backend` (or any path).
+Host `dist/` on any static server. Run the Python backend on the same host and
+reverse-proxy it (e.g. Nginx `proxy_pass`) to `wss://yourdomain.com/ws-backend`.
 
-Tell the frontend where the backend is:
+Point the frontend at it:
 ```js
 localStorage.setItem("psychopy.officialBackendUrl", "wss://yourdomain.com/ws-backend")
 ```
 
 ---
 
-## Desktop mode (Electron)
+## Known limitations (Phase 1)
 
-The original Electron workflow is unchanged. See [INSTALL.md](INSTALL.md) for setup.
-
-```bash
-npm run electron:start   # dev
-npm run electron:make    # package (macOS)
-npm run build:complete   # package (Windows)
-```
+- Only PsychoJS target is supported in browser mode (Python execution still requires the desktop app).
+- Stimulus files must be in the same folder as the `.psyexp` (subfolders are fine); files placed
+  elsewhere are matched by filename as a fallback, and anything still missing is listed in the Export dialog.
+- First preview requires internet access to download the official PsychoJS library; subsequent
+  runs use the cached copy in browser storage.
+- The Python backend must be running and reachable at compile time.
 
 ---
 
-## Limitations
+## Desktop mode (unchanged from upstream)
 
-- Browser mode only targets **PsychoJS** (Python runtime still requires the desktop app).
-- Stimulus files must be in the same folder as the `.psyexp` (subfolders are fine).
-  Files placed elsewhere are matched by filename as a fallback; missing required files
-  are listed in red in the Export dialog.
-- First preview requires an internet connection to download the official PsychoJS
-  library from `lib.pavlovia.org` — subsequent runs use the cached copy in browser storage.
-- The compile backend must be reachable from the browser (`ws://127.0.0.1:8002` by default).
-  It can run on a remote server; see *Production deployment* above.
+See [INSTALL.md](INSTALL.md).
+
+```bash
+npm run electron:start     # dev
+npm run electron:make      # package macOS
+npm run build:complete     # package Windows
+```
 
 ---
 
 ## Upstream
 
-This fork tracks **[psychopy/psychopy-studio](https://github.com/psychopy/psychopy-studio)**.
-Core PsychoPy library: **[psychopy/psychopy](https://github.com/psychopy/psychopy)** (dev branch).
-PsychoJS runtime: **[psychopy/psychojs](https://github.com/psychopy/psychojs)**, served via `lib.pavlovia.org`.
+- Studio UI: [psychopy/psychopy-studio](https://github.com/psychopy/psychopy-studio)
+- Core library: [psychopy/psychopy](https://github.com/psychopy/psychopy) (dev branch)
+- PsychoJS runtime: [psychopy/psychojs](https://github.com/psychopy/psychojs), served via `lib.pavlovia.org`
