@@ -8,7 +8,7 @@
     import { Device, Param } from "$lib/experiment"
     import { setContext } from "svelte";
     import { devices, python } from "$lib/globals.svelte";
-    import { pending as profilesPending, profiles } from "$lib/experiment/profiles.svelte";
+    import { pending as profilesPending, profiles, refreshProfileKind } from "$lib/experiment/profiles.svelte";
     import { translate } from "$lib/translation";
 
     let {
@@ -26,16 +26,7 @@
     let timeout = $state.raw(60000)
 
     function refresh(evt) {
-        profilesPending.devices.resolve(
-            python.liaison.send("app", {
-                command: "run",
-                args: [
-                    "psychopy.experiment:getDeviceProfiles"
-                ]
-            }).then(
-                resp => Object.assign(profiles.devices, resp)
-            )
-        )
+        refreshProfileKind("devices", "psychopy.experiment:getDeviceProfiles")
     }
 
     let disableBtns = $derived({

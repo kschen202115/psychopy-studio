@@ -1,13 +1,9 @@
-import xmlFormat from "xml-formatter";
 import { normalizeWebPath, readWebFS, webfsPath, writeWebFS } from "./storage.js";
+import { compilePsychoJS, roundtripPsyexp } from "$lib/official/backend.js";
 import { createZip } from "./zip.js";
 
-const DEFAULT_BACKEND_URL = "ws://localhost:8002";
-
 function serializeExperiment(experiment) {
-    const node = experiment.toXML();
-    const content = new XMLSerializer().serializeToString(node);
-    return xmlFormat(content);
+    return experiment.toXMLString();
 }
 
 function safeStem(value="experiment") {
@@ -18,58 +14,6 @@ function safeStem(value="experiment") {
 function projectPrefixFor(experiment) {
     const stem = safeStem(experiment?.file?.stem || experiment?.file?.name || "experiment");
     return `exports/${stem}`;
-}
-
-function sendBackendCommand(command, kwargs={}, url=DEFAULT_BACKEND_URL, timeout=120000) {
-    return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url);
-        const id = crypto.randomUUID();
-        const timer = setTimeout(() => {
-            try { socket.close(); } catch {}
-            reject(new Error(`Official PsychoPy web backend timed out while running ${command}.`));
-        }, timeout);
-
-        socket.onopen = () => {
-            socket.send(JSON.stringify({
-                id,
-                command: {
-                    command: "run",
-                    args: [command],
-                    kwargs,
-                },
-            }));
-        };
-        socket.onerror = () => {
-            clearTimeout(timer);
-            reject(new Error(`Could not connect to official PsychoPy web backend at ${url}.`));
-        };
-        socket.onmessage = (event) => {
-            let data;
-            try {
-                data = JSON.parse(event.data);
-            } catch (err) {
-                clearTimeout(timer);
-                reject(err);
-                return;
-            }
-            if (data?.evt?.id !== id) return;
-            clearTimeout(timer);
-            socket.close();
-            if ("response" in data) {
-                resolve(data.response);
-            } else {
-                reject(new Error(data?.error?.message || `Official PsychoPy web backend failed while running ${command}.`));
-            }
-        };
-    });
-}
-
-async function compileOfficialPsychoJS({ psyexpContent, psyexpPath, outfile }) {
-    return await sendBackendCommand("compilePsychoJS", {
-        psyexpContent,
-        psyexpPath,
-        outfile,
-    });
 }
 
 export function isBrowserOfficialExportAvailable() {
@@ -87,10 +31,19 @@ export async function exportOfficialExperimentToWebFS(experiment, options={}) {
     const indexName = "index.html";
     const zipName = `${stem}.zip`;
 
-    const psyexpContent = serializeExperiment(experiment);
-    const compileResult = await compileOfficialPsychoJS({
+    const psyexpPath = experiment.file?.file || psyexpName;
+    const roundtripResult = await roundtripPsyexp({
+        psyexpContent: serializeExperiment(experiment),
+        psyexpPath,
+    });
+    if (!roundtripResult?.ok || !roundtripResult.psyexp) {
+        throw new Error(roundtripResult?.blocker || "Official PsychoPy roundtrip did not return a .psyexp export.");
+    }
+
+    const psyexpContent = roundtripResult.psyexp;
+    const compileResult = await compilePsychoJS({
         psyexpContent,
-        psyexpPath: experiment.file?.file || psyexpName,
+        psyexpPath,
         outfile: jsName,
     });
 

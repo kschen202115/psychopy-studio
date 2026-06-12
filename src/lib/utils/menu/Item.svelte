@@ -8,11 +8,13 @@
         label,
         /** @prop @type {String|undefined} Path to an icon for this page's tab */
         icon=undefined,
+        /** @prop @type {boolean} Reserve icon space even if icon is omitted */
+        reserveIconSpace=true,
         /** @prop @type {String} Name of the keyboard shortcut (if any) for this menu item */
         shortcut=undefined,
         /** * @prop @type {function} Function to call when this item is clicked, given 3 params:
          * * @param evt {MouseEvent} Event triggered on click
-         * @param data {any} Arbitrary data associated with this menu item 
+         * @param data {any} Arbitrary data associated with this menu item
          */
         onclick=(evt, data) => {},
         /** @prop @type {any} Arbitrary data associated with this menu item  */
@@ -38,8 +40,8 @@
 </script>
 
 
-<button  
-    class=menu-item 
+<button
+    class=menu-item
     {...rest}
     onclick={(evt) => {
         // execute the given function, with arbitrary data given on init
@@ -51,10 +53,14 @@
     }}
     disabled={disabled}
 >
-    <Icon 
-        src={icon}
-        size=1rem
-    />
+    {#if icon}
+        <Icon
+            src={icon}
+            size=1rem
+        />
+    {:else if reserveIconSpace}
+        <span class=icon-spacer></span>
+    {/if}
     <span class=label>
         {label}
     </span>
@@ -90,6 +96,9 @@
     }
     .menu-item .label {
         grid-column-start: label;
+    }
+    .icon-spacer {
+        grid-column-start: icon;
     }
     .menu-item .shortcut {
         grid-column-start: shortcut;

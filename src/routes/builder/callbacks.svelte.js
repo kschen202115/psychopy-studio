@@ -65,7 +65,7 @@ export async function revealFolder() {
 export async function file_save() {
     // diverge here based on whether there is a current file...
     if (current.experiment.file.file) {
-        current.experiment.toFile(
+        await current.experiment.toFile(
             $state.snapshot(current.experiment.file)
         )
         // mark as no longer modified
@@ -266,12 +266,6 @@ export async function compilePython() {
 }
 
 export async function compileJS() {
-    // Browser-only exports are handled by the isolated WebFS layer in the
-    // Builder ribbon. Desktop/Electron compile keeps using PsychoPy's normal
-    // writeScript path.
-    if (!python) {
-        return
-    }
     // if no file, save as
     if (current.experiment.file === undefined) {
         await file_save_as()

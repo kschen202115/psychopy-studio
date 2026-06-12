@@ -2,6 +2,8 @@ import { devices } from "$lib/globals.svelte";
 import { python, electron } from "$lib/globals.svelte";
 import path from "path-browserify";
 import { parsePath, readFile, writeFile } from "$lib/utils/files";
+import { webfsPath } from "$lib/webfs/storage.js";
+import { compilePsychoJS, roundtripPsyexp } from "$lib/official/backend.js";
 import xmlFormat from 'xml-formatter';
 import { Routine, StandaloneRoutine } from "./routine.svelte";
 import { Component } from "./component.svelte";
@@ -396,14 +398,39 @@ export class Experiment {
         this.file = file
     }
 
-    async toFile(file) {
+    toXMLString() {
         // get experiment as xml
         let node = this.toXML()
         // convert to an xml string
         let ser = new XMLSerializer()
-        let content = ser.serializeToString(node)
         // make human readable
-        content = xmlFormat(content)
+        return xmlFormat(ser.serializeToString(node))
+    }
+
+    async officialRoundtrip(content, file) {
+        // Desktop/Electron saves are already routed through official PsychoPy
+        // during compile/run. Browser saves use the official web backend when
+        // available and fall back only as degraded mode.
+        if (python) {
+            return content
+        }
+        try {
+            const result = await roundtripPsyexp({
+                psyexpContent: content,
+                psyexpPath: file?.file || file?.name || "experiment.psyexp",
+            })
+            if (result?.ok && result.psyexp) {
+                return xmlFormat(result.psyexp)
+            }
+            console.warn("Using degraded local .psyexp save because official roundtrip failed.", result)
+        } catch (err) {
+            console.warn("Using degraded local .psyexp save because official roundtrip is unavailable.", err)
+        }
+        return content
+    }
+
+    async toFile(file) {
+        let content = await this.officialRoundtrip(this.toXMLString(), file)
         // write file
         await writeFile($state.snapshot(file), content)
         // if indicated in exp settings, export JS
@@ -413,6 +440,40 @@ export class Experiment {
     }
 
     async writeScript(target="PsychoPy", executable=undefined) {
+        if (target === "PsychoJS" && !python) {
+            if (!this.file?.file) {
+                console.error("Cannot compile to PsychoJS on an experiment with no psyexp file attached")
+                return
+            }
+            const outfile = path.join(this.file.parent || ".", this.file.stem + ".js")
+            try {
+                const psyexpContent = await this.officialRoundtrip(this.toXMLString(), this.file)
+                const compileResult = await compilePsychoJS({
+                    psyexpContent,
+                    psyexpPath: this.file.file,
+                    outfile,
+                })
+                if (!compileResult?.ok || !compileResult.script) {
+                    console.error("Official PsychoPy web backend could not compile PsychoJS.", compileResult)
+                    return
+                }
+                const targetFile = parsePath(webfsPath(outfile))
+                await writeFile(targetFile, compileResult.script)
+                if (compileResult.html) {
+                    await writeFile(parsePath(webfsPath(path.join(this.file.parent || ".", "index.html"))), compileResult.html)
+                }
+                if (compileResult.legacyScript) {
+                    await writeFile(parsePath(webfsPath(path.join(this.file.parent || ".", this.file.stem + "-legacy-browsers.js"))), compileResult.legacyScript)
+                }
+                if (compileResult.psyexp) {
+                    await writeFile($state.snapshot(this.file), xmlFormat(compileResult.psyexp))
+                }
+                return targetFile.file
+            } catch (err) {
+                console.error("Official PsychoPy web backend is required to compile PsychoJS in browser mode.", err)
+                return
+            }
+        }
         if (!python) {
             console.error("Script writing is not available in browser.")
             return

@@ -2,7 +2,7 @@
     import ComponentButton from './ComponentButton.svelte';
     import ComponentSection from './Section.svelte';
 
-    import { profiles as allProfiles, pending as profilesPending } from '$lib/experiment/profiles.svelte';
+    import { profiles as allProfiles, pending as profilesPending, profileSources, refreshProfileKind } from '$lib/experiment/profiles.svelte';
     import RoutineButton from './RoutineButton.svelte';
     import FilterDialog from './FilterDialog.svelte';
     import { CompactButton } from "$lib/utils/buttons";
@@ -73,16 +73,7 @@
      * Get Components again from PsychoPy
      */
     async function refreshProfiles() {
-        if (await python?.ready) {
-            profilesPending.components.resolve(
-                python.liaison.send("app", {
-                    command: "run",
-                    args: ["psychopy.experiment:getElementProfiles"]
-                }, 100000).then(
-                    data => Object.assign(allProfiles.components, data)
-                )
-            )
-        }
+        await refreshProfileKind("components", "psychopy.experiment:getElementProfiles")
     }
 
     let showFilterDlg = $state.raw(false);
@@ -117,8 +108,12 @@
         />
     </div>
     <div class=components>
-        {#await python?.ready then ready}
-            {#await profilesPending.components.promise}
+        {#if profileSources.components === "fallback"}
+            <div class="message degraded">
+                {translate("Using fallback component profiles until the official PsychoPy backend is available.")}
+            </div>
+        {/if}
+        {#await profilesPending.components.promise}
                 <div class=message>
                     {translate("Loading Components...")}
                 </div>
@@ -150,7 +145,6 @@
                     </pre>
                 </div>
             {/await}
-        {/await}
     </div>
 </div>
 
@@ -171,6 +165,9 @@
     }
     .error {
         color: var(--red);
+    }
+    .degraded {
+        color: var(--orange);
     }
 
     pre {
