@@ -43,8 +43,7 @@ dist
 .venv-backend/
 .claude/
 
-# EdgeOne Pages function: vendored at build time, never committed
-cloud-functions/_vendor/
-
-# EdgeOne CLI local project/login state
+# EdgeOne Pages: build output (.edgeone/assets + .edgeone/cloud-functions,
+# assembled by scripts/build-edgeone-output.mjs) and CLI project/login state
+# both live here — never committed
 .edgeone/

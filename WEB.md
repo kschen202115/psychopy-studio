@@ -41,24 +41,28 @@ npm run svelte:dev      # http://localhost:5173
 
 前端是纯静态(`adapter-static` → `dist/`),后端编译器作为 EdgeOne Pages 的 **Python Serverless 函数**部署。二者同域,无需 CORS。
 
-**目录结构**
+**目录结构**——自定义构建,走 EdgeOne **Build Output 规范**:构建产出 `.edgeone/`,由 `edgeone.json` 的 `outputDirectory: ".edgeone"` 指定,EdgeOne 直接消费(不做框架探测)。
 
 ```
-cloud-functions/
-├── api/backend.py        # 入口:GET 健康检查 / POST 跑命令;EdgeOne 调用其中的 handler 类
-├── requirements.txt      # pip 依赖(numpy/scipy/pandas/dukpy 等,不含 GUI 库)
-└── _vendor/              # 构建时生成、不入库(见 .gitignore)
-    ├── psychopy/           官方源码(git dev,剪掉 demos/tests,约 19M)
-    └── official_backend.py 后端逻辑(从 web_backend/ 拷贝)
+.edgeone/                              # 构建产出、不入库(.gitignore)
+├── assets/                            # 静态前端(dist/ 的拷贝)
+└── cloud-functions/api-python/        # Python 函数组(handler 模式)
+    ├── config.json                    # { version:3, routes:[{src:"^/api/backend$"}] } —— 函数 meta(关键!)
+    ├── app.py                         # 固定入口文件名,暴露 handler 类
+    ├── requirements.txt               # pip 依赖(EdgeOne 安装;numpy/scipy/dukpy 等,无 GUI 库)
+    ├── official_backend.py            # 后端逻辑(从 web_backend/ 拷贝)
+    └── psychopy/                      # 官方源码(git dev,剪掉 demos/tests)
 ```
+
+仓库里只提交 `edgeone.json`、`cloud-functions/requirements.txt`(依赖清单源)、`scripts/build-edgeone-output.mjs`。
 
 **构建**
 
 ```bash
-npm run build:edgeone   # = svelte:build(出 dist/)+ prepare:cloud-functions(填充 _vendor/)
+npm run build:edgeone   # = svelte:build(出 dist/)+ build:edgeone-output(组装 .edgeone/)
 ```
 
-`scripts/prepare-cloud-functions.mjs` 按 `$PSYCHOPY_CORE_SRC` → `../psychopy-core-src` → `git clone -b dev` 的顺序取 psychopy 源码,剪枝后连同后端逻辑拷进 `_vendor/`。EdgeOne 控制台里:构建命令设为 `npm run build:edgeone`,静态产物目录 `dist/`,函数目录 `cloud-functions/`。
+`scripts/build-edgeone-output.mjs`:把 `dist/` 拷进 `.edgeone/assets/`;按 `$PSYCHOPY_CORE_SRC` → `../psychopy-core-src` → `git clone -b dev` 取 psychopy 源码、剪枝,连同 `official_backend.py` 与生成的 `app.py`/`config.json`/`requirements.txt` 组装进 `.edgeone/cloud-functions/api-python/`。EdgeOne 控制台:构建命令 `npm run build:edgeone`,**输出目录 `.edgeone`**(`edgeone.json` 已声明),根目录 `.`。
 
 **为什么 vendor 源码而不是 pip 装 psychopy**:PyPI 版本太老,且 `pip install psychopy` 会拉 pyglet/wx/pyqt 等 GUI 依赖(serverless 用不上)。把源码挂 `sys.path`(`ensure_core_path`)绕过 `setup.py`,只补 numpy/scipy/pandas 等轻依赖即可;编译/profile 路径实测不需要 pyglet。
 
