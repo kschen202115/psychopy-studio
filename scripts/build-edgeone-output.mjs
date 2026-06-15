@@ -45,11 +45,16 @@ const ROUTE = "^/api/backend$";
 
 const APP_PY = `"""EdgeOne Pages Python function entry (fixed filename: app.py).
 
+Handler mode: EdgeOne detects the function by a top-level \`class handler\`
+(a BaseHTTPRequestHandler subclass) defined here, so we subclass our
+CommandRequestHandler rather than import-aliasing it.
+
 Vendored siblings in this directory: official_backend.py + psychopy/.
 The route is declared in config.json (${ROUTE} -> /api/backend).
 """
 import os
 import sys
+from http.server import BaseHTTPRequestHandler  # noqa: F401  (signals handler mode)
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
@@ -57,9 +62,12 @@ if _HERE not in sys.path:
 # official_backend reads PSYCHOPY_CORE_SRC at import time; psychopy/ is a sibling.
 os.environ.setdefault("PSYCHOPY_CORE_SRC", _HERE)
 
-from official_backend import CommandRequestHandler as handler  # noqa: E402
+from official_backend import CommandRequestHandler  # noqa: E402
 
-__all__ = ["handler"]
+
+class handler(CommandRequestHandler):
+    """EdgeOne handler-mode entry; inherits do_GET / do_POST / do_OPTIONS."""
+    pass
 `;
 
 const CONFIG_JSON = JSON.stringify({ version: 3, routes: [{ src: ROUTE }] }, null, 2) + "\n";
