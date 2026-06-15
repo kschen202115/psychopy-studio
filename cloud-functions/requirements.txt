@@ -5,13 +5,9 @@
 # NOT installed from PyPI, which would drag in GUI deps (pyglet/wx/pyqt) the
 # serverless runtime can't use. These are the libraries the compile/profile
 # path actually imports.
-numpy
-scipy
-pandas
 openpyxl
 json-tricks
 pyyaml
-pyserial
 esprima
 dukpy
 astunparse
