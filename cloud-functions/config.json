@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "routes": [
+    { "src": "^/api/backend$", "dest": "api/backend.py" }
+  ]
+}
