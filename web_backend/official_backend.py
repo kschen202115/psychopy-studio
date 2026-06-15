@@ -8,7 +8,6 @@ semantics to PsychoPy's official ``psychopy.experiment`` and compiler APIs.
 
 from __future__ import annotations
 
-import asyncio
 import base64
 import binascii
 import contextlib
@@ -20,11 +19,11 @@ import re
 import sys
 import tempfile
 import traceback
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import urlparse
 
-import websockets
 
 def _default_core_src() -> Path:
     """Resolve the official PsychoPy source checkout.
@@ -639,32 +638,112 @@ def parse_command_message(message: str) -> tuple[Any, str, list[Any], dict[str, 
     return msg_id, str(command), args, kwargs
 
 
-async def handler(websocket: Any) -> None:
-    logger.info("Accepted connection from %s", websocket.remote_address)
-    async for message in websocket:
-        msg_id = None
+# Browser POST bodies carry base64 resources, so allow a generous ceiling while
+# still rejecting absurd payloads. Mirrors the old WebSocket max_size headroom.
+MAX_BODY_BYTES = 64 * 1024 * 1024
+
+
+def run_command_envelope(message: str) -> tuple[int, str]:
+    """Run one JSON command envelope and return (http_status, json_body).
+
+    Command logic is identical to the old WebSocket path; only the transport
+    changed. Each request is independent, so no per-connection state is kept.
+    """
+    msg_id = None
+    try:
+        msg_id, command, args, kwargs = parse_command_message(message)
+    except OfficialBackendError as exc:
+        return 400, send_error(None, exc, include_traceback=False)
+    except Exception as exc:
+        logger.error("Failed to parse command message: %s", exc, exc_info=True)
+        return 400, send_error(None, exc)
+    try:
+        response = handle_command(command, args, kwargs)
+        return 200, send_ok(msg_id, response)
+    except Exception as exc:
+        logger.error("Command failed: %s", exc, exc_info=True)
+        return 500, send_error(msg_id, exc)
+
+
+class CommandRequestHandler(BaseHTTPRequestHandler):
+    """Stateless HTTP shell: POST runs a command, GET is a health probe."""
+
+    server_version = "OfficialPsychoPyWebBackend/1.0"
+    protocol_version = "HTTP/1.1"
+
+    def _set_cors_headers(self) -> None:
+        # The old server accepted any WebSocket origin (origins=None); keep the
+        # browser able to call the backend cross-origin (Vite :5173 → :8002).
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+
+    def _write_json(self, status: int, body: str) -> None:
+        payload = body.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(payload)))
+        self._set_cors_headers()
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def do_OPTIONS(self) -> None:  # noqa: N802 - http.server dispatch naming
+        self.send_response(204)
+        self._set_cors_headers()
+        self.end_headers()
+
+    def do_GET(self) -> None:  # noqa: N802 - http.server dispatch naming
+        self._write_json(200, json.dumps(
+            {"response": "pong", "service": "official-psychopy-web-backend"},
+            ensure_ascii=False,
+        ))
+
+    def do_POST(self) -> None:  # noqa: N802 - http.server dispatch naming
         try:
-            msg_id, command, args, kwargs = parse_command_message(message)
-            response = await asyncio.to_thread(handle_command, command, args, kwargs)
-            await websocket.send(send_ok(msg_id, response))
-        except websockets.exceptions.ConnectionClosed:
-            # client navigated away/reloaded before the reply was ready
-            logger.info("Client disconnected before receiving the reply")
+            length = int(self.headers.get("Content-Length", "0"))
+        except (TypeError, ValueError):
+            length = 0
+        if length <= 0:
+            self._write_json(400, send_error(
+                None, OfficialBackendError("empty-request", "POST body was empty"),
+                include_traceback=False,
+            ))
             return
-        except Exception as exc:
-            logger.error("Command failed: %s", exc, exc_info=True)
-            try:
-                await websocket.send(send_error(msg_id, exc))
-            except websockets.exceptions.ConnectionClosed:
-                logger.info("Client disconnected before receiving the error reply")
-                return
+        if length > MAX_BODY_BYTES:
+            self._write_json(413, send_error(
+                None,
+                OfficialBackendError("request-too-large", f"POST body exceeded {MAX_BODY_BYTES} bytes"),
+                include_traceback=False,
+            ))
+            return
+        raw = self.rfile.read(length)
+        try:
+            message = raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            self._write_json(400, send_error(
+                None, OfficialBackendError("invalid-encoding", f"POST body was not valid UTF-8: {exc}"),
+                include_traceback=False,
+            ))
+            return
+        status, body = run_command_envelope(message)
+        self._write_json(status, body)
+
+    def log_message(self, fmt: str, *args: Any) -> None:  # route through our logger
+        logger.info("%s - %s", self.address_string(), fmt % args)
 
 
-async def main() -> None:
-    async with websockets.serve(handler, HOST, PORT, origins=None, max_size=32 * 1024 * 1024):
-        logger.info("Official PsychoPy web backend listening on %s:%s", HOST, PORT)
-        await asyncio.Future()
+def main() -> None:
+    server = ThreadingHTTPServer((HOST, PORT), CommandRequestHandler)
+    server.daemon_threads = True
+    logger.info("Official PsychoPy web backend listening on http://%s:%s", HOST, PORT)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        logger.info("Shutting down official PsychoPy web backend")
+    finally:
+        server.server_close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

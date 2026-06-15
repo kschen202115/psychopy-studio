@@ -64,11 +64,11 @@ git clone --depth 1 -b dev https://github.com/psychopy/psychopy.git ../psychopy-
 
 # Minimal Python env (no GUI packages needed)
 python3 -m venv .venv-backend
-.venv-backend/bin/pip install websockets esprima dukpy astunparse numpy scipy pandas \
+.venv-backend/bin/pip install esprima dukpy astunparse numpy scipy pandas \
     openpyxl json-tricks i18next pyyaml pyserial
 .venv-backend/bin/pip install javascripthon --no-deps
 
-# Start (listens on ws://127.0.0.1:8002)
+# Start (listens on http://127.0.0.1:8002)
 .venv-backend/bin/python web_backend/official_backend.py
 # or: npm run web:backend
 ```
@@ -132,8 +132,8 @@ Upload .psyexp + stimuli
 Browser                                     Python (local, Phase 1 only)
 ─────────────────────────────────────       ──────────────────────────────────
 SvelteKit UI (Svelte 5)                     web_backend/official_backend.py
-  │                                           thin WebSocket shell
-  │  ws://127.0.0.1:8002
+  │                                           thin HTTP shell
+  │  POST http://127.0.0.1:8002
   ├──────────────────────────────────────►  psychopy.experiment.fromFile()
   │  { psyexp, resources:[{path,base64}] }  psychopy.scripts.psyexpCompile()
   │◄──────────────────────────────────────  exp.getResourceFiles()
@@ -167,11 +167,11 @@ npm run svelte:build   # static output → dist/
 ```
 
 Host `dist/` on any static server. Run the Python backend on the same host and
-reverse-proxy it (e.g. Nginx `proxy_pass`) to `wss://yourdomain.com/ws-backend`.
+reverse-proxy it (e.g. Nginx `proxy_pass`) to `https://yourdomain.com/psychopy-backend`.
 
 Point the frontend at it:
 ```js
-localStorage.setItem("psychopy.officialBackendUrl", "wss://yourdomain.com/ws-backend")
+localStorage.setItem("psychopy.officialBackendUrl", "https://yourdomain.com/psychopy-backend")
 ```
 
 ---

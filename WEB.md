@@ -22,12 +22,12 @@
 git clone --depth 1 -b dev https://github.com/psychopy/psychopy.git ../psychopy-core-src
 
 python3 -m venv .venv-backend
-.venv-backend/bin/pip install websockets esprima dukpy astunparse numpy scipy pandas \
+.venv-backend/bin/pip install esprima dukpy astunparse numpy scipy pandas \
     openpyxl json-tricks i18next pyyaml pyserial
 .venv-backend/bin/pip install javascripthon --no-deps
 
 .venv-backend/bin/python web_backend/official_backend.py
-# 监听 ws://127.0.0.1:8002(可用 PSYCHOPY_WEB_BACKEND_HOST/PORT、PSYCHOPY_CORE_SRC 覆盖)
+# 监听 http://127.0.0.1:8002(POST 跑命令、GET 健康检查;可用 PSYCHOPY_WEB_BACKEND_HOST/PORT、PSYCHOPY_CORE_SRC 覆盖)
 ```
 
 ### 2. 前端
@@ -37,8 +37,41 @@ npm install
 npm run svelte:dev      # http://localhost:5173
 ```
 
-生产部署:`npm run svelte:build` 后静态托管 `dist/`,后端反代到 `wss://<host>:8002`
-(前端可用 `localStorage.setItem("psychopy.officialBackendUrl", "wss://...")` 指定后端地址)。
+## 生产部署(EdgeOne Pages)
+
+前端是纯静态(`adapter-static` → `dist/`),后端编译器作为 EdgeOne Pages 的 **Python Serverless 函数**部署。二者同域,无需 CORS。
+
+**目录结构**
+
+```
+cloud-functions/
+├── api/backend.py        # 入口:GET 健康检查 / POST 跑命令;EdgeOne 调用其中的 handler 类
+├── requirements.txt      # pip 依赖(numpy/scipy/pandas/dukpy 等,不含 GUI 库)
+└── _vendor/              # 构建时生成、不入库(见 .gitignore)
+    ├── psychopy/           官方源码(git dev,剪掉 demos/tests,约 19M)
+    └── official_backend.py 后端逻辑(从 web_backend/ 拷贝)
+```
+
+**构建**
+
+```bash
+npm run build:edgeone   # = svelte:build(出 dist/)+ prepare:cloud-functions(填充 _vendor/)
+```
+
+`scripts/prepare-cloud-functions.mjs` 按 `$PSYCHOPY_CORE_SRC` → `../psychopy-core-src` → `git clone -b dev` 的顺序取 psychopy 源码,剪枝后连同后端逻辑拷进 `_vendor/`。EdgeOne 控制台里:构建命令设为 `npm run build:edgeone`,静态产物目录 `dist/`,函数目录 `cloud-functions/`。
+
+**为什么 vendor 源码而不是 pip 装 psychopy**:PyPI 版本太老,且 `pip install psychopy` 会拉 pyglet/wx/pyqt 等 GUI 依赖(serverless 用不上)。把源码挂 `sys.path`(`ensure_core_path`)绕过 `setup.py`,只补 numpy/scipy/pandas 等轻依赖即可;编译/profile 路径实测不需要 pyglet。
+
+**前端指向后端**:生产构建**默认**就走同域相对路径 `/api/backend`(`src/lib/official/backend.js` 按 `import.meta.env.DEV` 区分:dev 连 `:8002`,生产用 `/api/backend`),无需任何配置。只有当后端不在同域(例如独立域名)时才需覆盖:
+
+```js
+localStorage.setItem("psychopy.officialBackendUrl", "https://backend.example.com/api/backend")
+// 或在构建产物注入 window.__PSYCHOPY_OFFICIAL_BACKEND_URL__ = "..."
+```
+
+> 待验证:`dukpy` 是 C 扩展,需确认 EdgeOne 运行时有对应 wheel;执行超时/包体积上限以 EdgeOne 文档为准,建议先用 GET 健康检查跑通链路,再上编译。
+>
+> 也可不用 serverless:直接 `npm run svelte:build` 静态托管 `dist/`,另起独立后端 `python web_backend/official_backend.py` 并反代到 `https://<host>:8002`(此时需要 CORS,已内置)。
 
 ## 浏览器内工作流
 

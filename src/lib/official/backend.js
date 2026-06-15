@@ -1,10 +1,20 @@
-export const DEFAULT_OFFICIAL_BACKEND_URL = "ws://localhost:8002";
+export const DEFAULT_OFFICIAL_BACKEND_URL = "http://localhost:8002";
+
+// In production the backend is an EdgeOne Pages function served same-origin
+// (relative path → no CORS); under `vite dev` it's the standalone http.server
+// on :8002. import.meta.env.DEV is statically true in dev and false in builds.
+const PRODUCTION_BACKEND_PATH = "/api/backend";
 
 function browserDefaultUrl() {
     if (typeof window === "undefined") return DEFAULT_OFFICIAL_BACKEND_URL;
-    const protocol = window.location?.protocol === "https:" ? "wss:" : "ws:";
-    const hostname = window.location?.hostname || "localhost";
-    return `${protocol}//${hostname}:8002`;
+    // import.meta.env.DEV is statically true under `vite dev` and false in
+    // production builds, so the dev branch is dropped from the prod bundle.
+    if (import.meta.env.DEV) {
+        const protocol = window.location?.protocol === "https:" ? "https:" : "http:";
+        const hostname = window.location?.hostname || "localhost";
+        return `${protocol}//${hostname}:8002`;
+    }
+    return PRODUCTION_BACKEND_PATH;
 }
 
 function browserConfiguredUrl() {
@@ -22,64 +32,63 @@ function commandId() {
 }
 
 export function isOfficialBackendClientAvailable() {
-    return typeof WebSocket !== "undefined";
+    return typeof fetch !== "undefined";
 }
 
-export function sendOfficialBackendCommand(command, kwargs={}, options={}) {
+export async function sendOfficialBackendCommand(command, kwargs={}, options={}) {
     const {
         url = browserConfiguredUrl(),
         timeout = 120000,
     } = options;
 
     if (!isOfficialBackendClientAvailable()) {
-        return Promise.reject(new Error("Official PsychoPy web backend client requires WebSocket support."));
+        throw new Error("Official PsychoPy web backend client requires fetch support.");
     }
 
-    return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url);
-        const id = commandId();
-        const timer = setTimeout(() => {
-            try { socket.close(); } catch {}
-            reject(new Error(`Official PsychoPy web backend timed out while running ${command}.`));
-        }, timeout);
+    const id = commandId();
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeout) : null;
 
-        socket.onopen = () => {
-            socket.send(JSON.stringify({
-                id,
-                command: {
-                    command: "run",
-                    args: [command],
-                    kwargs,
-                },
-            }));
-        };
-        socket.onerror = () => {
-            clearTimeout(timer);
-            reject(new Error(`Could not connect to official PsychoPy web backend at ${url}.`));
-        };
-        socket.onmessage = (event) => {
-            let data;
-            try {
-                data = JSON.parse(event.data);
-            } catch (err) {
-                clearTimeout(timer);
-                reject(err);
-                return;
+    try {
+        let response;
+        try {
+            response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id,
+                    command: {
+                        command: "run",
+                        args: [command],
+                        kwargs,
+                    },
+                }),
+                signal: controller?.signal,
+            });
+        } catch (err) {
+            if (err?.name === "AbortError") {
+                throw new Error(`Official PsychoPy web backend timed out while running ${command}.`);
             }
-            if (data?.evt?.id !== id) return;
-            clearTimeout(timer);
-            socket.close();
-            if ("response" in data) {
-                resolve(data.response);
-            } else {
-                const error = data?.error || {};
-                const err = new Error(error.message || `Official PsychoPy web backend failed while running ${command}.`);
-                err.backendError = error;
-                reject(err);
-            }
-        };
-        socket.onclose = () => clearTimeout(timer);
-    });
+            throw new Error(`Could not connect to official PsychoPy web backend at ${url}.`);
+        }
+
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error(`Official PsychoPy web backend returned a non-JSON response while running ${command}.`);
+        }
+
+        if (data && "response" in data) {
+            return data.response;
+        }
+        const error = data?.error || {};
+        const err = new Error(error.message || `Official PsychoPy web backend failed while running ${command}.`);
+        err.backendError = error;
+        throw err;
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
 }
 
 export async function roundtripPsyexp({ psyexpContent, psyexpPath, resources }={}, options={}) {

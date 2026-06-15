@@ -19,7 +19,7 @@ function projectPrefixFor(experiment) {
 }
 
 export function isBrowserOfficialExportAvailable() {
-    return typeof window !== "undefined" && typeof WebSocket !== "undefined";
+    return typeof window !== "undefined" && typeof fetch !== "undefined";
 }
 
 /**

@@ -125,6 +125,8 @@
 		"svelte:check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"svelte:check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"web:backend": "python3 web_backend/official_backend.py",
+		"prepare:cloud-functions": "node scripts/prepare-cloud-functions.mjs",
+		"build:edgeone": "npm run svelte:build && npm run prepare:cloud-functions",
 		"electron:start": "electron electron/src/index.cjs",
 		"electron:lint": "echo \"No linting configured\"",
 		"build": "npm run svelte:build && electron-builder build",
