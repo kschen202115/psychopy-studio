@@ -23,7 +23,7 @@
  * ./psychopy-core-src -> shallow `git clone -b dev`.
  */
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -78,7 +78,8 @@ cpSync(BACKEND_SRC, join(FUNC, "backend.py"));
 if (existsSync(REQUIREMENTS_SRC)) cpSync(REQUIREMENTS_SRC, join(FUNC, "requirements.txt"));
 
 console.log(`[edgeone] deps: pruned psychopy/ -> cloud-functions/api/psychopy`);
-cpSync(src, join(FUNC, "psychopy"), {
+const psyDir = join(FUNC, "psychopy");
+cpSync(src, psyDir, {
   recursive: true,
   filter: (from) => {
     const rel = relative(src, from);
@@ -86,5 +87,38 @@ cpSync(src, join(FUNC, "psychopy"), {
     return !rel.split(/[\\/]/).some((seg) => PRUNE_DIRS.has(seg));
   },
 });
+
+// EdgeOne's PythonFunctionBuilder rejects any file named like a stdlib module;
+// psychopy ships psychopy/logging.py (clashes with `logging`). Rename it and
+// install a lazy meta-path alias EARLY in psychopy/__init__.py so the ~148
+// `import psychopy.logging` references resolve to the renamed file with the
+// original (lazy) load order, avoiding the circular import a hard re-register
+// would cause (preferences imports logging while __init__ is still running).
+console.log("[edgeone] dodge stdlib clash: psychopy/logging.py -> _psylogging.py");
+renameSync(join(psyDir, "logging.py"), join(psyDir, "_psylogging.py"));
+const initPath = join(psyDir, "__init__.py");
+const SHIM = `
+# --- EdgeOne vendoring shim (added by scripts/build-edgeone-output.mjs):
+# psychopy/logging.py was renamed to _psylogging.py (EdgeOne rejects files
+# named like stdlib modules); alias it back lazily as psychopy.logging.
+import os as _os
+import importlib.abc as _ia, importlib.util as _iu
+_PSY_DIR = _os.path.dirname(__file__)
+class _PsyLoggingAlias(_ia.MetaPathFinder):
+    def find_spec(self, name, path=None, target=None):
+        if name == "psychopy.logging":
+            return _iu.spec_from_file_location(
+                "psychopy.logging", _os.path.join(_PSY_DIR, "_psylogging.py"))
+        return None
+sys.meta_path.insert(0, _PsyLoggingAlias())
+`;
+const initSrc = readFileSync(initPath, "utf8");
+const anchor = "import pathlib\n";
+const at = initSrc.indexOf(anchor);
+if (at === -1) {
+  console.error("[edgeone] ERROR: insertion anchor not found in psychopy/__init__.py");
+  process.exit(1);
+}
+writeFileSync(initPath, initSrc.slice(0, at + anchor.length) + SHIM + initSrc.slice(at + anchor.length));
 
 console.log(`[edgeone] done — cloud-functions/api is ${dirSizeMB(FUNC)}M (route /api/backend)`);

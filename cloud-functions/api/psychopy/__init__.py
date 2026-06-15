@@ -9,6 +9,20 @@ import os
 import sys
 import pathlib
 
+# --- EdgeOne vendoring shim (added by scripts/build-edgeone-output.mjs):
+# psychopy/logging.py was renamed to _psylogging.py (EdgeOne rejects files
+# named like stdlib modules); alias it back lazily as psychopy.logging.
+import os as _os
+import importlib.abc as _ia, importlib.util as _iu
+_PSY_DIR = _os.path.dirname(__file__)
+class _PsyLoggingAlias(_ia.MetaPathFinder):
+    def find_spec(self, name, path=None, target=None):
+        if name == "psychopy.logging":
+            return _iu.spec_from_file_location(
+                "psychopy.logging", _os.path.join(_PSY_DIR, "_psylogging.py"))
+        return None
+sys.meta_path.insert(0, _PsyLoggingAlias())
+
 
 def getVersion():
     return (pathlib.Path(__file__).parent/"VERSION").read_text(encoding="utf-8").strip()
