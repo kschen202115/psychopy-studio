@@ -35,6 +35,11 @@ def _default_core_src() -> Path:
     env = os.environ.get("PSYCHOPY_CORE_SRC")
     if env:
         return Path(env)
+    # Vendored case (e.g. this file copied to EdgeOne's app.py): the pruned
+    # psychopy/ package sits right next to this file.
+    here = Path(__file__).resolve().parent
+    if (here / "psychopy" / "experiment").is_dir():
+        return here
     repo = Path(__file__).resolve().parents[1]
     for candidate in (repo.parent / "psychopy-core-src", repo / "psychopy-core-src"):
         if (candidate / "psychopy" / "experiment").is_dir():
@@ -665,8 +670,13 @@ def run_command_envelope(message: str) -> tuple[int, str]:
         return 500, send_error(msg_id, exc)
 
 
-class CommandRequestHandler(BaseHTTPRequestHandler):
-    """Stateless HTTP shell: POST runs a command, GET is a health probe."""
+class handler(BaseHTTPRequestHandler):  # noqa: N801 - EdgeOne handler-mode requires this exact lowercase name; this file is copied verbatim to the function's app.py
+    """Stateless HTTP shell: POST runs a command, GET is a health probe.
+
+    Named ``handler`` (not CapWords) on purpose: EdgeOne Pages' Python
+    handler mode discovers the function by a top-level ``class handler`` that
+    subclasses BaseHTTPRequestHandler. The local dev server below uses it too.
+    """
 
     server_version = "OfficialPsychoPyWebBackend/1.0"
     protocol_version = "HTTP/1.1"
@@ -734,7 +744,7 @@ class CommandRequestHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    server = ThreadingHTTPServer((HOST, PORT), CommandRequestHandler)
+    server = ThreadingHTTPServer((HOST, PORT), handler)
     server.daemon_threads = True
     logger.info("Official PsychoPy web backend listening on http://%s:%s", HOST, PORT)
     try:

@@ -13,9 +13,9 @@
  *   └── cloud-functions/
  *       └── api-python/               Python function group (handler mode)
  *           ├── config.json           { version, routes } — the "meta" file
- *           ├── app.py                fixed entry, exposes `handler`
+ *           ├── app.py                fixed entry = copy of official_backend.py
+ *           │                         (defines `class handler`, self-contained)
  *           ├── requirements.txt      pip deps (EdgeOne installs these)
- *           ├── official_backend.py   backend logic (vendored)
  *           └── psychopy/             pruned official PsychoPy source (git dev)
  *
  * PsychoPy source: $PSYCHOPY_CORE_SRC -> ../psychopy-core-src ->
@@ -42,33 +42,6 @@ const PSYCHOPY_BRANCH = "dev";
 // The function handles every method on this exact path; the handler itself is
 // path-agnostic (GET=health, POST=command), the regex just scopes the route.
 const ROUTE = "^/api/backend$";
-
-const APP_PY = `"""EdgeOne Pages Python function entry (fixed filename: app.py).
-
-Handler mode: EdgeOne detects the function by a top-level \`class handler\`
-(a BaseHTTPRequestHandler subclass) defined here, so we subclass our
-CommandRequestHandler rather than import-aliasing it.
-
-Vendored siblings in this directory: official_backend.py + psychopy/.
-The route is declared in config.json (${ROUTE} -> /api/backend).
-"""
-import os
-import sys
-from http.server import BaseHTTPRequestHandler  # noqa: F401  (signals handler mode)
-
-_HERE = os.path.dirname(os.path.abspath(__file__))
-if _HERE not in sys.path:
-    sys.path.insert(0, _HERE)
-# official_backend reads PSYCHOPY_CORE_SRC at import time; psychopy/ is a sibling.
-os.environ.setdefault("PSYCHOPY_CORE_SRC", _HERE)
-
-from official_backend import CommandRequestHandler  # noqa: E402
-
-
-class handler(CommandRequestHandler):
-    """EdgeOne handler-mode entry; inherits do_GET / do_POST / do_OPTIONS."""
-    pass
-`;
 
 const CONFIG_JSON = JSON.stringify({ version: 3, routes: [{ src: ROUTE }] }, null, 2) + "\n";
 
@@ -123,9 +96,12 @@ cpSync(src, join(FUNC, "psychopy"), {
     return !rel.split(/[\\/]/).some((seg) => PRUNE_DIRS.has(seg));
   },
 });
-cpSync(BACKEND_SRC, join(FUNC, "official_backend.py"));
+// app.py IS the backend: official_backend.py defines `class handler` and is
+// self-contained (only imports the vendored psychopy sibling), so EdgeOne's
+// handler-mode scanner sees a real BaseHTTPRequestHandler with do_GET/do_POST
+// — no wrapper/indirection that hides the methods from detection.
+cpSync(BACKEND_SRC, join(FUNC, "app.py"));
 if (existsSync(REQUIREMENTS_SRC)) cpSync(REQUIREMENTS_SRC, join(FUNC, "requirements.txt"));
-writeFileSync(join(FUNC, "app.py"), APP_PY);
 writeFileSync(join(FUNC, "config.json"), CONFIG_JSON);
 
 console.log(`[edgeone] done — .edgeone is ${dirSizeMB(OUT)}M (assets + api-python; route ${ROUTE})`);
