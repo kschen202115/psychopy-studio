@@ -1,0 +1,21 @@
+# Python deps for the EdgeOne Pages serverless function (api/psychopy.py).
+#
+# The official PsychoPy *source* is vendored at build time (see
+# scripts/prepare-cloud-functions.mjs) and put on sys.path — it is deliberately
+# NOT installed from PyPI, which would drag in GUI deps (pyglet/wx/pyqt) the
+# serverless runtime can't use. These are the libraries the compile/profile
+# path actually imports.
+numpy
+scipy
+pandas
+openpyxl
+json-tricks
+pyyaml
+pyserial
+esprima
+dukpy
+astunparse
+i18next
+# javascripthon pulls heavy metapensiero extras; install with --no-deps if your
+# build supports per-package flags (the compiler only needs its pythonjs entry).
+javascripthon

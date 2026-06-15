@@ -43,10 +43,9 @@ dist
 .venv-backend/
 .claude/
 
-# EdgeOne Pages: the function dir is vendored at build time by
-# scripts/build-edgeone-output.mjs (backend.py + psychopy/); only
-# cloud-functions/requirements.txt is committed.
-cloud-functions/api/
+# EdgeOne Pages: the function (cloud-functions/api/backend.py + psychopy/) is
+# committed directly so EdgeOne's `makers ci` step sees it in the cloned tree
+# and wires the /api/backend route. Refresh it with `npm run build:edgeone-output`.
 
 # EdgeOne CLI project/login state
 .edgeone/
