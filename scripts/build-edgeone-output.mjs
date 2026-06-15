@@ -1,49 +1,42 @@
 #!/usr/bin/env node
 /**
- * Assemble the EdgeOne Pages Build Output (.edgeone/) for our custom build.
+ * Assemble the EdgeOne Pages Python cloud function (source / file-system routing).
  *
- * Because we use a custom build command, EdgeOne consumes a prebuilt
- * `.edgeone/` directory directly (edgeone.json -> outputDirectory: ".edgeone")
- * instead of running framework detection / processing cloud-functions source.
- * https://pages.edgeone.ai/document/building-output-configuration
+ * EdgeOne Pages routes by FILE PATH: a .py file under cloud-functions/ that
+ * defines `class handler(BaseHTTPRequestHandler)` is auto-mapped to the URL of
+ * its path. So cloud-functions/api/backend.py -> GET/POST /api/backend.
+ * https://pages.edgeone.ai/document/cloud-functions
  *
- * Produces:
- *   .edgeone/
- *   ├── assets/                       static frontend (copy of dist/)
- *   └── cloud-functions/
- *       └── api-python/               Python function group (handler mode)
- *           ├── config.json           { version, routes } — the "meta" file
- *           ├── app.py                fixed entry = copy of official_backend.py
- *           │                         (defines `class handler`, self-contained)
- *           ├── requirements.txt      pip deps (EdgeOne installs these)
- *           └── psychopy/             pruned official PsychoPy source (git dev)
+ * Static frontend is handled separately (svelte:build -> dist/, declared as
+ * outputDirectory in edgeone.json). This script only produces the function:
+ *
+ *   cloud-functions/
+ *   ├── requirements.txt              (committed) pip deps, EdgeOne installs
+ *   └── api/                          (gitignored, built here)
+ *       ├── backend.py                copy of official_backend.py — defines
+ *       │                             `class handler`, route = /api/backend
+ *       ├── requirements.txt          same deps, also inside the function dir
+ *       └── psychopy/                 pruned official PsychoPy source (git dev),
+ *                                     a sibling so backend.py imports it
  *
  * PsychoPy source: $PSYCHOPY_CORE_SRC -> ../psychopy-core-src ->
  * ./psychopy-core-src -> shallow `git clone -b dev`.
  */
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = join(ROOT, "dist");
-const OUT = join(ROOT, ".edgeone");
-const ASSETS = join(OUT, "assets");
-const FUNC = join(OUT, "cloud-functions", "api-python");
+const CF = join(ROOT, "cloud-functions");
+const FUNC = join(CF, "api");                 // cloud-functions/api/backend.py -> /api/backend
 const BACKEND_SRC = join(ROOT, "web_backend", "official_backend.py");
-const REQUIREMENTS_SRC = join(ROOT, "cloud-functions", "requirements.txt");
+const REQUIREMENTS_SRC = join(CF, "requirements.txt");
 
 const PRUNE_DIRS = new Set(["demos", "tests", "__pycache__"]);
 const PSYCHOPY_GIT = "https://github.com/psychopy/psychopy.git";
 const PSYCHOPY_BRANCH = "dev";
-
-// The function handles every method on this exact path; the handler itself is
-// path-agnostic (GET=health, POST=command), the regex just scopes the route.
-const ROUTE = "^/api/backend$";
-
-const CONFIG_JSON = JSON.stringify({ version: 3, routes: [{ src: ROUTE }] }, null, 2) + "\n";
 
 function findLocalSource() {
   const candidates = [
@@ -65,10 +58,6 @@ function dirSizeMB(p) {
   try { return execFileSync("du", ["-sm", p], { encoding: "utf8" }).split(/\s+/)[0]; } catch { return "?"; }
 }
 
-if (!existsSync(DIST)) {
-  console.error(`[edgeone] ERROR: ${DIST} not found — run "npm run svelte:build" first`);
-  process.exit(1);
-}
 if (!existsSync(BACKEND_SRC)) {
   console.error(`[edgeone] ERROR: backend not found at ${BACKEND_SRC}`);
   process.exit(1);
@@ -78,16 +67,17 @@ let src = findLocalSource();
 if (src) console.log(`[edgeone] using local PsychoPy source: ${src}`);
 else { console.log("[edgeone] no local PsychoPy checkout, cloning from git"); src = cloneSource(); }
 
-// Reset only our build output; preserve .edgeone/project.json (CLI link state).
-rmSync(ASSETS, { recursive: true, force: true });
-rmSync(join(OUT, "cloud-functions"), { recursive: true, force: true });
-mkdirSync(ASSETS, { recursive: true });
+console.log(`[edgeone] resetting ${FUNC}`);
+rmSync(FUNC, { recursive: true, force: true });
 mkdirSync(FUNC, { recursive: true });
 
-console.log("[edgeone] static: dist/ -> .edgeone/assets/");
-cpSync(DIST, ASSETS, { recursive: true });
+// backend.py defines `class handler` and is self-contained (imports only the
+// vendored psychopy sibling); its path cloud-functions/api/backend.py is the route.
+console.log("[edgeone] handler: official_backend.py -> cloud-functions/api/backend.py");
+cpSync(BACKEND_SRC, join(FUNC, "backend.py"));
+if (existsSync(REQUIREMENTS_SRC)) cpSync(REQUIREMENTS_SRC, join(FUNC, "requirements.txt"));
 
-console.log(`[edgeone] function: pruned psychopy/ -> .edgeone/cloud-functions/api-python/psychopy`);
+console.log(`[edgeone] deps: pruned psychopy/ -> cloud-functions/api/psychopy`);
 cpSync(src, join(FUNC, "psychopy"), {
   recursive: true,
   filter: (from) => {
@@ -96,12 +86,5 @@ cpSync(src, join(FUNC, "psychopy"), {
     return !rel.split(/[\\/]/).some((seg) => PRUNE_DIRS.has(seg));
   },
 });
-// app.py IS the backend: official_backend.py defines `class handler` and is
-// self-contained (only imports the vendored psychopy sibling), so EdgeOne's
-// handler-mode scanner sees a real BaseHTTPRequestHandler with do_GET/do_POST
-// — no wrapper/indirection that hides the methods from detection.
-cpSync(BACKEND_SRC, join(FUNC, "app.py"));
-if (existsSync(REQUIREMENTS_SRC)) cpSync(REQUIREMENTS_SRC, join(FUNC, "requirements.txt"));
-writeFileSync(join(FUNC, "config.json"), CONFIG_JSON);
 
-console.log(`[edgeone] done — .edgeone is ${dirSizeMB(OUT)}M (assets + api-python; route ${ROUTE})`);
+console.log(`[edgeone] done — cloud-functions/api is ${dirSizeMB(FUNC)}M (route /api/backend)`);

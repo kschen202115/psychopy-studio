@@ -43,7 +43,10 @@ dist
 .venv-backend/
 .claude/
 
-# EdgeOne Pages: build output (.edgeone/assets + .edgeone/cloud-functions,
-# assembled by scripts/build-edgeone-output.mjs) and CLI project/login state
-# both live here — never committed
+# EdgeOne Pages: the function dir is vendored at build time by
+# scripts/build-edgeone-output.mjs (backend.py + psychopy/); only
+# cloud-functions/requirements.txt is committed.
+cloud-functions/api/
+
+# EdgeOne CLI project/login state
 .edgeone/
