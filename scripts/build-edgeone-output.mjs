@@ -99,6 +99,28 @@ for (const rel of keep) {
 console.log(`[edgeone]   kept ${copied} files` + (missing.length ? `, ${missing.length} listed-but-missing` : ""));
 if (missing.length) console.warn("[edgeone]   missing:", missing.slice(0, 10).join(", "));
 
+// preferences.py loads `<platform>.spec` (Darwin/Linux/Windows). The trace ran
+// on macOS so the keep-list only has Darwin.spec; on EdgeOne (Linux) the missing
+// Linux.spec makes prefs lack the [general] section (KeyError). The spec is
+// effectively platform-agnostic, so reuse Darwin.spec for the other platforms.
+const darwinSpec = join(psyDir, "preferences", "Darwin.spec");
+if (existsSync(darwinSpec)) {
+  for (const name of ["Linux.spec", "Windows.spec"]) {
+    cpSync(darwinSpec, join(psyDir, "preferences", name));
+  }
+  console.log("[edgeone] preferences: Darwin.spec -> Linux.spec, Windows.spec");
+}
+
+// platform_specific/__init__.py does `from .linux import *` on Linux, but the
+// macOS trace only kept darwin.py. Write a no-op linux.py (the real module is
+// ctypes realtime-priority code the compile path never uses).
+const platInit = join(psyDir, "platform_specific", "__init__.py");
+if (existsSync(platInit)) {
+  const linuxPy = join(psyDir, "platform_specific", "linux.py");
+  writeFileSync(linuxPy, '"""Linux platform stub (serverless compile backend); real module is unused ctypes code."""\n\n\ndef rush(value=False, realtime=False):\n    return False\n');
+  console.log("[edgeone] platform_specific: added no-op linux.py");
+}
+
 // EdgeOne's PythonFunctionBuilder rejects any file named like a stdlib module;
 // psychopy ships psychopy/logging.py (clashes with `logging`). Rename it and
 // install a lazy meta-path alias EARLY in psychopy/__init__.py so the ~148
