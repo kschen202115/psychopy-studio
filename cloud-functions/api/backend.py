@@ -76,6 +76,27 @@ def _install_optional_stubs() -> None:
 _install_optional_stubs()
 
 
+def _redirect_writable_home() -> None:
+    """Point ``HOME`` at a writable dir when the real one is read-only.
+
+    ``psychopy.preferences`` creates ``$HOME/.psychopy3`` (and subdirs) at
+    import time. Serverless filesystems are read-only except for the temp dir,
+    so importing psychopy there crashes with 'Read-only file system'. If HOME is
+    not writable, redirect it to a fresh temp dir (mkdtemp avoids psychopy's
+    non-``exist_ok`` ``os.makedirs`` failing on a reused warm container).
+    """
+    home = os.environ.get("HOME") or ""
+    if home and os.access(home, os.W_OK):
+        return
+    try:
+        os.environ["HOME"] = tempfile.mkdtemp(prefix="psychopy-home-")
+    except OSError:
+        pass
+
+
+_redirect_writable_home()
+
+
 def _default_core_src() -> Path:
     """Resolve the official PsychoPy source checkout.
 
