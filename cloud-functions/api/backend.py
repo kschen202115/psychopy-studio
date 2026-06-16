@@ -25,6 +25,57 @@ from typing import Any
 from urllib.parse import urlparse
 
 
+def _install_optional_stubs() -> None:
+    """Stub heavy deps PsychoPy imports at load time but never uses here.
+
+    PsychoPy imports ``scipy`` and ``pandas`` at module load, but the
+    compile/profile command paths never call into them. On the serverless
+    function they are deliberately NOT installed (dropping ~167MB to stay under
+    the bundle size limit); install no-op stubs so PsychoPy's top-level imports
+    succeed. When the real packages ARE installed (local dev) this is a no-op.
+    """
+    import importlib.abc
+    import importlib.machinery
+    import types
+
+    missing = []
+    for name in ("scipy", "pandas"):
+        try:
+            __import__(name)
+        except ImportError:
+            missing.append(name)
+    if not missing:
+        return
+
+    class _Stub(types.ModuleType):
+        __path__: list[str] = []
+
+        def __getattr__(self, attr: str) -> Any:
+            child = _Stub(f"{self.__name__}.{attr}")
+            setattr(self, attr, child)
+            return child
+
+        def __call__(self, *args: Any, **kwargs: Any) -> Any:
+            return _Stub(self.__name__)
+
+    class _StubFinder(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+        def find_spec(self, name: str, path: Any = None, target: Any = None) -> Any:
+            if name.split(".")[0] in missing:
+                return importlib.machinery.ModuleSpec(name, self)
+            return None
+
+        def create_module(self, spec: Any) -> Any:
+            return _Stub(spec.name)
+
+        def exec_module(self, module: Any) -> None:
+            pass
+
+    sys.meta_path.insert(0, _StubFinder())
+
+
+_install_optional_stubs()
+
+
 def _default_core_src() -> Path:
     """Resolve the official PsychoPy source checkout.
 

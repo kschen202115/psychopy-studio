@@ -1,10 +1,11 @@
-# Python deps for the EdgeOne Pages serverless function (api/psychopy.py).
+# Python deps EdgeOne installs for the serverless function (cloud-functions/api/backend.py).
 #
-# The official PsychoPy *source* is vendored at build time (see
-# scripts/prepare-cloud-functions.mjs) and put on sys.path — it is deliberately
-# NOT installed from PyPI, which would drag in GUI deps (pyglet/wx/pyqt) the
-# serverless runtime can't use. These are the libraries the compile/profile
-# path actually imports.
+# PsychoPy itself is vendored under cloud-functions/api/psychopy/ (not pip).
+# scipy and pandas are intentionally NOT listed: PsychoPy imports them at module
+# load, but the compile/profile command paths never call into them, so the
+# function stubs them out (_install_optional_stubs in backend.py). Dropping them
+# saves ~167MB and keeps the bundle well under the size limit.
+numpy
 openpyxl
 json-tricks
 pyyaml
@@ -12,6 +13,7 @@ esprima
 dukpy
 astunparse
 i18next
-# javascripthon pulls heavy metapensiero extras; install with --no-deps if your
-# build supports per-package flags (the compiler only needs its pythonjs entry).
 javascripthon
+pyserial
+packaging
+six
