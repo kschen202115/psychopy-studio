@@ -137,6 +137,15 @@ if (existsSync(platInit)) {
   console.log("[edgeone] platform_specific: added no-op linux.py");
 }
 
+// EdgeOne's bundler drops dirs named "scripts" from the function, taking the
+// PsychoJS/PsychoPy compiler (psychopy/scripts/psyexpCompile.py) with it.
+// Rename it; backend.py imports compileScript with a scripts->pyscripts fallback.
+const scriptsDir = join(psyDir, "scripts");
+if (existsSync(scriptsDir)) {
+  renameSync(scriptsDir, join(psyDir, "pyscripts"));
+  console.log("[edgeone] renamed psychopy/scripts -> pyscripts (EdgeOne drops 'scripts')");
+}
+
 // EdgeOne's PythonFunctionBuilder rejects any file named like a stdlib module;
 // psychopy ships psychopy/logging.py (clashes with `logging`). Rename it and
 // install a lazy meta-path alias EARLY in psychopy/__init__.py so the ~148

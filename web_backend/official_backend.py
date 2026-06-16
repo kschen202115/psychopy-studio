@@ -475,7 +475,12 @@ def _compile_official(
     resources: Any = None,
 ) -> dict[str, Any]:
     ensure_core_path()
-    from psychopy.scripts.psyexpCompile import compileScript
+    try:
+        from psychopy.scripts.psyexpCompile import compileScript
+    except ModuleNotFoundError:
+        # EdgeOne's function bundler strips dirs named "scripts"; the build
+        # renames the vendored psychopy/scripts -> psychopy/pyscripts.
+        from psychopy.pyscripts.psyexpCompile import compileScript
 
     roundtrip = _roundtrip_impl(psyexp_content, psyexp_path, resources=resources)
     infile = Path(roundtrip["outfile"])
