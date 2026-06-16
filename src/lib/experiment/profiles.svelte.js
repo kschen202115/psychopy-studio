@@ -29,6 +29,17 @@ export var pending = $state({
 })
 
 function applyProfiles(kind, data, source) {
+    if (kind === "components" && data && typeof data === "object") {
+        // Some serverless hosts (e.g. EdgeOne) strip non-.py files from the
+        // function bundle, so the official backend can't read the component
+        // SVG icons and returns an empty iconSVG. Keep the bundled fallback
+        // iconSVG when the backend doesn't supply one, so icons still render.
+        for (const [name, prof] of Object.entries(data)) {
+            if (prof && !prof.iconSVG && profiles[kind][name]?.iconSVG) {
+                prof.iconSVG = profiles[kind][name].iconSVG
+            }
+        }
+    }
     Object.assign(profiles[kind], data)
     profileSources[kind] = source
     return profiles[kind]
