@@ -97,6 +97,49 @@ def _redirect_writable_home() -> None:
 _redirect_writable_home()
 
 
+def _restore_psychopy_data() -> None:
+    """Restore PsychoPy data files EdgeOne strips from the function bundle.
+
+    EdgeOne's Python function bundler keeps only ``.py`` files, dropping data
+    files PsychoPy reads at runtime (``.tmpl`` code templates, ``.yaml`` alert
+    catalogues, ``.svg`` icons, …). The build base64-embeds them into
+    ``psychopy/_edgeone_data.py``. If the vendored package is missing them (its
+    dir is read-only here), copy the .py package to a writable temp dir, write
+    the data files back in, and point PSYCHOPY_CORE_SRC at it.
+    """
+    here = Path(__file__).resolve().parent
+    bundled = here / "psychopy"
+    data_mod = bundled / "_edgeone_data.py"
+    # Sentinel: a template the compiler needs. Present -> data intact (local dev).
+    sentinel = bundled / "experiment" / "components" / "settings" / "JS_htmlHeader.tmpl"
+    if not data_mod.is_file() or sentinel.is_file():
+        return
+    import base64
+    import importlib.util
+    import shutil
+
+    spec = importlib.util.spec_from_file_location("_edgeone_data", data_mod)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    files = getattr(mod, "FILES", {})
+    if not files:
+        return
+    dest_root = Path(tempfile.gettempdir()) / "psyroot"
+    dest = dest_root / "psychopy"
+    if not dest.exists():
+        shutil.copytree(bundled, dest)
+    for rel, b64 in files.items():
+        target = dest / rel
+        if target.is_file():
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(base64.b64decode(b64))
+    os.environ["PSYCHOPY_CORE_SRC"] = str(dest_root)
+
+
+_restore_psychopy_data()
+
+
 def _default_core_src() -> Path:
     """Resolve the official PsychoPy source checkout.
 

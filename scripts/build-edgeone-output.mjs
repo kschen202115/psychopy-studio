@@ -23,7 +23,7 @@
  * ./psychopy-core-src -> shallow `git clone -b dev`.
  */
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -195,5 +195,25 @@ if (at === -1) {
 initSrc = initSrc.slice(0, at + anchor.length) + SHIM + initSrc.slice(at + anchor.length);
 writeFileSync(initPath, initSrc);
 console.log(`[edgeone] hardcoded version ${version} / git_sha ${gitSha} (EdgeOne drops VERSION/GIT_SHA)`);
+
+// EdgeOne's bundler keeps only .py files, dropping every data file PsychoPy
+// reads at runtime (.tmpl templates, .yaml alerts, .svg icons, .json, …).
+// Base64-embed them all so the function can restore them into a writable copy
+// at startup (see _restore_psychopy_data in official_backend.py).
+const dataFiles = {};
+const walk = (dir, base) => {
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const rel = base ? `${base}/${ent.name}` : ent.name;
+    if (ent.isDirectory()) walk(join(dir, ent.name), rel);
+    else if (!ent.name.endsWith(".py")) dataFiles[rel] = readFileSync(join(dir, ent.name)).toString("base64");
+  }
+};
+walk(psyDir, "");
+const body = Object.entries(dataFiles).map(([k, v]) => `    ${JSON.stringify(k)}: ${JSON.stringify(v)},`).join("\n");
+writeFileSync(
+  join(psyDir, "_edgeone_data.py"),
+  `"""Base64 of PsychoPy data files EdgeOne strips from the bundle; restored at runtime."""\nFILES = {\n${body}\n}\n`,
+);
+console.log(`[edgeone] embedded ${Object.keys(dataFiles).length} data files -> _edgeone_data.py`);
 
 console.log(`[edgeone] done — cloud-functions/api is ${dirSizeMB(FUNC)}M (route /api/backend)`);
