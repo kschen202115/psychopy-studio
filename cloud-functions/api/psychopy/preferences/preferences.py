@@ -331,8 +331,10 @@ class Preferences:
         fine, eg for key-bindings, but outside it (where user prefs will
         live) is not allowed by easy_install (security risk)
         """
-        self.prefsSpec = ConfigObj(self.paths['prefsSpecFile'],
-                                   encoding='UTF8', list_values=False)
+        # EdgeOne drops .spec files from the bundle; load the spec from the
+        # embedded copy instead of the (possibly-missing) file.
+        from psychopy.preferences._edgeone_spec import SPEC as _SPEC
+        self.prefsSpec = ConfigObj(_SPEC.splitlines(), list_values=False)
 
         # check/create path for user prefs
         if not os.path.isdir(self.paths['userPrefsDir']):

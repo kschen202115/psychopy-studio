@@ -103,12 +103,28 @@ if (missing.length) console.warn("[edgeone]   missing:", missing.slice(0, 10).jo
 // on macOS so the keep-list only has Darwin.spec; on EdgeOne (Linux) the missing
 // Linux.spec makes prefs lack the [general] section (KeyError). The spec is
 // effectively platform-agnostic, so reuse Darwin.spec for the other platforms.
-const darwinSpec = join(psyDir, "preferences", "Darwin.spec");
-if (existsSync(darwinSpec)) {
-  for (const name of ["Linux.spec", "Windows.spec"]) {
-    cpSync(darwinSpec, join(psyDir, "preferences", name));
+// EdgeOne drops non-.py data files (incl. .spec) from the function bundle, so
+// preferences.py's ConfigObj(<platform>.spec) reads an empty/missing file and
+// prefs end up without the [general] section (KeyError). Embed the spec into a
+// .py module, patch preferences.py to load it from there, and drop the .spec.
+const prefDir = join(psyDir, "preferences");
+const darwinSpec = join(prefDir, "Darwin.spec");
+const prefsPy = join(prefDir, "preferences.py");
+if (existsSync(darwinSpec) && existsSync(prefsPy)) {
+  writeFileSync(
+    join(prefDir, "_edgeone_spec.py"),
+    `"""Embedded prefs spec — EdgeOne drops non-.py data files from the bundle."""\nSPEC = ${JSON.stringify(readFileSync(darwinSpec, "utf8"))}\n`,
+  );
+  const oldSpec = "        self.prefsSpec = ConfigObj(self.paths['prefsSpecFile'],\n                                   encoding='UTF8', list_values=False)";
+  const newSpec = "        # EdgeOne drops .spec files; load the spec from the embedded copy.\n        from psychopy.preferences._edgeone_spec import SPEC as _SPEC\n        self.prefsSpec = ConfigObj(_SPEC.splitlines(), list_values=False)";
+  const prefsSrc = readFileSync(prefsPy, "utf8");
+  if (!prefsSrc.includes(oldSpec)) {
+    console.error("[edgeone] ERROR: preferences spec-load line not found to patch");
+    process.exit(1);
   }
-  console.log("[edgeone] preferences: Darwin.spec -> Linux.spec, Windows.spec");
+  writeFileSync(prefsPy, prefsSrc.replace(oldSpec, newSpec));
+  for (const f of ["Darwin.spec", "Linux.spec", "Windows.spec"]) rmSync(join(prefDir, f), { force: true });
+  console.log("[edgeone] preferences: embedded spec -> _edgeone_spec.py, dropped .spec files");
 }
 
 // platform_specific/__init__.py does `from .linux import *` on Linux, but the
