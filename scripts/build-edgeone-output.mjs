@@ -123,13 +123,30 @@ class _PsyLoggingAlias(_ia.MetaPathFinder):
         return None
 sys.meta_path.insert(0, _PsyLoggingAlias())
 `;
-const initSrc = readFileSync(initPath, "utf8");
+// EdgeOne's bundler drops extensionless files (VERSION, GIT_SHA), so
+// psychopy/__init__.py's getVersion() FileNotFound-crashes at import. Hardcode
+// the values (read from source) instead of reading those files at runtime.
+const version = existsSync(join(src, "VERSION")) ? readFileSync(join(src, "VERSION"), "utf8").trim() : "0.0.0";
+let gitSha = existsSync(join(src, "GIT_SHA")) ? readFileSync(join(src, "GIT_SHA"), "utf8").trim() : "";
+// Use a non-"n/a" value so __init__ skips its `git rev-parse` subprocess fallback.
+if (!gitSha || gitSha === "n/a") gitSha = "vendored";
+let initSrc = readFileSync(initPath, "utf8");
+initSrc = initSrc.replace(
+  'return (pathlib.Path(__file__).parent/"VERSION").read_text(encoding="utf-8").strip()',
+  `return ${JSON.stringify(version)}`,
+);
+initSrc = initSrc.replace(
+  '__git_sha__ = (pathlib.Path(__file__).parent/"GIT_SHA").read_text(encoding="utf-8").strip()',
+  `__git_sha__ = ${JSON.stringify(gitSha)}`,
+);
 const anchor = "import pathlib\n";
 const at = initSrc.indexOf(anchor);
 if (at === -1) {
   console.error("[edgeone] ERROR: insertion anchor not found in psychopy/__init__.py");
   process.exit(1);
 }
-writeFileSync(initPath, initSrc.slice(0, at + anchor.length) + SHIM + initSrc.slice(at + anchor.length));
+initSrc = initSrc.slice(0, at + anchor.length) + SHIM + initSrc.slice(at + anchor.length);
+writeFileSync(initPath, initSrc);
+console.log(`[edgeone] hardcoded version ${version} / git_sha ${gitSha} (EdgeOne drops VERSION/GIT_SHA)`);
 
 console.log(`[edgeone] done — cloud-functions/api is ${dirSizeMB(FUNC)}M (route /api/backend)`);
