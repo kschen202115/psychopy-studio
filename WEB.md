@@ -8,27 +8,23 @@
 | 层 | 实现 |
 | --- | --- |
 | 前端 | 官方 psychopy-studio Svelte 界面(本仓库) |
-| 编译 | 官方 `psychopy.experiment` + `psychopy.scripts.psyexpCompile`,由 `web_backend/official_backend.py` 这个薄 WebSocket 壳暴露 |
+| 编译 | 官方 `psychopy.experiment` + `psychopy.scripts.psyexpCompile`,**在浏览器内由 Pyodide Web Worker 运行**(`src/lib/official/pyodideWorker.js` + 传输无关的 `web_backend/official_core.py`),无服务器进程 |
 | 运行库 | 官方 PsychoJS(从 `https://lib.pavlovia.org` 按官方 `getPsychoJS` 的规则获取,缓存进浏览器存储) |
 | 文件系统 | 浏览器 IndexedDB(WebFS),Service Worker 把 `/webfs/*` 映射成可访问的 URL;支持上传/下载与本机交换文件 |
 
 ## 启动
 
-### 1. Python 后端(官方编译器)
+### 1. 构建浏览器内后端资产(无需启动服务器)
 
-需要官方 PsychoPy 源码(dev 分支)在本仓库旁边的 `psychopy-core-src/`:
+编译器跑在浏览器里,所以**没有服务器要启动**。两个生成物(均 gitignore)首次需构建一次:
 
 ```bash
-git clone --depth 1 -b dev https://github.com/psychopy/psychopy.git ../psychopy-core-src
-
-python3 -m venv .venv-backend
-.venv-backend/bin/pip install websockets esprima dukpy astunparse numpy scipy pandas \
-    openpyxl json-tricks i18next pyyaml pyserial
-.venv-backend/bin/pip install javascripthon --no-deps
-
-.venv-backend/bin/python web_backend/official_backend.py
-# 监听 ws://127.0.0.1:8002(可用 PSYCHOPY_WEB_BACKEND_HOST/PORT、PSYCHOPY_CORE_SRC 覆盖)
+bash web_backend/pyodide/build_archive.sh   # 精简 psychopy + vendored 依赖 → static/pyodide/psychopy-core.zip
+bash web_backend/pyodide/fetch_runtime.sh   # 自托管 pyodide 运行时 + numpy → static/pyodide/runtime/
 ```
+
+`build_archive.sh` 会在需要时把官方 PsychoPy `dev` 分支克隆到 `../psychopy-core-src`
+(可用 `PSYCHOPY_CORE_SRC` 覆盖)。后端原理见 [web_backend/pyodide/README.md](web_backend/pyodide/README.md)。
 
 ### 2. 前端
 
@@ -37,8 +33,12 @@ npm install
 npm run svelte:dev      # http://localhost:5173
 ```
 
-生产部署:`npm run svelte:build` 后静态托管 `dist/`,后端反代到 `wss://<host>:8002`
-(前端可用 `localStorage.setItem("psychopy.officialBackendUrl", "wss://...")` 指定后端地址)。
+Pyodide Worker 在首次编译时懒加载(数秒),之后保持热。
+
+生产部署:三步——`build_archive.sh` + `fetch_runtime.sh` + `npm run svelte:build`,然后把 `dist/`
+托管到**任意静态服务器/CDN**即可,**无后端可反代**;运行时与 psychopy 包都同源自托管,可完全离线。
+
+> 旧的 WebSocket Python 服务器(`official_backend.py`)仍保留,作本地开发 / 对比浏览器输出之用。
 
 ## 浏览器内工作流
 
@@ -52,7 +52,7 @@ npm run svelte:dev      # http://localhost:5173
 
 ## 数据流(资源映射)
 
-- 编译时:实验文件夹下的素材以 base64 随编译请求发给后端,落在服务端临时目录的 `.psyexp` 旁,官方编译器据此读取条件表、登记资源清单,然后临时目录即弃;
+- 编译时:实验文件夹下的素材以 base64 随编译请求发给 Worker,落在 Pyodide 虚拟文件系统临时目录的 `.psyexp` 旁,官方编译器据此读取条件表、登记资源清单,然后临时目录即弃;
 - 运行时:PsychoJS 按 `psychoJS.start({resources})` 清单从 `/webfs/<实验目录>/` 相对路径取素材(Service Worker 从 IndexedDB 提供);
 - 注意:不要给实验设置 "HTML path"(在线导出目录)——官方编译器在设了 HTML 目录时不写运行时资源清单,Web 模式依赖该清单。
 

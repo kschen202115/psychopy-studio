@@ -16,33 +16,33 @@ use PsychoPy on any device without installing anything.
 ### Roadmap
 
 ```
-Phase 1 — Python backend (current)
+Phase 1 — Python backend (done, kept as optional dev tool)
   Browser UI  ←WebSocket→  local Python process  →  official psychopy compiler
-  Files: browser IndexedDB.  Compiler: official psychopy.experiment + psyexpCompile.
-  Status: working end-to-end, some rough edges.
 
-Phase 2 — Python in WASM (planned)
-  Eliminate the local Python process entirely.
-  Run the official PsychoPy compiler inside the browser via Pyodide / python-wasm.
-  No backend, no WebSocket.  Pure browser, works offline.
+Phase 2 — Python in WASM (current)
+  The official PsychoPy compiler runs INSIDE the browser via Pyodide.
+  No server process, no WebSocket. Self-hosted runtime → works fully offline.
+  Files: browser IndexedDB.  Compiler: official psychopy.experiment + psyexpCompile.
 
 Phase 3 — Native JS compiler (long-term)
   Port the .psyexp → PsychoJS compilation pipeline to JavaScript.
-  Zero Python dependency.  Full offline capability.  Embeddable in any page.
+  Zero Python dependency.  Embeddable in any page.
 ```
 
 Each phase keeps the same browser-storage architecture and UI — only the compilation
-layer changes.  Phase 1 is complete and usable today.
+layer changes.  **Phase 2 is complete:** the compiler runs in a Pyodide Web Worker,
+so a deployed app needs no backend at all. The Phase 1 WebSocket server still works
+and is kept for local development / output diffing.
 
 ---
 
-## What this fork adds (Phase 1)
+## What this fork adds
 
 | | Upstream | This fork |
 |---|---|---|
 | **Deployment** | Electron desktop app | Electron + plain browser (SvelteKit) |
 | **File storage** | Local OS filesystem | Browser IndexedDB (`/webfs/*`) — nothing leaves your machine |
-| **Compilation** | Desktop Python only | Via WebSocket to a local Python process (official `psychopy.experiment` + `psyexpCompile`) |
+| **Compilation** | Desktop Python only | **In-browser via Pyodide** — official `psychopy.experiment` + `psyexpCompile` run in a Web Worker, no server |
 | **PsychoJS library** | Bundled with Pavlovia upload | Auto-fetched from `lib.pavlovia.org`, cached in browser storage |
 | **Resource files** | On disk | Uploaded to browser storage; sent to compiler as base64; resolved with `exp.getResourceFiles()` |
 | **Preview** | Not available | One click → new tab, `__pilotToken=local` |
@@ -56,27 +56,22 @@ official PsychoPy/Pavlovia pipeline — this fork does not reimplement them.
 
 ## Quick start
 
-### 1 — Python compiler backend
+### 1 — Build the in-browser backend assets
+
+The compiler runs in the browser, so there is **no server to start**. Two
+generated assets (both gitignored) must be built once before running:
 
 ```bash
-# Put the official PsychoPy source next to this repo
-git clone --depth 1 -b dev https://github.com/psychopy/psychopy.git ../psychopy-core-src
-
-# Minimal Python env (no GUI packages needed)
-python3 -m venv .venv-backend
-.venv-backend/bin/pip install websockets esprima dukpy astunparse numpy scipy pandas \
-    openpyxl json-tricks i18next pyyaml pyserial
-.venv-backend/bin/pip install javascripthon --no-deps
-
-# Start (listens on ws://127.0.0.1:8002)
-.venv-backend/bin/python web_backend/official_backend.py
-# or: npm run web:backend
+# pruned upstream psychopy + vendored python deps  → static/pyodide/psychopy-core.zip
+bash web_backend/pyodide/build_archive.sh
+# self-hosted pyodide runtime + numpy              → static/pyodide/runtime/
+bash web_backend/pyodide/fetch_runtime.sh
 ```
 
-To use a different PsychoPy checkout:
-```bash
-export PSYCHOPY_CORE_SRC=/path/to/psychopy
-```
+`build_archive.sh` clones the official PsychoPy `dev` branch to
+`../psychopy-core-src` if needed (override with `PSYCHOPY_CORE_SRC`). See
+[web_backend/pyodide/README.md](web_backend/pyodide/README.md) for how the
+backend works.
 
 ### 2 — Frontend
 
@@ -85,7 +80,12 @@ npm install
 npm run svelte:dev   # → http://localhost:5173
 ```
 
-Open `http://localhost:5173`, switch to **Builder**.
+Open `http://localhost:5173`, switch to **Builder**. The Pyodide worker starts
+lazily on the first compile (a few seconds), then stays warm.
+
+> **Optional** — the legacy WebSocket Python server still exists for local
+> development / diffing the in-browser output. See
+> [web_backend/pyodide/README.md](web_backend/pyodide/README.md).
 
 ---
 
@@ -99,9 +99,9 @@ Upload .psyexp + stimuli
         │
         ▼
   [Compile to JS and preview]
-        │  WebSocket: { psyexp, resources: [{path, base64}] }
+        │  postMessage: { psyexp, resources: [{path, base64}] }
         ▼
-  official_backend.py
+  Pyodide Web Worker → official_core.handle_command()
     psychopy.experiment.fromFile()
     psychopy.scripts.psyexpCompile()
     exp.getResourceFiles()   ← official resource manifest
@@ -126,18 +126,22 @@ Upload .psyexp + stimuli
 
 ---
 
-## Architecture (Phase 1)
+## Architecture
 
 ```
-Browser                                     Python (local, Phase 1 only)
-─────────────────────────────────────       ──────────────────────────────────
-SvelteKit UI (Svelte 5)                     web_backend/official_backend.py
-  │                                           thin WebSocket shell
-  │  ws://127.0.0.1:8002
-  ├──────────────────────────────────────►  psychopy.experiment.fromFile()
-  │  { psyexp, resources:[{path,base64}] }  psychopy.scripts.psyexpCompile()
-  │◄──────────────────────────────────────  exp.getResourceFiles()
-  │  { html, js, requiredResources }         temp dir discarded after compile
+Browser (everything runs here — no server)
+──────────────────────────────────────────────────────────────────
+SvelteKit UI (Svelte 5)
+  │   src/lib/official/backend.js  (unchanged public API)
+  │   postMessage { psyexp, resources:[{path,base64}] }
+  ▼
+Pyodide Web Worker  (src/lib/official/pyodideWorker.js)
+  │   self-hosted pyodide runtime + numpy + pruned psychopy archive
+  │   official_core.handle_command()
+  │     psychopy.experiment.fromFile()
+  │     psychopy.scripts.psyexpCompile()
+  │     exp.getResourceFiles()
+  │   → { html, js, requiredResources }
   │
   ▼
 IndexedDB (PsychoPyWebFS)
@@ -160,30 +164,32 @@ Service Worker (/webfs-sw.js)
 
 ---
 
-## Production deployment (Phase 1)
+## Production deployment
 
 ```bash
-npm run svelte:build   # static output → dist/
+bash web_backend/pyodide/build_archive.sh   # → static/pyodide/psychopy-core.zip
+bash web_backend/pyodide/fetch_runtime.sh   # → static/pyodide/runtime/
+npm run svelte:build                         # static output → dist/
 ```
 
-Host `dist/` on any static server. Run the Python backend on the same host and
-reverse-proxy it (e.g. Nginx `proxy_pass`) to `wss://yourdomain.com/ws-backend`.
-
-Point the frontend at it:
-```js
-localStorage.setItem("psychopy.officialBackendUrl", "wss://yourdomain.com/ws-backend")
-```
+Host `dist/` on **any static server / CDN** — there is no backend to run or
+reverse-proxy. The Pyodide runtime and PsychoPy archive are served from the same
+origin, so the app works offline and behind restricted networks (no external
+CDN at run time).
 
 ---
 
-## Known limitations (Phase 1)
+## Known limitations
 
 - Only PsychoJS target is supported in browser mode (Python execution still requires the desktop app).
 - Stimulus files must be in the same folder as the `.psyexp` (subfolders are fine); files placed
   elsewhere are matched by filename as a fallback, and anything still missing is listed in the Export dialog.
 - First preview requires internet access to download the official PsychoJS library; subsequent
   runs use the cached copy in browser storage.
-- The Python backend must be running and reachable at compile time.
+- First compile of a session loads the Pyodide runtime (~29 MB from the app's own
+  origin) and inits the worker for a few seconds; it then stays warm.
+- `getDeviceProfiles` (camera/serial hardware) degrades to local fallback profiles
+  in the browser — same as a desktop backend without `pyglet`.
 
 ---
 
