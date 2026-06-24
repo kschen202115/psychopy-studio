@@ -166,16 +166,52 @@ Service Worker (/webfs-sw.js)
 
 ## Production deployment
 
+The app is a **pure static site** — no backend, no serverless function, no
+reverse-proxy. The compiler runs in the browser via Pyodide.
+
+### Build (3 steps, in order)
+
+The two asset scripts must run **before** `svelte:build` so `adapter-static`
+copies the generated assets from `static/pyodide/` into `dist/`:
+
 ```bash
-bash web_backend/pyodide/build_archive.sh   # → static/pyodide/psychopy-core.zip
-bash web_backend/pyodide/fetch_runtime.sh   # → static/pyodide/runtime/
-npm run svelte:build                         # static output → dist/
+bash web_backend/pyodide/fetch_runtime.sh   # → static/pyodide/runtime/        (~25 MB: pyodide + numpy)
+bash web_backend/pyodide/build_archive.sh   # → static/pyodide/psychopy-core.zip (~3.8 MB: pruned psychopy + deps)
+npm ci
+npm run svelte:build                         # → dist/  (~65 MB, fully static)
 ```
 
-Host `dist/` on **any static server / CDN** — there is no backend to run or
-reverse-proxy. The Pyodide runtime and PsychoPy archive are served from the same
-origin, so the app works offline and behind restricted networks (no external
-CDN at run time).
+One-liner for CI:
+
+```bash
+bash web_backend/pyodide/fetch_runtime.sh && bash web_backend/pyodide/build_archive.sh && npm ci && npm run svelte:build
+```
+
+### Host
+
+Serve `dist/` on **any static host / CDN** (Nginx, Caddy, GitHub Pages, Netlify,
+Vercel, Cloudflare Pages, …). The Pyodide runtime and the PsychoPy archive are
+served from the same origin, so the app works offline and behind CDN-restricted
+networks (no external CDN at run time).
+
+For Git-based static hosts, set the build command to the CI one-liner above and
+the output directory to `dist`.
+
+### Build-environment requirements (CI)
+
+The generated assets are gitignored, so the build machine regenerates them and
+needs: `bash`, `python3` + `pip`, `git`, `curl`, `zip`, and `node`/`npm`. These
+scripts reach the network **only at build time** (jsdelivr for pyodide, GitHub
+for psychopy, PyPI for the pure-python deps); the deployed site needs none.
+
+### Host config notes
+
+- Serve `.wasm` as `application/wasm` (Pyodide uses streaming compilation) —
+  most hosts do this by default.
+- **No** COOP/COEP cross-origin-isolation headers are required (single-threaded
+  worker, no SharedArrayBuffer).
+- `static/webfs-sw.js` is served at the root scope (`/webfs-sw.js`) — satisfied
+  by any static host.
 
 ---
 
