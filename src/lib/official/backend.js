@@ -1,18 +1,14 @@
-export const DEFAULT_OFFICIAL_BACKEND_URL = "ws://localhost:8002";
+/**
+ * Official PsychoPy backend client.
+ *
+ * Transport is now an in-browser Pyodide Web Worker (no server process): the
+ * worker runs the same official_core.handle_command used by the legacy
+ * WebSocket dev server. The public API below is unchanged so callers
+ * (export.js, experiment.svelte.js, profiles.svelte.js) need no edits.
+ */
 
-function browserDefaultUrl() {
-    if (typeof window === "undefined") return DEFAULT_OFFICIAL_BACKEND_URL;
-    const protocol = window.location?.protocol === "https:" ? "wss:" : "ws:";
-    const hostname = window.location?.hostname || "localhost";
-    return `${protocol}//${hostname}:8002`;
-}
-
-function browserConfiguredUrl() {
-    if (typeof window === "undefined") return DEFAULT_OFFICIAL_BACKEND_URL;
-    return window.__PSYCHOPY_OFFICIAL_BACKEND_URL__
-        || window.localStorage?.getItem?.("psychopy.officialBackendUrl")
-        || browserDefaultUrl();
-}
+// kept for backwards-compatible imports; no longer used for transport.
+export const DEFAULT_OFFICIAL_BACKEND_URL = "pyodide://in-browser";
 
 function commandId() {
     if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -22,67 +18,78 @@ function commandId() {
 }
 
 export function isOfficialBackendClientAvailable() {
-    return typeof WebSocket !== "undefined";
+    return typeof Worker !== "undefined" && typeof WebAssembly !== "undefined";
 }
 
-export function sendOfficialBackendCommand(command, kwargs={}, options={}) {
-    const {
-        url = browserConfiguredUrl(),
-        timeout = 120000,
-    } = options;
+let worker = null;
+const pending = new Map();         // id -> { resolve, reject, timer }
+const statusListeners = new Set(); // optional init-progress subscribers
+
+/** Subscribe to worker init progress ({phase, detail} | {ready:true}). */
+export function onOfficialBackendStatus(listener) {
+    statusListeners.add(listener);
+    return () => statusListeners.delete(listener);
+}
+
+function getWorker() {
+    if (worker) return worker;
+    worker = new Worker(new URL("./pyodideWorker.js", import.meta.url), {
+        type: "module",
+    });
+    worker.onmessage = (ev) => {
+        const data = ev.data || {};
+        if (data.type === "status") {
+            statusListeners.forEach((l) => l({ phase: data.phase, detail: data.detail }));
+            return;
+        }
+        if (data.type === "ready") {
+            statusListeners.forEach((l) => l({ ready: true }));
+            return;
+        }
+        const entry = pending.get(data.id);
+        if (!entry) return;
+        clearTimeout(entry.timer);
+        pending.delete(data.id);
+        if (data.ok) {
+            entry.resolve(data.response);
+        } else {
+            const error = data.error || {};
+            const err = new Error(error.message || "Official PsychoPy backend command failed.");
+            err.backendError = error;
+            entry.reject(err);
+        }
+    };
+    worker.onerror = (ev) => {
+        // fail all in-flight commands; drop the worker so the next call retries
+        const err = new Error(`Pyodide backend worker error: ${ev.message || ev}`);
+        pending.forEach(({ reject, timer }) => { clearTimeout(timer); reject(err); });
+        pending.clear();
+        worker = null;
+    };
+    return worker;
+}
+
+export function sendOfficialBackendCommand(command, kwargs = {}, options = {}) {
+    const { timeout = 120000 } = options;
 
     if (!isOfficialBackendClientAvailable()) {
-        return Promise.reject(new Error("Official PsychoPy web backend client requires WebSocket support."));
+        return Promise.reject(new Error(
+            "Official PsychoPy backend requires Web Worker + WebAssembly support."));
     }
 
     return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url);
+        const w = getWorker();
         const id = commandId();
         const timer = setTimeout(() => {
-            try { socket.close(); } catch {}
-            reject(new Error(`Official PsychoPy web backend timed out while running ${command}.`));
+            pending.delete(id);
+            reject(new Error(`Official PsychoPy backend timed out while running ${command}.`));
         }, timeout);
-
-        socket.onopen = () => {
-            socket.send(JSON.stringify({
-                id,
-                command: {
-                    command: "run",
-                    args: [command],
-                    kwargs,
-                },
-            }));
-        };
-        socket.onerror = () => {
-            clearTimeout(timer);
-            reject(new Error(`Could not connect to official PsychoPy web backend at ${url}.`));
-        };
-        socket.onmessage = (event) => {
-            let data;
-            try {
-                data = JSON.parse(event.data);
-            } catch (err) {
-                clearTimeout(timer);
-                reject(err);
-                return;
-            }
-            if (data?.evt?.id !== id) return;
-            clearTimeout(timer);
-            socket.close();
-            if ("response" in data) {
-                resolve(data.response);
-            } else {
-                const error = data?.error || {};
-                const err = new Error(error.message || `Official PsychoPy web backend failed while running ${command}.`);
-                err.backendError = error;
-                reject(err);
-            }
-        };
-        socket.onclose = () => clearTimeout(timer);
+        pending.set(id, { resolve, reject, timer });
+        w.postMessage({ id, command, args: [], kwargs });
     });
 }
 
-export async function roundtripPsyexp({ psyexpContent, psyexpPath, resources }={}, options={}) {
+export async function roundtripPsyexp({ psyexpContent, psyexpPath, resources } = {}, options = {}) {
     return await sendOfficialBackendCommand("roundtripPsyexp", {
         psyexpContent,
         psyexpPath,
@@ -90,7 +97,7 @@ export async function roundtripPsyexp({ psyexpContent, psyexpPath, resources }={
     }, options);
 }
 
-export async function compilePsychoJS({ psyexpContent, psyexpPath, outfile, resources }={}, options={}) {
+export async function compilePsychoJS({ psyexpContent, psyexpPath, outfile, resources } = {}, options = {}) {
     return await sendOfficialBackendCommand("compilePsychoJS", {
         psyexpContent,
         psyexpPath,
