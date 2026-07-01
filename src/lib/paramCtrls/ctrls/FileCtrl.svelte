@@ -3,6 +3,7 @@
     import { Button, CompactButton } from "$lib/utils/buttons";
     import { mimeTypesFromParam } from "./utils";
     import { browseFileOpen } from "$lib/utils/files.js";
+    import { isWebPath, normalizeWebPath } from "$lib/webfs/storage.js";
     import { getContext } from "svelte";
 
     let {
@@ -36,16 +37,34 @@
         let types = mimeTypesFromParam(param)
         // get file
         let file = await browseFileOpen(types, current.experiment?.file?.parent);
-        // if one was selected, use it
+        // if one was selected, store a path relative to the experiment
         if (file) {
-            if (current.experiment?.file?.parent) {
-                // make relative to experiment path if possible
-                param.val = file.file.replace(current.experiment.file.parent, "").replace(/^\//, "")
-            } else {
-                // otherwise use as absolute
-                param.val = file.file
-            }
+            param.val = relativeToExperiment(file.file)
         }
+    }
+
+    /**
+     * Store a file path the way the compiler expects it: relative to the
+     * experiment folder, never a `/webfs/…` absolute path. For browser (WebFS)
+     * paths this strips the `/webfs/` scheme and the experiment-folder prefix
+     * (so an untitled experiment gets `cond.csv`, not `/webfs/cond.csv`). Desktop
+     * OS paths keep the original folder-relative behaviour.
+     */
+    function relativeToExperiment(full) {
+        const parent = current.experiment?.file?.parent
+        if (isWebPath(full)) {
+            const key = normalizeWebPath(full)               // drops the /webfs/ scheme
+            const parentKey = normalizeWebPath(parent || "")
+            if (parentKey && key.startsWith(parentKey + "/")) {
+                return key.slice(parentKey.length + 1)       // relative to the experiment folder
+            }
+            return key                                       // untitled / outside folder → bare key
+        }
+        // desktop / OS path
+        if (parent) {
+            return full.replace(parent, "").replace(/^[\\/]/, "")
+        }
+        return full
     }
 </script>
 
