@@ -24,13 +24,13 @@ const ARCHIVE_URL = "/pyodide/psychopy-core.zip";
 
 // heavy/native libs psychopy imports at load but the compile path never calls;
 // stubbed as real (type-safe) classes so isinstance()/attr-chains don't crash.
-// pandas is stubbed only for warmup — importConditions needs the real one, which
-// is swapped in right after init (see ensureConditionsDeps).
-const STUB_ROOTS = ["scipy", "pandas", "dukpy", "serial"];
+// pandas is NOT stubbed: it's loaded for real during init (below) because the
+// compiler's getResourceFiles + importConditions read csv/xlsx conditions files
+// through it, so it must be available before the first command.
+const STUB_ROOTS = ["scipy", "dukpy", "serial"];
 
 let pyodide = null;
 let initPromise = null;
-let conditionsDepsPromise = null;
 
 function status(phase, detail) {
   postMessage({ type: "status", phase, detail });
@@ -41,8 +41,10 @@ async function init() {
   const { loadPyodide } = await import(/* @vite-ignore */ `${PYODIDE_BASE}pyodide.mjs`);
   pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
 
-  status("packages", "numpy");
-  await pyodide.loadPackage(["numpy"]);
+  status("packages", "numpy + pandas");
+  // pandas (+ numpy) up front so conditions files (csv/xlsx) read the same as
+  // desktop. openpyxl for xlsx is pure-python and comes from the archive below.
+  await pyodide.loadPackage(["numpy", "pandas"]);
 
   status("env", "stubs + platform shim");
   pyodide.runPython(`
@@ -90,14 +92,10 @@ import official_core
 `);
 
   status("ready", "warming up (import psychopy.experiment)");
-  // force the heavy psychopy import now so the first real command is fast
+  // force the heavy psychopy import now so the first real command is fast. pandas
+  // is already loaded, so psychopy.data.utils binds the real pandas/openpyxl here.
   pyodide.runPython("import psychopy.experiment")
   postMessage({ type: "ready" });
-
-  // init is done — start loading conditions-file deps now (not lazily) so they're
-  // usually ready before the user opens a loop with a conditions file. This runs
-  // in the background and never blocks `ready`.
-  ensureConditionsDeps().catch(() => {});
 }
 
 function ensureInit() {
@@ -108,50 +106,8 @@ function ensureInit() {
   return initPromise;
 }
 
-// Load pandas and hand it to official PsychoPy so importConditions parses
-// csv/xlsx exactly like the desktop build. Only pandas is loaded here: it's a
-// C-extension not in the archive; openpyxl (for xlsx) is pure-python and already
-// vendored in psychopy-core.zip, so it's importable from warmup on. Because
-// psychopy.data.utils binds `import pandas as pd` at import time — against the
-// stub during warmup — we drop the pandas stub, purge the stubbed modules, then
-// reload psychopy.data.utils so pd rebinds to the real pandas. Runs once;
-// importConditions awaits it (see runCommand).
-function ensureConditionsDeps() {
-  if (!conditionsDepsPromise) {
-    conditionsDepsPromise = (async () => {
-      await ensureInit();
-      status("packages", "pandas (conditions)");
-      await pyodide.loadPackage(["pandas"]); // pandas + dateutil/pytz/six via lock
-      pyodide.runPython(`
-import sys, importlib
-# swap the pandas stub for the real package
-if "pandas" in _STUB_ROOTS:
-    _STUB_ROOTS.remove("pandas")
-for _m in [n for n in list(sys.modules) if n == "pandas" or n.startswith("pandas.")]:
-    del sys.modules[_m]
-import pandas  # now the real wheel
-# re-run psychopy.data.utils top level so pd rebinds to the real pandas
-import psychopy.data.utils as _u
-importlib.reload(_u)
-`);
-    })().catch((e) => { conditionsDepsPromise = null; throw e; }); // allow retry
-  }
-  return conditionsDepsPromise;
-}
-
-function needsConditionsDeps(command, args) {
-  return command === "importConditions"
-    || command === "psychopy.data.utils:importConditions"
-    || (command === "run" && Array.isArray(args) && /importConditions/.test(String(args[0])));
-}
-
 async function runCommand(id, command, args, kwargs) {
   await ensureInit();
-  // conditions parsing needs the real pandas; make sure it's swapped in first
-  // (usually already done from the post-init preload, so this resolves instantly)
-  if (needsConditionsDeps(command, args)) {
-    await ensureConditionsDeps();
-  }
   // call official_core.handle_command(command, args, kwargs); marshal via JSON
   const handle = pyodide.runPython(`
 import json, official_core
