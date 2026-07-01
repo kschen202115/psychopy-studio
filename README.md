@@ -175,10 +175,10 @@ The two asset scripts must run **before** `svelte:build` so `adapter-static`
 copies the generated assets from `static/pyodide/` into `dist/`:
 
 ```bash
-bash web_backend/pyodide/fetch_runtime.sh   # → static/pyodide/runtime/        (~25 MB: pyodide + numpy)
+bash web_backend/pyodide/fetch_runtime.sh   # → static/pyodide/runtime/        (~51 MB: pyodide + numpy + pandas)
 bash web_backend/pyodide/build_archive.sh   # → static/pyodide/psychopy-core.zip (~3.8 MB: pruned psychopy + deps)
 npm ci
-npm run svelte:build                         # → dist/  (~65 MB, fully static)
+npm run svelte:build                         # → dist/  (~90 MB, fully static)
 ```
 
 One-liner for CI:
@@ -196,6 +196,31 @@ networks (no external CDN at run time).
 
 For Git-based static hosts, set the build command to the CI one-liner above and
 the output directory to `dist`.
+
+### Deploy to Cloudflare (Worker with Static Assets)
+
+`wrangler.jsonc` (repo root, on the pyodide branch) serves `dist/` as a Cloudflare
+Worker with [Static Assets](https://developers.cloudflare.com/workers/static-assets/) —
+no Worker script, no serverless function; every route is a static file. The
+prerendered pages (`/builder`, `/coder`, `/runner`, …) are real directories, and
+unmatched routes fall back to adapter-static's `404.html`.
+
+```bash
+# 1. build (the 3 steps above) so ./dist exists
+bash web_backend/pyodide/fetch_runtime.sh && bash web_backend/pyodide/build_archive.sh && npm ci && npm run svelte:build
+
+# 2. deploy. Auth via `wrangler login` (interactive) OR a scoped API token:
+export CLOUDFLARE_API_TOKEN=...        # needs "Workers Scripts:Edit" permission
+npx wrangler deploy                    # uploads ./dist per wrangler.jsonc
+```
+
+Notes:
+- `not_found_handling: "404-page"` + `html_handling: "auto-trailing-slash"` make
+  the prerendered directory routing behave like a classic static host.
+- The runtime/archive are same-origin under `/pyodide/`, so no COOP/COEP headers
+  and no external CDN are needed at run time (see host notes below).
+- To pin a custom domain / route, add `routes` or a `[env]` block to
+  `wrangler.jsonc` per the Cloudflare docs.
 
 ### Build-environment requirements (CI)
 
