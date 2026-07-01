@@ -105,3 +105,17 @@ export async function compilePsychoJS({ psyexpContent, psyexpPath, outfile, reso
         resources,
     }, options);
 }
+
+/**
+ * Import a conditions file (csv/xlsx) through official psychopy.data.importConditions,
+ * matching the desktop liaison call. The backend is sandboxed and cannot read WebFS,
+ * so the file content must be supplied via `resources` (keyed by `fileName`).
+ * Returns [trialList, fieldNames].
+ */
+export async function importConditions({ fileName, resources, returnFieldNames = true } = {}, options = {}) {
+    return await sendOfficialBackendCommand("importConditions", {
+        fileName,
+        returnFieldNames,
+        resources,
+    }, options);
+}

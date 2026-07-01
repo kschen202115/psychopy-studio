@@ -559,6 +559,58 @@ def compile_psychopy(
         )
 
 
+def official_import_conditions(
+    file_name: str | None = None,
+    *,
+    return_field_names: bool = True,
+    selection: str = "",
+    resources: Any = None,
+) -> Any:
+    """Import a conditions file (csv/xlsx/...) via psychopy.data.importConditions.
+
+    Mirrors the desktop liaison call so the browser build shows an identical
+    "N conditions / M parameters" summary and parses exactly like the desktop.
+
+    The backend is sandboxed and never dereferences WebFS/client paths, so the
+    caller must send the file's content via ``resources``; we materialize it into
+    an isolated temp dir and hand official PsychoPy the real path. Returns
+    ``[trialList, fieldNames]`` (JSON-safe), matching the liaison result shape.
+    """
+    ensure_core_path()
+    if not file_name:
+        raise OfficialBackendError(
+            "conditions-filename-required",
+            "fileName is required to import a conditions file",
+        )
+    try:
+        from psychopy.data.utils import importConditions
+
+        root = Path(tempfile.mkdtemp(prefix=TEMP_PREFIX))
+        materialize_resources(root, resources)
+        target = root / safe_relative_path(str(file_name))
+        if not target.exists():
+            raise OfficialBackendError(
+                "conditions-content-required",
+                "Conditions file content was not provided; send it via `resources` "
+                "so the sandboxed backend can read it (WebFS paths are not dereferenced)",
+                fileName=file_name,
+            )
+        conditions, field_names = importConditions(
+            str(target), returnFieldNames=True, selection=selection or "",
+        )
+        if return_field_names:
+            return [json_safe(conditions), json_safe(field_names)]
+        return json_safe(conditions)
+    except OfficialBackendError:
+        raise
+    except Exception as exc:
+        raise OfficialBackendError(
+            "official-import-conditions-failed",
+            f"Official PsychoPy could not import conditions: {type(exc).__name__}: {exc}",
+            fileName=file_name,
+        ) from exc
+
+
 def _arg(args: list[Any], index: int, default: Any = None) -> Any:
     return args[index] if len(args) > index else default
 
@@ -592,6 +644,13 @@ def handle_command(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any
             outfile=kwargs.get("outfile") or _arg(args, 1),
             resources=kwargs.get("resources"),
         )
+    if command in {"importConditions", "psychopy.data.utils:importConditions"}:
+        return official_import_conditions(
+            file_name=kwargs.get("fileName") or _arg(args, 0),
+            return_field_names=kwargs.get("returnFieldNames", True),
+            selection=kwargs.get("selection", ""),
+            resources=kwargs.get("resources"),
+        )
     raise OfficialBackendError(
         "unsupported-command",
         f"Unsupported official web backend command: {command}",
@@ -604,6 +663,7 @@ def handle_command(command: str, args: list[Any], kwargs: dict[str, Any]) -> Any
             "roundtripPsyexp",
             "compilePsychoJS",
             "compilePsychoPy",
+            "importConditions",
         ],
     )
 

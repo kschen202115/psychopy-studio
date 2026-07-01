@@ -24,10 +24,22 @@ const ARCHIVE_URL = "/pyodide/psychopy-core.zip";
 
 // heavy/native libs psychopy imports at load but the compile path never calls;
 // stubbed as real (type-safe) classes so isinstance()/attr-chains don't crash.
+// pandas is stubbed only for warmup — importConditions needs the real one, which
+// is swapped in right after init (see ensureConditionsDeps).
 const STUB_ROOTS = ["scipy", "pandas", "dukpy", "serial"];
+
+// deps needed only by importConditions (conditions-file parsing). pandas + its
+// deps come from the pyodide index (in pyodide-lock.json); openpyxl/et_xmlfile
+// are not in that index, so they're vendored as pure-python wheels alongside the
+// runtime (see fetch_runtime.sh). Keep filenames in sync with that script.
+const CONDITIONS_WHEELS = [
+  `${PYODIDE_BASE}et_xmlfile-2.0.0-py3-none-any.whl`,
+  `${PYODIDE_BASE}openpyxl-3.1.5-py2.py3-none-any.whl`,
+];
 
 let pyodide = null;
 let initPromise = null;
+let conditionsDepsPromise = null;
 
 function status(phase, detail) {
   postMessage({ type: "status", phase, detail });
@@ -90,6 +102,11 @@ import official_core
   // force the heavy psychopy import now so the first real command is fast
   pyodide.runPython("import psychopy.experiment")
   postMessage({ type: "ready" });
+
+  // init is done — start loading conditions-file deps now (not lazily) so they're
+  // usually ready before the user opens a loop with a conditions file. This runs
+  // in the background and never blocks `ready`.
+  ensureConditionsDeps().catch(() => {});
 }
 
 function ensureInit() {
@@ -100,8 +117,49 @@ function ensureInit() {
   return initPromise;
 }
 
+// Load pandas (+ openpyxl for xlsx) and hand them to official PsychoPy so
+// importConditions parses csv/xlsx exactly like the desktop build. Because
+// psychopy.data.utils binds `import pandas as pd` / `import openpyxl` at import
+// time — against the stub during warmup — we drop the pandas stub, purge the
+// stubbed modules, then reload psychopy.data.utils so those names rebind to the
+// real libraries. Runs once; importConditions awaits it (see runCommand).
+function ensureConditionsDeps() {
+  if (!conditionsDepsPromise) {
+    conditionsDepsPromise = (async () => {
+      await ensureInit();
+      status("packages", "pandas + openpyxl (conditions)");
+      await pyodide.loadPackage(["pandas"]);        // pandas + dateutil/pytz/six via lock
+      await pyodide.loadPackage(CONDITIONS_WHEELS); // openpyxl + et_xmlfile (vendored)
+      pyodide.runPython(`
+import sys, importlib
+# swap the pandas stub for the real package
+if "pandas" in _STUB_ROOTS:
+    _STUB_ROOTS.remove("pandas")
+for _m in [n for n in list(sys.modules) if n == "pandas" or n.startswith("pandas.")]:
+    del sys.modules[_m]
+import pandas  # now the real wheel
+# re-run psychopy.data.utils top level so pd/openpyxl rebind to the real libs
+import psychopy.data.utils as _u
+importlib.reload(_u)
+`);
+    })().catch((e) => { conditionsDepsPromise = null; throw e; }); // allow retry
+  }
+  return conditionsDepsPromise;
+}
+
+function needsConditionsDeps(command, args) {
+  return command === "importConditions"
+    || command === "psychopy.data.utils:importConditions"
+    || (command === "run" && Array.isArray(args) && /importConditions/.test(String(args[0])));
+}
+
 async function runCommand(id, command, args, kwargs) {
   await ensureInit();
+  // conditions parsing needs pandas/openpyxl; make sure they're swapped in first
+  // (usually already done from the post-init preload, so this resolves instantly)
+  if (needsConditionsDeps(command, args)) {
+    await ensureConditionsDeps();
+  }
   // call official_core.handle_command(command, args, kwargs); marshal via JSON
   const handle = pyodide.runPython(`
 import json, official_core
