@@ -290,8 +290,12 @@ export class Experiment {
     fromJSON(node) {
         // reset experiment
         this.reset(true, false)
-        // set basic attributes
-        this.file = parsePath(node.filename);
+        // set basic attributes; keep reset()'s "untitled" file object when the
+        // node has no filename (unnamed experiment) so its untitled semantics
+        // (name/stem/ext) survive undo/redo instead of becoming empty
+        if (node.filename) {
+            this.file = parsePath(node.filename);
+        }
         this.version = node.version;
         // copy settings
         this.settings.fromJSON(node.settings);

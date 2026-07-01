@@ -20,6 +20,9 @@ mime.define({
  * path-browserify is fine, but it's no pathlib.Path
  */
 export function parsePath(file) {
+    // coerce nullish/non-string input to a string so we never crash (e.g. an
+    // unnamed experiment stores filename: undefined; see Experiment.fromJSON)
+    file = String(file ?? "")
     // replace \ (path hates this for some reason)
     file = file.replaceAll("\\", "/")
     // parse
