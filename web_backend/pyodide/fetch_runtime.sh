@@ -3,10 +3,11 @@
 # time (relevant for offline use and CDN-restricted networks).
 #
 # Output: static/pyodide/runtime/  (generated, gitignored)
-# The core loader + numpy are fetched, plus pandas & openpyxl (used only by
-# importConditions, loaded on demand by pyodideWorker.js — NOT at startup). All
-# other Python deps are vendored in psychopy-core.zip (see build_archive.sh), so
-# micropip is never used at run time.
+# The core loader + numpy + pandas are fetched. pandas is a C-extension, so
+# (unlike the pure-python deps) it can't live in the archive; it's needed only by
+# importConditions and is loaded after startup by pyodideWorker.js. openpyxl (for
+# xlsx conditions) is pure-python and already vendored in psychopy-core.zip (see
+# build_archive.sh), as are all other deps — so micropip is never used at run time.
 set -euo pipefail
 
 VER="v0.26.4"
@@ -31,12 +32,5 @@ for f in pyodide.mjs pyodide.asm.js pyodide.asm.wasm python_stdlib.zip \
   echo "fetch $f"
   curl -fsSL "$BASE/$f" -o "$OUT/$f"
 done
-
-# openpyxl (+ et_xmlfile) enable .xlsx conditions files but are NOT in the
-# pyodide index, so vendor the pure-python wheels from PyPI. Versions are pinned
-# to match CONDITIONS_WHEELS in src/lib/official/pyodideWorker.js — keep in sync.
-echo "fetch openpyxl + et_xmlfile (PyPI, pure-python)"
-python3 -m pip download --no-deps --only-binary=:all: --dest "$OUT" \
-  "openpyxl==3.1.5" "et_xmlfile==2.0.0"
 
 echo "Pyodide runtime in $OUT ($(du -sh "$OUT" | cut -f1))"
