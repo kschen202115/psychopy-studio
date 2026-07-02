@@ -28,7 +28,7 @@
             primary
             horizontal
             disabled={!valid}
-            onclick={(evt) => component.restore.set()} 
+            onclick={(evt) => component.restore.mark()}
         />
         <Button
             label={translate("Discard")}

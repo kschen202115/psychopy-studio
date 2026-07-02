@@ -39,14 +39,14 @@
     buttons={{
         OK: evt => {
             element.trim();
-            element.restore.set();
+            element.restore.mark();
             onapply(evt);
-        }, 
+        },
         APPLY: evt => {
             element.trim();
-            element.restore.set();
+            element.restore.mark();
             onapply(evt);
-        }, 
+        },
         EXTRA: extraButtons,
         CANCEL: evt => {
             element.restore.apply()

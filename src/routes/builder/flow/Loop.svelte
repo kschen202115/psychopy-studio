@@ -138,8 +138,8 @@
     bind:shown={showDialog} 
     onopen={() => element.initiator.restore.set()}
     buttons={{
-        OK: (evt) => {}, 
-        APPLY: (evt) => element.initiator.restore.set(),
+        OK: (evt) => {},
+        APPLY: (evt) => element.initiator.restore.mark(),
         CANCEL: (evt) => element.initiator.restore.apply(), 
     }}
     buttonsDisabled={btnsDisabled}

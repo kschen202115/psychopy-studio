@@ -306,20 +306,23 @@ export class HasParams {
     restore = {
         point: undefined,
         set: () => {
-            // update history
-            if (this.exp) {
-                this.exp.history.update(`edit ${this.name}`);
+            // update history (components own an exp ref, routine settings reach it via their routine)
+            let exp = this.exp ?? this.routine?.exp;
+            if (exp) {
+                exp.history.update(`edit ${this.name}`);
             }
             // set restore point
+            this.restore.mark();
+        },
+        mark: () => {
+            // set restore point without recording history (i.e. after changes were applied,
+            // so the pre-change history entry stays on top for undo)
             this.restore.point = this.toJSON();
         },
         apply: () => {
-            // restore backup to clear changes
+            // restore backup to clear changes; the history entry from set() now matches the
+            // present state again, so undo will skip it
             this.fromJSON(this.restore.point);
-            // remove last entry from experiment history
-            if (this.exp) {
-                this.exp.history.past.pop();
-            }
         }
     };
 

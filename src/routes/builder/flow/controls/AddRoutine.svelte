@@ -63,10 +63,12 @@
         onopen={() => current.inserting.settings.restore.set()}
         buttons={{
             OK: (evt) => {
+                // record undo point before adding
+                current.experiment.history.update(`new Routine`)
                 // add to experiment
                 current.inserting.exp = current.experiment
                 current.experiment.routines[current.inserting.name] = current.inserting
-            }, 
+            },
             CANCEL: (evt) => {
                 current.inserting.settings.restore.apply()
                 // stop inserting
