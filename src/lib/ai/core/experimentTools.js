@@ -16,7 +16,7 @@ import { Routine } from "$lib/experiment/routine.svelte";
 import { Component } from "$lib/experiment/component.svelte";
 import { LoopInitiator } from "$lib/experiment/flow.svelte";
 import { profiles } from "$lib/experiment/profiles.svelte";
-import { writeWebFS, isWebPath, normalizeWebPath, webfsPath } from "$lib/webfs/storage.js";
+import { writeWebFS, readWebFS, listWebFS, isWebPath, normalizeWebPath, webfsPath } from "$lib/webfs/storage.js";
 
 /** Result helpers */
 const ok = (extra = {}) => ({ ok: true, ...extra });
@@ -57,14 +57,24 @@ export function get_component_schema(experiment, { type } = {}) {
     }
     const params = {};
     for (const [name, p] of Object.entries(profile.params || {})) {
-        params[name] = {
+        const entry = {
             valType: p.valType,
+            inputType: p.inputType, // how it's edited: single / choice / bool / color / file ...
             label: p.label,
             hint: p.hint,
             category: p.categ,
             default: p.val,
+            updates: p.updates, // default update mode (usually "constant")
             allowedVals: Array.isArray(p.allowedVals) && p.allowedVals.length ? p.allowedVals : undefined,
+            // update modes this param supports, e.g. ["constant","set every repeat","set every frame"].
+            // Set a param's update mode via {val, updates} in add_component/set_component_params.
+            allowedUpdates: Array.isArray(p.allowedUpdates) && p.allowedUpdates.length ? p.allowedUpdates : undefined,
         };
+        // conditional visibility: this param only applies when a sibling has a given value
+        if (p.depends && (p.depends.shown?.length || p.depends.enabled?.length)) {
+            entry.depends = p.depends;
+        }
+        params[name] = entry;
     }
     return ok({ type, summary: profile.tooltip, params });
 }
@@ -79,11 +89,12 @@ export function get_experiment_state(experiment) {
         if (rt instanceof Routine) {
             routines[name] = {
                 kind: "Routine",
-                components: rt.components.map((c) => ({
-                    name: c.name,
-                    type: c.tag,
-                    params: paramValues(c),
-                })),
+                components: rt.components.map((c) => {
+                    const entry = { name: c.name, type: c.tag, params: paramValues(c) };
+                    const updates = paramUpdates(c); // only params whose update mode != "constant"
+                    if (Object.keys(updates).length) entry.updates = updates;
+                    return entry;
+                }),
             };
         } else {
             // StandaloneRoutine (e.g. code-only routines)
@@ -109,12 +120,97 @@ export function get_experiment_state(experiment) {
     });
 }
 
+/** The experiment's WebFS folder (the prefix its assets live under), or "" for root/untitled. */
+function experimentFolder(experiment) {
+    return isWebPath(experiment?.file?.file) ? normalizeWebPath(experiment.file.parent || "") : "";
+}
+
+/**
+ * List the files stored in the browser filesystem (WebFS): uploaded stimuli
+ * (images/audio/video), conditions files, etc. Use this while planning to see
+ * which assets already exist so you can reference them in component params.
+ * `ref` is the exact string to put in a file param (relative to the experiment
+ * folder when the file lives inside it).
+ */
+export async function list_files(experiment, { prefix } = {}) {
+    let keys;
+    try {
+        keys = await listWebFS(prefix ? normalizeWebPath(prefix) : "");
+    } catch (e) {
+        return err(`Failed to list WebFS: ${e?.message || e}`);
+    }
+    const folder = experimentFolder(experiment);
+    const files = keys
+        .filter((k) => !k.endsWith("/")) // drop any folder markers
+        .map((key) => {
+            const inFolder = folder ? key === folder || key.startsWith(folder + "/") : true;
+            const ref = folder && key.startsWith(folder + "/") ? key.slice(folder.length + 1) : key;
+            const ext = (key.split(".").pop() || "").toLowerCase();
+            return { path: key, ref, ext, inExperimentFolder: inFolder };
+        });
+    return ok({ folder: folder || "(root)", files, count: files.length });
+}
+
+/** Extensions we treat as text and can safely return inline. */
+const TEXT_EXTS = new Set(["csv", "tsv", "txt", "json", "js", "py", "xml", "md", "html", "css", "yaml", "yml", "log"]);
+const READ_FILE_MAX = 20000; // chars — cap so a big file can't blow the context window
+
+/**
+ * Read a text file from WebFS (e.g. an existing conditions CSV) to inspect its
+ * columns/content. Binary files (images/audio/xlsx) return metadata only —
+ * their bytes are not useful to the model.
+ */
+export async function read_file(experiment, { path } = {}) {
+    if (!path) return err(`"path" is required.`);
+    const folder = experimentFolder(experiment);
+    // try the given path, then resolved inside the experiment folder
+    const candidates = [path];
+    if (folder && !normalizeWebPath(path).startsWith(folder + "/")) candidates.push(`${folder}/${path}`);
+    let content, resolved;
+    for (const c of candidates) {
+        try {
+            const got = await readWebFS(c);
+            if (got !== undefined) { content = got; resolved = normalizeWebPath(c); break; }
+        } catch { /* try next */ }
+    }
+    if (content === undefined) return err(`File not found in WebFS: "${path}". Call list_files to see available files.`);
+
+    const ext = (resolved.split(".").pop() || "").toLowerCase();
+    // Binary content (Blob / ArrayBuffer / typed array) — report metadata, not bytes.
+    const isText = typeof content === "string";
+    if (!isText && !TEXT_EXTS.has(ext)) {
+        const size = content?.size ?? content?.byteLength ?? content?.length;
+        return ok({ path: resolved, ext, binary: true, size, note: "Binary file; content not shown. Reference it by path in a file param." });
+    }
+    let text = typeof content === "string" ? content : await blobToText(content);
+    const truncated = text.length > READ_FILE_MAX;
+    if (truncated) text = text.slice(0, READ_FILE_MAX);
+    return ok({ path: resolved, ext, truncated, text });
+}
+
+/** Coerce a Blob / ArrayBuffer / typed array of text into a string. */
+async function blobToText(content) {
+    if (content instanceof Blob) return await content.text();
+    if (content instanceof ArrayBuffer) return new TextDecoder().decode(content);
+    if (ArrayBuffer.isView(content)) return new TextDecoder().decode(content);
+    return String(content);
+}
+
 /** Snapshot a HasParams element's params as a plain {name: val} map. */
 function paramValues(el) {
     const out = {};
     for (const [name, p] of Object.entries(el.params || {})) {
         const v = p.val;
         out[name] = typeof v === "object" && v !== null ? JSON.parse(JSON.stringify(v)) : v;
+    }
+    return out;
+}
+
+/** Non-default update modes as a {name: updates} map (omits the common "constant"). */
+function paramUpdates(el) {
+    const out = {};
+    for (const [name, p] of Object.entries(el.params || {})) {
+        if (p.updates && p.updates !== "constant") out[name] = p.updates;
     }
     return out;
 }
@@ -292,22 +388,52 @@ export async function create_conditions_file(experiment, { filename = "condition
  * Helpers
  * ------------------------------------------------------------------ */
 
-/** Apply a {paramName: value} map to a HasParams element, validating each. */
+/**
+ * Apply a {paramName: value} map to a HasParams element, validating each.
+ *
+ * A value is normally the literal or `$expr` to store. To also set the param's
+ * update mode, pass an object `{val, updates}` — e.g.
+ * `{"val": "$word", "updates": "set every repeat"}`. Either key may be omitted
+ * (val-only re-uses the current update mode; updates-only keeps the value).
+ */
 function applyParams(el, params, skipName) {
     const set = [];
-    for (const [pname, value] of Object.entries(params || {})) {
+    for (const [pname, raw] of Object.entries(params || {})) {
         if (skipName && pname === "name") continue;
         const param = el.params[pname];
         if (!param) {
             return err(`Parameter "${pname}" does not exist on ${el.tag}. Call get_component_schema for valid params.`, { set });
         }
-        if (Array.isArray(param.allowedVals) && param.allowedVals.length && !param.allowedVals.includes(value)) {
-            return err(
-                `Value ${JSON.stringify(value)} not allowed for "${pname}". Allowed: ${param.allowedVals.join(", ")}.`,
-                { set }
-            );
+
+        // Detect the {val, updates} wrapper: a plain object carrying either key.
+        // (Genuine list values like pos [0,0] are arrays, so they pass through as-is.)
+        const isWrapper =
+            raw !== null && typeof raw === "object" && !Array.isArray(raw) && ("val" in raw || "updates" in raw);
+        const value = isWrapper ? raw.val : raw;
+        const updates = isWrapper ? raw.updates : undefined;
+
+        if (!isWrapper || "val" in raw) {
+            if (Array.isArray(param.allowedVals) && param.allowedVals.length && !param.allowedVals.includes(value)) {
+                return err(
+                    `Value ${JSON.stringify(value)} not allowed for "${pname}". Allowed: ${param.allowedVals.join(", ")}.`,
+                    { set }
+                );
+            }
+            param.val = value;
         }
-        param.val = value;
+        if (updates !== undefined) {
+            // No allowedUpdates (null or []) means the param has no update mode at all — reject.
+            const allowed = Array.isArray(param.allowedUpdates) ? param.allowedUpdates : [];
+            if (!allowed.includes(updates)) {
+                return err(
+                    allowed.length
+                        ? `Update mode ${JSON.stringify(updates)} not allowed for "${pname}". Allowed: ${allowed.join(", ")}.`
+                        : `Parameter "${pname}" does not support update modes; omit "updates".`,
+                    { set }
+                );
+            }
+            param.updates = updates;
+        }
         set.push(pname);
     }
     return ok({ set });
@@ -343,6 +469,8 @@ const READ_TOOLS = {
     list_component_types: (_exp, input) => list_component_types(input),
     get_component_schema,
     get_experiment_state: (exp) => get_experiment_state(exp),
+    list_files,
+    read_file,
 };
 
 const WRITE_TOOLS = {

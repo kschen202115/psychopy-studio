@@ -20,7 +20,7 @@ export const TOOL_SCHEMAS = [
     {
         name: "get_component_schema",
         description:
-            "Get the full parameter schema (types, labels, hints, allowed values, defaults) for one component type. Call this before setting parameters you are unsure about, to avoid invalid names or values.",
+            "Get the full parameter schema for one component type: each param's valType, inputType, label, hint, category, default, allowed values, and — importantly — allowedUpdates (the update modes it supports, e.g. \"constant\", \"set every repeat\", \"set every frame\"). Call this before setting parameters you are unsure about, to avoid invalid names/values and to know which params can update per-repeat or per-frame.",
         input_schema: {
             type: "object",
             properties: { type: { type: "string", description: "Component type, e.g. \"TextComponent\"." } },
@@ -33,6 +33,31 @@ export const TOOL_SCHEMAS = [
         description:
             "Read the current experiment: settings, all routines with their components and parameter values, and the flow order. Call this at the start of a task and after a series of edits to verify the result.",
         input_schema: { type: "object", properties: {}, additionalProperties: false },
+    },
+    {
+        name: "list_files",
+        description:
+            "List files in the browser filesystem (WebFS): uploaded stimuli (images/audio/video), conditions files, etc. Call this while planning to discover which assets already exist so you can reference them instead of inventing paths. Each entry has `path` (full key), `ref` (the string to put in a file param, relative to the experiment folder), `ext`, and `inExperimentFolder`.",
+        input_schema: {
+            type: "object",
+            properties: {
+                prefix: { type: "string", description: "Optional folder prefix to filter by; omit to list everything." },
+            },
+            additionalProperties: false,
+        },
+    },
+    {
+        name: "read_file",
+        description:
+            "Read a text file from WebFS (e.g. an existing conditions CSV/TSV) to inspect its columns and rows before referencing them. Binary files (images/audio/xlsx) return metadata only — reference those by path, don't read them. Content is truncated if very large.",
+        input_schema: {
+            type: "object",
+            properties: {
+                path: { type: "string", description: "File path (a `path` or `ref` from list_files, or a name relative to the experiment folder)." },
+            },
+            required: ["path"],
+            additionalProperties: false,
+        },
     },
     {
         name: "present_plan",
@@ -96,7 +121,8 @@ export const TOOL_SCHEMAS = [
                 name: { type: "string", description: "Optional component name; defaults from the type, auto-numbered." },
                 params: {
                     type: "object",
-                    description: "Map of parameter name -> value to set (e.g. {\"text\": \"Hello\", \"color\": \"red\"}).",
+                    description:
+                        "Map of parameter name -> value. A value is normally the literal or $-expression (e.g. {\"text\": \"Hello\", \"color\": \"red\"}). To ALSO set a param's update mode, pass {\"val\": ..., \"updates\": ...} instead — e.g. {\"text\": {\"val\": \"$word\", \"updates\": \"set every repeat\"}}. Any param read from a conditions file via $column MUST use \"set every repeat\" or it will not change across trials. Allowed update modes come from each param's allowedUpdates (get_component_schema).",
                     additionalProperties: true,
                 },
             },
@@ -106,13 +132,19 @@ export const TOOL_SCHEMAS = [
     },
     {
         name: "set_component_params",
-        description: "Update one or more parameters of an existing component.",
+        description:
+            "Update one or more parameters of an existing component. Each value is the literal/$-expression to store, or {\"val\": ..., \"updates\": ...} to also set the update mode (\"constant\" / \"set every repeat\" / \"set every frame\"). $column values from a conditions file need \"set every repeat\".",
         input_schema: {
             type: "object",
             properties: {
                 routine: { type: "string" },
                 component: { type: "string", description: "Name of the component to edit." },
-                params: { type: "object", additionalProperties: true },
+                params: {
+                    type: "object",
+                    description:
+                        "Map of parameter name -> value or {val, updates}. e.g. {\"color\": \"red\"} or {\"pos\": {\"val\": \"$stimPos\", \"updates\": \"set every repeat\"}}.",
+                    additionalProperties: true,
+                },
             },
             required: ["routine", "component", "params"],
             additionalProperties: false,
