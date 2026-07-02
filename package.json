@@ -125,6 +125,9 @@
 		"svelte:check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"svelte:check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"web:backend": "python3 web_backend/official_backend.py",
+		"cf:build": "npm run svelte:build",
+		"cf:deploy": "npm run svelte:build && wrangler deploy",
+		"cf:preview": "wrangler dev",
 		"electron:start": "electron electron/src/index.cjs",
 		"electron:lint": "echo \"No linting configured\"",
 		"build": "npm run svelte:build && electron-builder build",
@@ -150,6 +153,7 @@
 		"wait-on": "^9.0.6"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.107.0",
 		"@lezer/javascript": "^1.5.4",
 		"@lezer/python": "^1.1.19",
 		"@monaco-editor/loader": "^1.5.0",

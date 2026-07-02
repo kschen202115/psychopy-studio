@@ -19,6 +19,7 @@
     } from "./callbacks.svelte";
     import { python } from "$lib/globals.svelte";
     import TipsDialog from '../../lib/dialogs/tips/TipsDialog.svelte';
+    import AssistantPanel from '$lib/ai/AssistantPanel.svelte';
     import { updateLocale, translate } from "$lib/translation";
 
     // parse url params
@@ -115,6 +116,8 @@
     <Shortcuts
         callbacks={shortcuts}
     />
+    <!-- AI experiment-building assistant -->
+    <AssistantPanel getExperiment={() => current.experiment} />
     <!-- this will setup a Python instance -->
     {#if python}
         <SetupPython />
