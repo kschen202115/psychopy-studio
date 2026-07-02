@@ -13,6 +13,19 @@
  *   -> { type: "ready" }                          init finished
  */
 
+// Polyfill Promise.withResolvers for older mobile browsers (Safari <17.4 等);
+// pyodide.mjs uses it at load time. Worker scope has its own global.
+if (typeof Promise.withResolvers !== "function") {
+  Promise.withResolvers = function () {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
+}
+
 // single source of truth: the transport-agnostic backend core, inlined at build
 // time so there is no second copy to keep in sync.
 import officialCoreSource from "../../../web_backend/official_core.py?raw";

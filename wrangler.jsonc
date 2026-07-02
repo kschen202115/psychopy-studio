@@ -1,0 +1,14 @@
+{
+	// PsychoPy Studio — 纯浏览器端（Pyodide）静态站点，部署为 Cloudflare Worker (Static Assets)。
+	// 后端编译逻辑全部跑在浏览器 Web Worker 里,无需服务端函数。
+	"name": "psychopy-studio",
+	"compatibility_date": "2026-06-29",
+	"assets": {
+		// vite build (adapter-static) 的产物目录
+		"directory": "./dist",
+		// 预渲染页面 /builder /coder /runner 等是真实目录,自动按 index.html 解析;
+		// 未命中的路由回落到 adapter-static 生成的 404.html
+		"not_found_handling": "404-page",
+		"html_handling": "auto-trailing-slash"
+	}
+}

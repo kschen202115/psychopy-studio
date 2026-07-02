@@ -2,6 +2,20 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<!-- Polyfill Promise.withResolvers for older mobile browsers (Safari <17.4 等).
+		     必须同步先于 SvelteKit bundle 执行 —— 应用与 Pyodide 都大量用到它. -->
+		<script>
+			if (typeof Promise.withResolvers !== 'function') {
+				Promise.withResolvers = function () {
+					let resolve, reject;
+					const promise = new Promise(function (res, rej) {
+						resolve = res;
+						reject = rej;
+					});
+					return { promise: promise, resolve: resolve, reject: reject };
+				};
+			}
+		</script>
 		<link rel="preload" as="style" href="%sveltekit.assets%/fonts/Nunito.css" />
 		<link rel="preload" as="style" href="%sveltekit.assets%/fonts/Noto.css" />
 		<link rel="preload" as="style" href="%sveltekit.assets%/fonts/JetBrainsMono.css" />
