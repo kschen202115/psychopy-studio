@@ -108,17 +108,21 @@ export function quit() {
 /* Edit */
 export function undo() {
     current.experiment.history.undo();
-    // restore focus to tab if possible
+    // restore focus to tab if possible, otherwise fall back to the first routine
     if (current.routine && current.routine.name in current.experiment.routines) {
         current.routine = current.experiment.routines[current.routine.name]
+    } else {
+        current.routine = Object.values(current.experiment.routines)[0]
     }
 }
 
 export function redo() {
     current.experiment.history.redo();
-    // restore focus to tab if possible
+    // restore focus to tab if possible, otherwise fall back to the first routine
     if (current.routine && current.routine.name in current.experiment.routines) {
         current.routine = current.experiment.routines[current.routine.name]
+    } else {
+        current.routine = Object.values(current.experiment.routines)[0]
     }
 }
 

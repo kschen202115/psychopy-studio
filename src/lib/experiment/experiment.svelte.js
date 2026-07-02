@@ -27,15 +27,21 @@ export class Experiment {
         future: [],
         update: (msg) => {
             // store experiment state
+            let state = this.toJSON()
+            // skip if identical to the last stored state (e.g. a dialog opened then closed
+            // without changes), so no-op snapshots don't pollute the stack
+            let top = this.history.past[this.history.past.length - 1]
+            if (top && JSON.stringify(top.state) === JSON.stringify(state)) {
+                return
+            }
             this.history.past.push(
                 {
                     msg: msg,
-                    state: this.toJSON()
+                    state: state
                 }
             )
             // limit to 16 items to save memory
             while (this.history.past.length >= 16) {
-                delete this.history.past[0]
                 this.history.past = this.history.past.slice(1);
             }
             // clear future
@@ -47,16 +53,23 @@ export class Experiment {
             this.history.future = []
         },
         undo: () => {
+            // get present state
+            let present = this.toJSON()
+            let presentStr = JSON.stringify(present)
+            // pop states until we find one which differs from the present - entries equal
+            // to the present (e.g. recorded after a change rather than before) are no-ops
+            let last = this.history.past.pop()
+            while (last && JSON.stringify(last.state) === presentStr) {
+                last = this.history.past.pop()
+            }
             // do nothing if we have no past
-            if (!this.history.past) {
+            if (!last) {
                 return
             }
-            // get last state
-            let last = this.history.past.pop()
             // store present as future
             this.history.future.unshift({
-                msg: last.msg, 
-                state: this.toJSON()
+                msg: last.msg,
+                state: present
             })
             // restore last state
             this.fromJSON(
@@ -64,16 +77,22 @@ export class Experiment {
             )
         },
         redo: () => {
-            // do nothin if we have no future
-            if (!this.history.future) {
+            // get present state
+            let present = this.toJSON()
+            let presentStr = JSON.stringify(present)
+            // shift states until we find one which differs from the present
+            let next = this.history.future.shift()
+            while (next && JSON.stringify(next.state) === presentStr) {
+                next = this.history.future.shift()
+            }
+            // do nothing if we have no future
+            if (!next) {
                 return
             }
-            // get next state
-            let next = this.history.future.shift()
             // add current state to past
             this.history.past.push({
                 msg: next.msg,
-                state: this.toJSON()
+                state: present
             })
             // restore next state
             this.fromJSON(

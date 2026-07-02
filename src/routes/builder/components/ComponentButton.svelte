@@ -62,11 +62,13 @@
     onopen={() => dlgComponent.restore.set()}
     buttons={{
         OK: (evt) => {
+            // record undo point before adding
+            current.experiment.history.update(`add ${dlgComponent.name}`);
             // add to experiment
             current.routine.addComponent(dlgComponent);
             // set restore point
-            dlgComponent.restore.set()
-        }, 
+            dlgComponent.restore.mark()
+        },
         CANCEL: () => dlgComponent.restore.apply(), 
         HELP: dlgComponent.helpLink
     }}

@@ -190,8 +190,8 @@ export class Routine {
      * @param {Object} node JSON object to populate from
      */
     fromJSON(node) {
-        // clear Components
-        Object.keys(this.components).forEach(key => delete this.components[key]);
+        // clear Components (delete on an array would leave holes and keep its length)
+        this.components.length = 0;
         // populate settings
         this.settings.fromJSON(node.settings);
         // populate components
