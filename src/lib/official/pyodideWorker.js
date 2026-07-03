@@ -49,9 +49,30 @@ function status(phase, detail) {
   postMessage({ type: "status", phase, detail });
 }
 
+// Import an ES module whose host may return a non-JS MIME type. EdgeOne serves
+// .mjs as application/octet-stream, which the browser refuses as a module
+// script ("Expected a JavaScript module script..."), so a direct
+// `import(url)` of pyodide.mjs fails there. Fetch the source and import it via a
+// Blob URL tagged text/javascript instead — the MIME is then always correct.
+// Safe for pyodide.mjs: it has no import.meta.url usage and we pass indexURL
+// explicitly, so relocating the loader to a blob URL doesn't change where it
+// fetches asm.js/wasm/stdlib (those come from PYODIDE_BASE, and .js/.wasm are
+// served with correct MIME everywhere).
+async function importModuleWithMime(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status}`);
+  const src = await res.text();
+  const blobUrl = URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
+  try {
+    return await import(/* @vite-ignore */ blobUrl);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
+
 async function init() {
   status("pyodide", "loading runtime");
-  const { loadPyodide } = await import(/* @vite-ignore */ `${PYODIDE_BASE}pyodide.mjs`);
+  const { loadPyodide } = await importModuleWithMime(`${PYODIDE_BASE}pyodide.mjs`);
   pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
 
   status("packages", "numpy + pandas");
