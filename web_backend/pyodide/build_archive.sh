@@ -31,15 +31,26 @@ PSYCHOPY_CORE_SRC="$CORE_SRC" PRUNE_OUT="$STAGE/psychopy" python3 "$HERE/prune_p
 #    compile path calls translates(enable_es6=True) which never touches dukpy,
 #    so dukpy is stubbed in the worker instead of installed.
 echo "Vendoring pure-python deps ..."
+# The packages are written straight into $VENDOR. In restricted CI sandboxes
+# (e.g. EdgeOne) pip's post-install pyenv-rehash hook can fail with
+# "/usr/bin/chmod: Permission denied" AFTER the files are already in place, which
+# would otherwise abort the build under `set -e`. Tolerate a non-zero exit here
+# and judge success by verifying the vendored output below instead.
 python3 -m pip install --no-deps --target "$VENDOR" \
   esprima astunparse i18next javascripthon \
-  json-tricks openpyxl pyyaml six et-xmlfile packaging >/dev/null
+  json-tricks openpyxl pyyaml six et-xmlfile packaging >/dev/null \
+  || echo "  (pip exited non-zero — likely the pyenv-rehash hook; verifying output)"
 # importable names to copy (metapensiero = javascripthon; six is a single module;
 # yaml = pyyaml; et_xmlfile is an openpyxl dependency). Exclude compiled .so —
 # the pure-python fallbacks are what pyodide uses.
+missing=""
 for name in esprima astunparse i18next metapensiero json_tricks openpyxl yaml et_xmlfile six.py packaging; do
-  if [ -e "$VENDOR/$name" ]; then cp -R "$VENDOR/$name" "$STAGE/"; fi
+  if [ -e "$VENDOR/$name" ]; then cp -R "$VENDOR/$name" "$STAGE/"; else missing="$missing $name"; fi
 done
+if [ -n "$missing" ]; then
+  echo "Vendoring failed — missing deps:$missing" >&2
+  exit 1
+fi
 find "$STAGE" -name "*.so" -delete 2>/dev/null || true
 
 # 4. zip with package dirs at archive root (unpacked into site-packages)
