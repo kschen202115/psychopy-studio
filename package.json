@@ -126,8 +126,6 @@
 		"svelte:check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"web:backend": "python3 web_backend/official_backend.py",
 		"cf:build": "bash web_backend/pyodide/build.sh",
-		"cf:deploy": "bash web_backend/pyodide/build.sh && npx wrangler deploy",
-		"cf:preview": "bash web_backend/pyodide/build.sh && npx wrangler dev",
 		"electron:start": "electron electron/src/index.cjs",
 		"electron:lint": "echo \"No linting configured\"",
 		"build": "npm run svelte:build && electron-builder build",
