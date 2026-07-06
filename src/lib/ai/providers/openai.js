@@ -39,6 +39,12 @@ function toOpenAIMessages(system, history) {
                     type: "function",
                     function: { name: tc.name, arguments: JSON.stringify(tc.input || {}) },
                 }));
+                // DeepSeek (and other reasoning models) require the thinking-mode
+                // `reasoning_content` to be replayed on an assistant turn that
+                // carries tool_calls, otherwise the follow-up request is rejected.
+                // Only attach it here — replaying it on a completed (tool-less)
+                // turn is disallowed by the same APIs.
+                if (e.reasoningContent) msg.reasoning_content = e.reasoningContent;
             }
             out.push(msg);
         } else if (e.role === "tool") {
@@ -73,6 +79,7 @@ export function createOpenAIProvider({ apiKey, model, baseURL }) {
         const decoder = new TextDecoder();
         let buf = "";
         let text = "";
+        let reasoning = "";
         const tcSlots = {}; // index -> { id, name, args }
 
         for (;;) {
@@ -94,6 +101,10 @@ export function createOpenAIProvider({ apiKey, model, baseURL }) {
                 }
                 const delta = json.choices?.[0]?.delta;
                 if (!delta) continue;
+                if (delta.reasoning_content) {
+                    reasoning += delta.reasoning_content;
+                    onEvent?.({ type: "reasoning", text: delta.reasoning_content });
+                }
                 if (delta.content) {
                     text += delta.content;
                     onEvent?.({ type: "text", text: delta.content });
@@ -120,14 +131,14 @@ export function createOpenAIProvider({ apiKey, model, baseURL }) {
                 return { id: s.id || `call_${i}`, name: s.name, input };
             });
 
-        return { text, toolCalls };
+        return { text, toolCalls, reasoning };
     }
 
     async function runTurn({ system, history, executeTool, onEvent, signal }) {
         for (let step = 0; step < MAX_STEPS; step++) {
             if (signal?.aborted) break;
-            const { text, toolCalls } = await callModel({ system, history, signal, onEvent });
-            history.push({ role: "assistant", content: text, toolCalls });
+            const { text, toolCalls, reasoning } = await callModel({ system, history, signal, onEvent });
+            history.push({ role: "assistant", content: text, toolCalls, reasoningContent: reasoning });
             if (toolCalls.length === 0) break;
             for (const tc of toolCalls) {
                 onEvent?.({ type: "tool_use", name: tc.name, input: tc.input });
