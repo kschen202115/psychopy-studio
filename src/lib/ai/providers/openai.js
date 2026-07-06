@@ -48,7 +48,10 @@ function toOpenAIMessages(system, history) {
             }
             out.push(msg);
         } else if (e.role === "tool") {
-            out.push({ role: "tool", tool_call_id: e.toolCallId, content: JSON.stringify(e.result) });
+            // `name` is redundant for OpenAI itself, but Gemini's OpenAI-compat
+            // layer needs it to fill the native functionResponse.name field —
+            // without it the request fails with REQUIRED_FIELD_MISSING.
+            out.push({ role: "tool", tool_call_id: e.toolCallId, name: e.name, content: JSON.stringify(e.result) });
         }
     }
     return out;
